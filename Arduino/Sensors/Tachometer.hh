@@ -20,7 +20,7 @@ public:
    */
   void setup()
   {
-    pinMode(TACH_PIN, OUTPUT);
+    pinMode(TACH_PIN, INPUT);
   }
 
   /**

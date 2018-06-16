@@ -20,7 +20,7 @@ public:
    */
   void setup()
   {
-    pinMode(POT_PIN, OUTPUT);
+    pinMode(POT_PIN, INPUT);
   }
 
   /**
