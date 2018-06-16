@@ -32,7 +32,7 @@ int tachVal = 0;
 
 const bool TEST_POT = false;
 const bool TEST_TACH = false;
-const bool TEST_ARDUINO_PI = true;
+const bool TEST_ARDUINO_PI = false;
 
 /**
  * Sets up the Arduino
@@ -54,6 +54,7 @@ void loop()
     // display the read in value
     Serial.print("Pot Value = ");
     Serial.println(potVal, DEC);
+    delay(300);
   }
 
   if (TEST_TACH)
@@ -63,7 +64,7 @@ void loop()
     // display the read in value
     Serial.print("Tach Value = ");
     Serial.println(tachVal, DEC);
-    delay(0.5);
+    delay(300);
   }
 
   if (TEST_ARDUINO_PI)
@@ -75,7 +76,7 @@ void loop()
     if (TEST_SERIAL)
     {
       Serial.println(data);
-      delay(200);
+      delay(300);
     }
     else if (TEST_I2C)
     {
