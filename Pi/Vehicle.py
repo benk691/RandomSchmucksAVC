@@ -8,7 +8,7 @@ class Vehicle:
     '''
     Initializes the basics of the vehicle
     '''
-    speed = 0.0
+    self.speed = 0.0
 
   #-------------------------------------------------------------------------------
   def setSpeed(self, inSpeed):
@@ -17,7 +17,7 @@ class Vehicle:
     @param inSpeed - the input speed, this should be a decimal value that is used 
                      as an analog input into the Sabertooth H-Bridge
     '''
-    speed = inSpeed
+    self.speed = inSpeed
 
   #-------------------------------------------------------------------------------
   def getSpeed(self):
@@ -26,7 +26,7 @@ class Vehicle:
     @return speed of the vehicle. This is the anlog value being feed into the 
             Sabertooth H-Bridge
     '''
-    return speed
+    return self.speed
   
   #-------------------------------------------------------------------------------
   def drive(self):
@@ -49,7 +49,7 @@ class Vehicle:
     @return string describing debug information
     '''
     desc = "Vehicle Info:\n"
-    desc += "\tspeed = {0}\n".format(speed)
+    desc += "\tspeed = {0}\n".format(self.speed)
     return desc
   
   #-------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ class Vehicle:
     Gets the string representation of the class
     @return string representation of the class
     '''
-    return _debugDescription()
+    return self._debugDescription()
 
   #-------------------------------------------------------------------------------
   def __str__(self):
@@ -66,5 +66,5 @@ class Vehicle:
     Gets the string representation of the class
     @return string representation of the class
     '''
-    return _debugDescription()
+    return self._debugDescription()
 
