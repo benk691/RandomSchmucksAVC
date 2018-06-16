@@ -1,31 +1,15 @@
-/***********************************************************************************
- * GENERAL CONSTANTS
- ***********************************************************************************/
-// Baudrate
-const int BAUDRATE = 9600;
+#include "Constants.hh"
+#include "Potentiometer.hh"
 
-/***********************************************************************************
- * ANALOG PINS
- ***********************************************************************************/
-// Potentiometer pin
-const int potPin = 2;
-// Tachometer pin
-const int tachPin = 3;
-
-/***********************************************************************************
- * SENSOR VALUES
- ***********************************************************************************/
-// Value read in from the pot
-int potVal = 0;
-// Value read in from the tachometer
-int tachVal = 0;
+Potentiometer frontPotSensor(Constants::FRONT_POT_PIN);
 
 /**
- * Setup the Arduino
+ * Setup the Arduino and the sensors
  */
 void setup() 
 {
-  Serial.begin(BAUDRATE);
+  Serial.begin(Constants::BAUDRATE);
+  frontPotSensor.setup();
 }
 
 /**
@@ -34,3 +18,4 @@ void setup()
 void loop() 
 {
 }
+
