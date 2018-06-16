@@ -8,11 +8,10 @@ class Potentiometer
 {
 public:
   /**
-   * Sets up the potentiometer for front end steering
+   * Initializes the potentiometer
    */
   Potentiometer(unsigned int potPin) : 
-    POT_PIN(potPin),
-    potValue(0)
+    POT_PIN(potPin)
   {}
 
   /**
@@ -23,6 +22,7 @@ public:
   {
     pinMode(POT_PIN, INPUT);
   }
+
   /**
    * Sets the value of the potentiometer by reading the pin
    */
@@ -66,7 +66,7 @@ private:
   // Potentiometer pin (NOTE: this is an analog pin)
   const unsigned int POT_PIN;
   // Last value read off of the potentiometer
-  int potValue;
+  int potValue = 0;
 
   // Deleted functionality
   Potentiometer() = delete;
