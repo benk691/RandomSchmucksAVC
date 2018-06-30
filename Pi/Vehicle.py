@@ -1,4 +1,5 @@
 import time
+import re
 from Constants import Constants
 from Motor import Motor
 
@@ -6,21 +7,22 @@ class Vehicle:
   '''
   Controls the Fisher Price Vehicle
   '''
+  # Regex to get decimal values
+  decMatch = re.compile(r'\d+\.\d+')
+
   #-------------------------------------------------------------------------------
-  def __init__(self, GPIO):
+  def __init__(self, GPIO, serial):
     '''
     Initializes the basics of the vehicle
     @param GPIO - the current instance of the RPi.GPIO import that is being used
+    @param serial - the serial communication line
     '''
-    self.speed = 0.0
-    # variables are encapsulated inside of Motor so do not need extra variables
-    #self.leftMotorFreq = 0.0
-    #self.rightMotorFreq = 0.0
-    #self.leftMotorDutyCycle = 0.0
-    #self.rightMotorDutyCycle
+    self.leftVelocity = 0
+    self.rightVelocity = 0
     # Initial frequency = 5kHz
     self.driveMotor = Motor(GPIO, Constants.HBRIDGE_S1_DRIVE_PIN, 5000, 0)
     self.turnMotor = Motor(GPIO, Constants.HBRIDGE_S2_TURN_PIN, 5000, 0)
+    self.serial = serial
     self.tabs = 0
 
   #-------------------------------------------------------------------------------
@@ -39,16 +41,25 @@ class Vehicle:
     @return speed of the vehicle. This is the anlog value being feed into the 
             Sabertooth H-Bridge
     '''
-    return self.speed
+    velLine = self.serial.readline()
+    if 'LV' in velLine and 'RV' in velLine:
+      left, right = velLine.split(',')
+      lValues = decMatch.findall(left)
+      if lValues:
+        self.leftVelocity = float(lValues[0])
+
+      if rValues:
+        self.rightVelocity = float(rValues[0])
   
   #-------------------------------------------------------------------------------
   def drive(self):
     '''
     Drives the vehicle forward
     '''
-    for dc in range(100):
-      self.driveMotor.changeDutyCycle(dc)
-      time.sleep(1)
+    pass
+    #for dc in range(100):
+    #  self.driveMotor.changeDutyCycle(dc)
+    #  time.sleep(1)
 
   #-------------------------------------------------------------------------------
   def turn(self):
@@ -76,7 +87,8 @@ class Vehicle:
     self.leftMotor.setTabs(self.tabs + 2)
     self.rightMotor.setTabs(self.tabs + 2)
     desc = "{0}Vehicle Info:\n".format('\t' * self.tabs)
-    desc += "{0}\tspeed = {1}\n".format(self.speed)
+    desc += "{0}\tRight Velocity = {1}\n".format(self.rightVelocity)
+    desc += "{0}\tLeft Velocity = {1}\n".format(self.leftVelocity)
     desc += "{0}\tDrive Motor:\n{1}\n".format('\t' * self.tabs, self.driveMotor)
     desc += "{0}\tTurn Motor:\n{1}\n".format('\t' * self.tabs, self.turnMotor)
     return desc
