@@ -2,13 +2,26 @@
 #include "Potentiometer.hh"
 #include "Tachometer.hh"
 
-Potentiometer steeringPotSensor(Constants::STEERING_POT_PIN);
+//Potentiometer steeringPotSensor(Constants::STEERING_POT_PIN);
 Tachometer rightTach(Constants::REAR_RIGHT_WHEEL_TACH_PIN);
 Tachometer leftTach(Constants::REAR_LEFT_WHEEL_TACH_PIN);
 
+// Sleep time (milli seconds)
+const int SLEEP_TIME = 10;
+
 int steeringPotValue = 0;
+
+// Tachometer Specific Data
+const int TACH_THRESHOLD = 40;
 int rightTachValue = 0;
 int leftTachValue = 0;
+int prevRightTachValue = 0;
+int prevLeftTachValue = 0;
+int rightVelocity = 0;
+double rightStripCount = 0;
+int leftVelocity = 0;
+double leftStripCount = 0;
+int loopCount = 0;
 
 /**
  * Setup the Arduino and the sensors
@@ -16,7 +29,7 @@ int leftTachValue = 0;
 void setup() 
 {
   Serial.begin(Constants::BAUDRATE);
-  steeringPotSensor.setup();
+//  steeringPotSensor.setup();
   rightTach.setup();
   leftTach.setup();
 }
@@ -26,17 +39,61 @@ void setup()
  */
 void loop() 
 {
-  steeringPotValue = steeringPotSensor.readPotValue();
+//  steeringPotValue = steeringPotSensor.readPotValue();
+
+  prevRightTachValue = rightTachValue;
+  prevLeftTachValue = leftTachValue;
+  
   rightTachValue = rightTach.readTachValue();
   leftTachValue = leftTach.readTachValue();
+
+  if ((prevRightTachValue - rightTachValue) > TACH_THRESHOLD)
+  {
+    rightStripCount += 0.75;
+  }
+
+  if ((prevRightTachValue - rightTachValue) < -TACH_THRESHOLD)
+  {
+    rightStripCount += 0.25;
+  }
+
+  if ((prevLeftTachValue - leftTachValue) > TACH_THRESHOLD)
+  {
+    leftStripCount += 0.75;
+  }
+
+  if ((prevLeftTachValue - leftTachValue) < -TACH_THRESHOLD)
+  {
+    leftStripCount += 0.25;
+  }
+
+  loopCount++;
+
+  if (loopCount >= 100)
+  {
+    rightVelocity = ((rightStripCount / 15.0) * 0.36 * M_PI) / 1.0;
+    leftVelocity = ((leftStripCount / 15.0) * 0.36 * M_PI) / 1.0;
+    loopCount = 0;
+    rightStripCount = 0;
+    leftStripCount = 0;
+    Serial.print("LV:");
+    Serial.print(leftVelocity, 5);
+    Serial.print(',');
+    Serial.print("RV:");
+    Serial.println(rightVelocity, 5);
+  }
+
+  delay(SLEEP_TIME);
+
+  
   // Send data to Rasberry Pi
-  Serial.print("SP:");
-  Serial.print(steeringPotValue, DEC);
-  Serial.print(',');
-  Serial.print("RT:");
-  Serial.print(rightTachValue, DEC);
-  Serial.print(',');
-  Serial.print("LT:");
-  Serial.println(leftTachValue, DEC);
+//  Serial.print("SP:");
+//  Serial.print(steeringPotValue, DEC);
+//  Serial.print(',');
+//  Serial.print("RT:");
+//  Serial.print(rightTachValue, DEC);
+//  Serial.print(',');
+//  Serial.print("LT:");
+//  Serial.println(leftTachValue, DEC);
 }
 
