@@ -1,3 +1,4 @@
+#include <Servo.h>
 /***********************************************************************************
  * GENERAL CONSTANTS
  ***********************************************************************************/
@@ -23,7 +24,8 @@ const int servoPin = 9;
 // potentiometer pin
 const int potPin = 2;
 // tachometer pin
-const int tachPin = 3;
+const int leftTachPin = 2;
+const int rightTachPin = 2;
 
 /***********************************************************************************
  * SENSOR VALUES
@@ -31,7 +33,8 @@ const int tachPin = 3;
 // Value read in from the pot
 int potVal = 0;
 // Value read in from the tachometer
-int tachVal = 0;
+int leftTachVal = 0;
+int rightTachVal = 0;
 
 /***********************************************************************************
  * FUNCTIONS
@@ -40,11 +43,10 @@ int tachVal = 0;
 const bool TEST_POT = false;
 const bool TEST_TACH = false;
 const bool TEST_SERVO = false;
+const bool TEST_IMU = false;
 const bool TEST_ARDUINO_PI = false;
 
-#if TEST_SERVO
 Servo servo;
-#endif
 
 /**
  * Sets up the Arduino
@@ -77,10 +79,13 @@ void loop()
   if (TEST_TACH)
   {
     // Read Tachometer
-    tachVal = analogRead(tachPin);
+    leftTachVal = analogRead(leftTachPin);
+    rightTachVal = analogRead(rightTachPin);
     // display the read in value
-    Serial.print("Tach Value = ");
-    Serial.println(tachVal, DEC);
+    Serial.print("Left Tach Value = ");
+    Serial.println(leftTachVal, DEC);
+    Serial.print("Right Tach Value = ");
+    Serial.println(rightTachVal, DEC);
     delay(SLEEP_TIME);
   }
 
@@ -97,7 +102,11 @@ void loop()
     // Direction 2
     servo.write(180);
     delay(SLEEP_TIME);
-    
+  }
+
+  if (TEST_IMU)
+  {
+    // PASS
   }
 
   if (TEST_ARDUINO_PI)

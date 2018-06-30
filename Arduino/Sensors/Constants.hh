@@ -10,8 +10,8 @@ public:
   // Baudrate of the program
   static const unsigned int BAUDRATE = 9600;
 
-  // The Front steering potentiometer pin (this is an Analog pin)
-  static const unsigned int FRONT_POT_PIN = 1;
+  // The steering potentiometer pin (this is an Analog pin)
+  static const unsigned int STEERING_POT_PIN = 1;
 
   // The rear right wheel tachometer pin (this is an Analog pin)
   static const unsigned int REAR_RIGHT_WHEEL_TACH_PIN = 2;
