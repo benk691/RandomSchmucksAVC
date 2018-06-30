@@ -7,14 +7,21 @@ def main():
   '''
   Main program
   '''
+
   try:
     vehicle = setup()
     while True:
       vehicle.drive()
-  except:
-    pass
   finally:
     GPIO.cleanup()
+  #try:
+  #  vehicle = setup()
+  #  while True:
+  #    vehicle.drive()
+  #except Exception as e:
+  #  print(e)
+  #finally:
+  #  GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
 def setup():

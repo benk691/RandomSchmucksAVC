@@ -19,8 +19,8 @@ class Vehicle:
     #self.leftMotorDutyCycle = 0.0
     #self.rightMotorDutyCycle
     # Initial frequency = 5kHz
-    self.leftMotor = Motor(GPIO, Constants.HBRIDGE_S1_PIN, 5000, 0)
-    self.rightMotor = Motor(GPIO, Constants.HBRIDGE_S2_PIN, 5000, 0)
+    self.driveMotor = Motor(GPIO, Constants.HBRIDGE_S1_DRIVE_PIN, 5000, 0)
+    self.turnMotor = Motor(GPIO, Constants.HBRIDGE_S2_TURN_PIN, 5000, 0)
     self.tabs = 0
 
   #-------------------------------------------------------------------------------
@@ -47,8 +47,7 @@ class Vehicle:
     Drives the vehicle forward
     '''
     for dc in range(100):
-      self.leftMotor.changeDutyCycle(dc)
-      self.rightMotor.changeDutyCycle(dc)
+      self.driveMotor.changeDutyCycle(dc)
       time.sleep(1)
 
   #-------------------------------------------------------------------------------
@@ -56,7 +55,9 @@ class Vehicle:
     '''
     Turns the vehicle
     '''
-    pass
+    for dc in range(100):
+      self.turnMotor.changeDutyCycle(dc)
+      time.sleep(1)
 
   #-------------------------------------------------------------------------------
   def setTabs(self, tabs):
@@ -76,8 +77,8 @@ class Vehicle:
     self.rightMotor.setTabs(self.tabs + 2)
     desc = "{0}Vehicle Info:\n".format('\t' * self.tabs)
     desc += "{0}\tspeed = {1}\n".format(self.speed)
-    desc += "{0}\tLeft Motor:\n{1}\n".format('\t' * self.tabs, self.leftMotor)
-    desc += "{0}\tRight Motor:\n{1}\n".format('\t' * self.tabs, self.rightMotor)
+    desc += "{0}\tDrive Motor:\n{1}\n".format('\t' * self.tabs, self.driveMotor)
+    desc += "{0}\tTurn Motor:\n{1}\n".format('\t' * self.tabs, self.turnMotor)
     return desc
   
   #-------------------------------------------------------------------------------
