@@ -1,23 +1,36 @@
+import time
+from Constants import Constants
+from Motor import Motor
 
 class Vehicle:
   '''
   Controls the Fisher Price Vehicle
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self):
+  def __init__(self, GPIO):
     '''
     Initializes the basics of the vehicle
+    @param GPIO - the current instance of the RPi.GPIO import that is being used
     '''
     self.speed = 0.0
+    # variables are encapsulated inside of Motor so do not need extra variables
+    #self.leftMotorFreq = 0.0
+    #self.rightMotorFreq = 0.0
+    #self.leftMotorDutyCycle = 0.0
+    #self.rightMotorDutyCycle
+    # Initial frequency = 5kHz
+    self.leftMotor = Motor(GPIO, Constants.HBRIDGE_S1_PIN, 5000, 0)
+    self.rightMotor = Motor(GPIO, Constants.HBRIDGE_S2_PIN, 5000, 0)
+    self.tabs = 0
 
   #-------------------------------------------------------------------------------
-  def setSpeed(self, inSpeed):
+  def setSpeed(self, speed):
     '''
     Sets the speed of the vehicle
-    @param inSpeed - the input speed, this should be a decimal value that is used 
+    @param speed - the input speed, this should be a decimal value that is used 
                      as an analog input into the Sabertooth H-Bridge
     '''
-    self.speed = inSpeed
+    self.speed = speed
 
   #-------------------------------------------------------------------------------
   def getSpeed(self):
@@ -33,14 +46,25 @@ class Vehicle:
     '''
     Drives the vehicle forward
     '''
-    pass
+    for dc in range(100):
+      self.leftMotor.changeDutyCycle(dc)
+      self.rightMotor.changeDutyCycle(dc)
+      time.sleep(1)
 
   #-------------------------------------------------------------------------------
   def turn(self):
     '''
-    Drives the vehicle forward
+    Turns the vehicle
     '''
     pass
+
+  #-------------------------------------------------------------------------------
+  def setTabs(self, tabs):
+    '''
+    Set the number of tabs to use when printing out information
+    @param tabs - the number of tabs to use in print out
+    '''
+    self.tabs = tabs
 
   #-------------------------------------------------------------------------------
   def _debugDescrition():
@@ -48,8 +72,12 @@ class Vehicle:
     Generates debugging information about the vehicle
     @return string describing debug information
     '''
-    desc = "Vehicle Info:\n"
-    desc += "\tspeed = {0}\n".format(self.speed)
+    self.leftMotor.setTabs(self.tabs + 2)
+    self.rightMotor.setTabs(self.tabs + 2)
+    desc = "{0}Vehicle Info:\n".format('\t' * self.tabs)
+    desc += "{0}\tspeed = {1}\n".format(self.speed)
+    desc += "{0}\tLeft Motor:\n{1}\n".format('\t' * self.tabs, self.leftMotor)
+    desc += "{0}\tRight Motor:\n{1}\n".format('\t' * self.tabs, self.rightMotor)
     return desc
   
   #-------------------------------------------------------------------------------

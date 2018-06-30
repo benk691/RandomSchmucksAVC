@@ -15,8 +15,10 @@ class Motor:
     self.pin = pin
     self.freq = freq
     self.dutyCycle = dutyCycle
+    GPIO.setup(self.pin, GPIO.OUT)
     self.signal = GPIO.PWM(self.pin, self.freq)
     self.signal.start(self.dutyCycle)
+    self.tabs = 0
 
   #-------------------------------------------------------------------------------
   def changeDutyCycle(self, dutyCycle):
@@ -24,7 +26,7 @@ class Motor:
     Changes the motor's duty cycle
     @param dutyCycle - the duty cyle to use
     '''
-    self.signal.changeDutyCycle(dutyCycle)
+    self.signal.ChangeDutyCycle(dutyCycle)
     self.dutyCycle = dutyCycle
 
   #-------------------------------------------------------------------------------
@@ -33,8 +35,16 @@ class Motor:
     Changes the motor's frequency
     @param freq - the freq to use
     '''
-    self.signal.changeFrequency(freq)
+    self.signal.ChangeFrequency(freq)
     self.freq = freq
+
+  #-------------------------------------------------------------------------------
+  def setTabs(self, tabs):
+    '''
+    Set the number of tabs to use when printing out information
+    @param tabs - the number of tabs to use in print out
+    '''
+    self.tabs = tabs
 
   #-------------------------------------------------------------------------------
   def _debugDescription():
@@ -42,10 +52,10 @@ class Motor:
     Generates debugging information about hte motor
     @return string describing debug information
     '''
-    desc += "Motor Info:\n"
-    desc += "\tpin = {0}\n".format(self.pin)
-    desc += "\tfreq = {0}\n".format(self.freq)
-    desc += "\tdutyCycle = {0}\n".format(self.dutyCycle)
+    desc += "{0}Motor Info:\n".format('\t' * self.tabs)
+    desc += "{0}\tpin = {1}\n".format('\t' * self.tabs, self.pin)
+    desc += "{0}\tfreq = {1}\n".format('\t' * self.tabs, self.freq)
+    desc += "{0}\tdutyCycle = {1}\n".format('\t' * self.tabs, self.dutyCycle)
     return desc
 
   #-------------------------------------------------------------------------------

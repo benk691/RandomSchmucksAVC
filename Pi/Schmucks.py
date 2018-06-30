@@ -4,7 +4,29 @@ from Vehicle import Vehicle
 
 #-------------------------------------------------------------------------------
 def main():
-  vehicle = Vehicle()
+  '''
+  Main program
+  '''
+  try:
+    vehicle = setup()
+    while True:
+      vehicle.drive()
+  except:
+    pass
+  finally:
+    GPIO.cleanup()
+
+#-------------------------------------------------------------------------------
+def setup():
+  '''
+  Setup the Raspberry Pi to run
+  @return the vehicle object
+  '''
+  GPIO.setwarnings(False)
+  GPIO.setmode(GPIO.BOARD)
+
+  vehicle = Vehicle(GPIO)
+  return vehicle
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
