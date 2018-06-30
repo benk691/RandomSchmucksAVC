@@ -1,5 +1,8 @@
 #!/usr/bin/python3
+import serial
+import time
 import RPi.GPIO as GPIO
+from Constants import Constants
 from Vehicle import Vehicle
 
 #-------------------------------------------------------------------------------
@@ -9,9 +12,11 @@ def main():
   '''
 
   try:
-    vehicle = setup()
+    vehicle, ser = setup()
     while True:
-      vehicle.drive()
+      #vehicle.drive()
+      print(vehicle)
+      time.sleep(1)
   finally:
     GPIO.cleanup()
   #try:
@@ -28,12 +33,15 @@ def setup():
   '''
   Setup the Raspberry Pi to run
   @return the vehicle object
+  @return the serial communication line
   '''
+  ser = serial.Serial('/dev/ttyACM0', Constants.BAUDRATE)
+  ser.baudrate = Constants.BAUDRATE
   GPIO.setwarnings(False)
   GPIO.setmode(GPIO.BOARD)
 
-  vehicle = Vehicle(GPIO)
-  return vehicle
+  vehicle = Vehicle(GPIO, ser)
+  return vehicle, ser
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
