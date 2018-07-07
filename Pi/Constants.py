@@ -3,6 +3,9 @@ class Constants:
   '''
   Defines constants for the Rasberry Pi
   '''
+  # Arduino Serial Port
+  ARDUINO_SERIAL_PORT = '/dev/ttyACM0'
+  
   # Baudrate of the program
   BAUDRATE = 9600
   

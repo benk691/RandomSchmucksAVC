@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.5
 import serial
 import time
 import RPi.GPIO as GPIO
@@ -35,7 +35,7 @@ def setup():
   @return the vehicle object
   @return the serial communication line
   '''
-  ser = serial.Serial('/dev/ttyACM0', Constants.BAUDRATE)
+  ser = serial.Serial(Constants.ARDUINO_SERIAL_PORT, Constants.BAUDRATE)
   ser.baudrate = Constants.BAUDRATE
   GPIO.setwarnings(False)
   GPIO.setmode(GPIO.BOARD)

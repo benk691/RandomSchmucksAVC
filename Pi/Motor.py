@@ -49,12 +49,12 @@ class Motor:
     self.tabs = tabs
 
   #-------------------------------------------------------------------------------
-  def _debugDescription():
+  def _debugDescription(self):
     '''
     Generates debugging information about hte motor
     @return string describing debug information
     '''
-    desc += "{0}Motor Info:\n".format('\t' * self.tabs)
+    desc = "{0}Motor Info:\n".format('\t' * self.tabs)
     desc += "{0}\tpin = {1}\n".format('\t' * self.tabs, self.pin)
     desc += "{0}\tfreq = {1}\n".format('\t' * self.tabs, self.freq)
     desc += "{0}\tdutyCycle = {1}\n".format('\t' * self.tabs, self.dutyCycle)

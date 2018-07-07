@@ -79,16 +79,16 @@ class Vehicle:
     self.tabs = tabs
 
   #-------------------------------------------------------------------------------
-  def _debugDescrition():
+  def _debugDescription(self):
     '''
     Generates debugging information about the vehicle
     @return string describing debug information
     '''
-    self.leftMotor.setTabs(self.tabs + 2)
-    self.rightMotor.setTabs(self.tabs + 2)
+    self.driveMotor.setTabs(self.tabs + 1)
+    self.turnMotor.setTabs(self.tabs + 1)
     desc = "{0}Vehicle Info:\n".format('\t' * self.tabs)
-    desc += "{0}\tRight Velocity = {1}\n".format(self.rightVelocity)
-    desc += "{0}\tLeft Velocity = {1}\n".format(self.leftVelocity)
+    desc += "{0}\tRight Velocity = {1}\n".format('\t' * self.tabs, self.rightVelocity)
+    desc += "{0}\tLeft Velocity = {1}\n".format('\t' * self.tabs, self.leftVelocity)
     desc += "{0}\tDrive Motor:\n{1}\n".format('\t' * self.tabs, self.driveMotor)
     desc += "{0}\tTurn Motor:\n{1}\n".format('\t' * self.tabs, self.turnMotor)
     return desc
