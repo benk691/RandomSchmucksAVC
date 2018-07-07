@@ -13,10 +13,8 @@ class Motor:
     @param dutyCycle - the PWM duty cycle to use
     '''
     self.pin = pin
-    print('pin = {0}'.format(self.pin))
     self.freq = freq
     self.dutyCycle = dutyCycle
-    print('pin = {0}'.format(self.pin))
     GPIO.setup(self.pin, GPIO.OUT)
     self.signal = GPIO.PWM(self.pin, self.freq)
     self.signal.start(self.dutyCycle)

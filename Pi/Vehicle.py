@@ -19,9 +19,8 @@ class Vehicle:
     '''
     self.leftVelocity = 0
     self.rightVelocity = 0
-    # Initial frequency = 5kHz
-    self.driveMotor = Motor(GPIO, Constants.HBRIDGE_S1_DRIVE_PIN, 5000, 0)
-    self.turnMotor = Motor(GPIO, Constants.HBRIDGE_S2_TURN_PIN, 5000, 0)
+    self.driveMotor = Motor(GPIO, Constants.HBRIDGE_S1_DRIVE_PIN, Constants.HBRIDGE_MOTOR_FREQ, 0)
+    self.turnMotor = Motor(GPIO, Constants.HBRIDGE_S2_TURN_PIN, Constants.HBRIDGE_MOTOR_FREQ, 0)
     self.serial = serial
     self.tabs = 0
 
@@ -38,14 +37,15 @@ class Vehicle:
   def getSpeed(self):
     '''
     Gets the current speed of the vehicle
-    @return speed of the vehicle. This is the anlog value being feed into the 
+    @return speed of the vehicle. This is the analog value being feed into the 
             Sabertooth H-Bridge
     '''
-    velLine = self.serial.readline()
+    velLine = str(self.serial.readline())
     if 'LV' in velLine and 'RV' in velLine:
       left, right = velLine.split(',')
-      lValues = decMatch.findall(left)
-      if lValues:
+      lSearch = decMatch.search(left)
+      rSearch = decMatch.search(right)
+      if lSearch:
         self.leftVelocity = float(lValues[0])
 
       if rValues:
@@ -57,18 +57,13 @@ class Vehicle:
     Drives the vehicle forward
     '''
     pass
-    #for dc in range(100):
-    #  self.driveMotor.changeDutyCycle(dc)
-    #  time.sleep(1)
 
   #-------------------------------------------------------------------------------
   def turn(self):
     '''
     Turns the vehicle
     '''
-    for dc in range(100):
-      self.turnMotor.changeDutyCycle(dc)
-      time.sleep(1)
+    pass
 
   #-------------------------------------------------------------------------------
   def setTabs(self, tabs):
@@ -84,8 +79,8 @@ class Vehicle:
     Generates debugging information about the vehicle
     @return string describing debug information
     '''
-    self.driveMotor.setTabs(self.tabs + 1)
-    self.turnMotor.setTabs(self.tabs + 1)
+    self.driveMotor.setTabs(self.tabs + 2)
+    self.turnMotor.setTabs(self.tabs + 2)
     desc = "{0}Vehicle Info:\n".format('\t' * self.tabs)
     desc += "{0}\tRight Velocity = {1}\n".format('\t' * self.tabs, self.rightVelocity)
     desc += "{0}\tLeft Velocity = {1}\n".format('\t' * self.tabs, self.leftVelocity)

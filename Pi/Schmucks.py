@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 import serial
 import time
 import RPi.GPIO as GPIO
@@ -13,20 +13,13 @@ def main():
 
   try:
     vehicle, ser = setup()
+  
     while True:
-      #vehicle.drive()
+      vehicle.getSpeed()
       print(vehicle)
       time.sleep(1)
   finally:
     GPIO.cleanup()
-  #try:
-  #  vehicle = setup()
-  #  while True:
-  #    vehicle.drive()
-  #except Exception as e:
-  #  print(e)
-  #finally:
-  #  GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
 def setup():

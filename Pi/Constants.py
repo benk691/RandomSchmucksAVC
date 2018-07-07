@@ -14,3 +14,6 @@ class Constants:
 
   # The pin for signal 2 to the H-Bridge this pin will control the servo motor to turn the vehicle
   HBRIDGE_S2_TURN_PIN = 5
+
+  # Initial PWM frequency for the H-Bridge motors (Hz)
+  HBRIDGE_MOTOR_FREQ = 5000
