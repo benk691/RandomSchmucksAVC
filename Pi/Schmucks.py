@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.5
 import serial
 import time
 import RPi.GPIO as GPIO

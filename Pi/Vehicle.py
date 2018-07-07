@@ -7,7 +7,7 @@ class Vehicle:
   '''
   Controls the Fisher Price Vehicle
   '''
-  # Regex to get decimal values
+  # Regex to get floating point values
   decMatch = re.compile(r'\d+\.\d+')
 
   #-------------------------------------------------------------------------------
@@ -46,10 +46,10 @@ class Vehicle:
       lSearch = decMatch.search(left)
       rSearch = decMatch.search(right)
       if lSearch:
-        self.leftVelocity = float(lValues[0])
+        self.leftVelocity = float(lValues[lSearch.start() : lSearch.end()])
 
       if rValues:
-        self.rightVelocity = float(rValues[0])
+        self.rightVelocity = float(rValues[rSearch.start() : rSearch.end()])
   
   #-------------------------------------------------------------------------------
   def drive(self):
