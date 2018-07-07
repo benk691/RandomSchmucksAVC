@@ -17,9 +17,9 @@ int rightTachValue = 0;
 int leftTachValue = 0;
 int prevRightTachValue = 0;
 int prevLeftTachValue = 0;
-int rightVelocity = 0;
+double rightVelocity = 0;
 double rightStripCount = 0;
-int leftVelocity = 0;
+double leftVelocity = 0;
 double leftStripCount = 0;
 int loopCount = 0;
 
@@ -41,8 +41,11 @@ void loop()
 {
 //  steeringPotValue = steeringPotSensor.readPotValue();
 
-  prevRightTachValue = rightTachValue;
-  prevLeftTachValue = leftTachValue;
+  if (loopCount % 3 == 0)
+  {
+    prevRightTachValue = rightTachValue;
+    prevLeftTachValue = leftTachValue;
+  }
   
   rightTachValue = rightTach.readTachValue();
   leftTachValue = leftTach.readTachValue();
@@ -81,6 +84,12 @@ void loop()
     Serial.print(',');
     Serial.print("RV:");
     Serial.println(rightVelocity, 5);
+
+    Serial.print("LT:");
+    Serial.print(leftTachValue, DEC);
+    Serial.print(',');
+    Serial.print("RT:");
+    Serial.println(rightTachValue, DEC);
   }
 
   delay(SLEEP_TIME);
