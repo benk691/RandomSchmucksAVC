@@ -4,6 +4,7 @@ import time
 import RPi.GPIO as GPIO
 from Constants import Constants
 from Vehicle import Vehicle
+from DataConsumer import DataConsumer
 
 #-------------------------------------------------------------------------------
 def main():
@@ -13,12 +14,16 @@ def main():
 
   try:
     vehicle, ser = setup()
-  
+    dataConsumer = DataConsumer(ser)
+    dataConsumer.start()
     while True:
-      vehicle.getSpeed()
-      print(vehicle)
-      time.sleep(1)
+      pass
+      #vehicle.getSpeed()
+      #print(vehicle)
+      #time.sleep(1)
+      
   finally:
+    dataConsumer.shutdown()
     GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
