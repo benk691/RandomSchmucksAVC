@@ -16,9 +16,10 @@ MAX_RIGHT_TURN_VALUE = 421
 CENTER_TURN_VALUE = 483
 MAX_LEFT_TURN_VALUE = 605
 TURN_TOLERANCE = 10
+DUTY_CYCLE_DEAD_ZONE = 50.0
 #--------------------------
-DUTY_CYCLE_LEFT = 5.0
-DUTY_CYCLE_RIGHT = 2.0
+DUTY_CYCLE_LEFT = DUTY_CYCLE_DEAD_ZONE + 5.0
+DUTY_CYCLE_RIGHT = DUTY_CYCLE_DEAD_ZONE - 5.0
 
 # Turn States
 LEFT = 0
@@ -73,13 +74,13 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
   global driveDutyCycle
 
   if STATE[1] == SLOW:
-    if (driveDutyCycle - 5.0) <= 0.0 or driveDutyCycle >= 100.0:
-      driveDutyCycle = 5.0
+    if (driveDutyCycle + 1.0) <= 0.0 or driveDutyCycle >= 100.0:
+      driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 5.0
     else:
-      driveDutyCycle -= 5.0
+      driveDutyCycle += 1.0
   elif STATE[1] == FAST:
     if driveDutyCycle <= 0.0 or (driveDutyCycle + 10.0) >= 100.0:
-      driveDutyCycle = 50.0
+      driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 15.0
     else:
       driveDutyCycle += 10.0
     
@@ -96,7 +97,7 @@ def controlSteering(turnMotorSignal, potValue):
 
   if STATE[0] == STRAIGHT:
     if potValue >= (CENTER_TURN_VALUE - TURN_TOLERANCE) and potValue <= (CENTER_TURN_VALUE + TURN_TOLERANCE):
-      turnDutyCycle = 0.0
+      turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
     # To far right
     elif potValue < (CENTER_TURN_VALUE - TURN_TOLERANCE):
       turnDutyCycle = DUTY_CYCLE_LEFT
@@ -105,7 +106,7 @@ def controlSteering(turnMotorSignal, potValue):
       turnDutyCycle = DUTY_CYCLE_RIGHT
   elif STATE[0] == LEFT:
     if potValue >= (MAX_LEFT_TURN_VALUE - TURN_TOLERANCE) and potValue <= (MAX_LEFT_TURN_VALUE + TURN_TOLERANCE):
-      turnDutyCycle = 0.0
+      turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
     # To far right
     elif potValue < (MAX_LEFT_TURN_VALUE - TURN_TOLERANCE):
       turnDutyCycle = DUTY_CYCLE_LEFT
@@ -115,7 +116,7 @@ def controlSteering(turnMotorSignal, potValue):
       
   elif STATE[0] == RIGHT:
     if potValue >= (MAX_RIGHT_TURN_VALUE - TURN_TOLERANCE) and potValue <= (MAX_RIGHT_TURN_VALUE + TURN_TOLERANCE):
-      turnDutyCycle = 0.0
+      turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
     # To far left
     elif potValue < (MAX_RIGHT_TURN_VALUE - TURN_TOLERANCE):
       turnDutyCycle = DUTY_CYCLE_RIGHT
