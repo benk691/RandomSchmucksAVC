@@ -2,7 +2,7 @@
 #include "Potentiometer.hh"
 #include "Tachometer.hh"
 
-//Potentiometer steeringPotSensor(Constants::STEERING_POT_PIN);
+Potentiometer steeringPotSensor(Constants::STEERING_POT_PIN);
 Tachometer rightTach(Constants::REAR_RIGHT_WHEEL_TACH_PIN);
 Tachometer leftTach(Constants::REAR_LEFT_WHEEL_TACH_PIN);
 
@@ -36,13 +36,15 @@ double startTime = 0;
 double elapsedTime = 0;
 int fractional = 0;
 
+// ACK Setup
+int ack = 0;
 /**
  * Setup the Arduino and the sensors
  */
 void setup() 
 {
   Serial.begin(Constants::BAUDRATE);
-//  steeringPotSensor.setup();
+  steeringPotSensor.setup();
   rightTach.setup();
   leftTach.setup();
 }
@@ -52,7 +54,23 @@ void setup()
  */
 void loop() 
 {
-//  steeringPotValue = steeringPotSensor.readPotValue();
+  // TODO: Consider
+  // ACK based
+  // Print all bytes one line ata time, then it doesn't matter when I start
+  // Header: Value method
+  
+  // Make sure Pi and Arduino are both ready
+  while (ack != 0xAA)
+  {
+    Serial.write(0xDEAD);
+
+    if (Serial.available() > 0)
+    {
+      ack = Serial.read();
+    }
+  }
+  
+  steeringPotValue = steeringPotSensor.readPotValue();
 
   if (loopCount % 1 == 0)
   {
@@ -87,27 +105,6 @@ void loop()
     leftHigh = 0;
   }
 
-  
-//  if ((prevRightTachValue - rightTachValue) > TACH_THRESHOLD)
-//  {
-//    rightStripCount += 0.5;
-//  }
-//
-//  if ((prevRightTachValue - rightTachValue) < -TACH_THRESHOLD)
-//  {
-//    rightStripCount += 0.5;
-//  }
-//
-//  if ((prevLeftTachValue - leftTachValue) > TACH_THRESHOLD)
-//  {
-//    leftStripCount += 0.5;
-//  }
-//
-//  if ((prevLeftTachValue - leftTachValue) < -TACH_THRESHOLD)
-//  {
-//    leftStripCount += 0.5;
-//  }
-
   loopCount++;
 
   if (loopCount >= 300)
@@ -117,29 +114,30 @@ void loop()
     rightVelocity = ((rightStripCount / 30.0) * 0.36 * M_PI) / (elapsedTime / 1000.0); 
     leftVelocity = ((leftStripCount / 30.0) * 0.36 * M_PI) / (elapsedTime / 1000.0);
 
-    Serial.print("LV:");
-    Serial.print(leftVelocity, 5);
-    Serial.print(',');
-    Serial.print("RV:");
-    Serial.println(rightVelocity, 5);
     
-    Serial.print("LT:");
-    Serial.print(leftTachValue, DEC);
-    Serial.print(',');
-    Serial.print("RT:");
-    Serial.println(rightTachValue, DEC);
-
-    Serial.print("LSC:");
-    Serial.print(leftStripCount, 2);
-    Serial.print(',');
-    Serial.print("RSC:");
-    Serial.println(rightStripCount, 2);
-    
-    Serial.print("Elapsed Time:");
-    Serial.println(elapsedTime, 5);
-    
-
-    Serial.println();
+//    Serial.print("LV:");
+//    Serial.print(leftVelocity, 5);
+//    Serial.print(',');
+//    Serial.print("RV:");
+//    Serial.println(rightVelocity, 5);
+//    
+//    Serial.print("LT:");
+//    Serial.print(leftTachValue, DEC);
+//    Serial.print(',');
+//    Serial.print("RT:");
+//    Serial.println(rightTachValue, DEC);
+//
+//    Serial.print("LSC:");
+//    Serial.print(leftStripCount, 2);
+//    Serial.print(',');
+//    Serial.print("RSC:");
+//    Serial.println(rightStripCount, 2);
+//    
+//    Serial.print("Elapsed Time:");
+//    Serial.println(elapsedTime, 5);
+//    
+//
+//    Serial.println();
 
     loopCount = 0;
     rightStripCount = 0;
@@ -147,16 +145,5 @@ void loop()
   }
 
   delay(SLEEP_TIME);
-
-  
-  // Send data to Rasberry Pi
-//  Serial.print("SP:");
-//  Serial.print(steeringPotValue, DEC);
-//  Serial.print(',');
-//  Serial.print("RT:");
-//  Serial.print(rightTachValue, DEC);
-//  Serial.print(',');
-//  Serial.print("LT:");
-//  Serial.println(leftTachValue, DEC);
 }
 
