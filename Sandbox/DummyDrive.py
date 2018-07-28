@@ -11,7 +11,7 @@ HBRIDGE_S1_PIN = 12
 HBRIDGE_S2_PIN = 18
 DRIVE_PIN = HBRIDGE_S1_PIN
 TURN_PIN = HBRIDGE_S2_PIN
-HBRIDGE_MOTOR_FREQ = 100 #5000
+HBRIDGE_MOTOR_FREQ = 5000
 MAX_RIGHT_TURN_VALUE = 421
 CENTER_TURN_VALUE = 483
 MAX_LEFT_TURN_VALUE = 605
@@ -38,6 +38,10 @@ stateCount = 1
 driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
 turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
 
+FORWARD = 650
+STOP = 1380
+REV = 2112
+
 #-------------------------------------------------------------------------------
 def main():
   '''
@@ -46,11 +50,25 @@ def main():
   try:
     ser, driveMotorSignal, turnMotorSignal = setup()
   
+    #driveMotorSignal.ChangeDutyCycle(100)
+    GPIO.output(DRIVE_PIN, GPIO.LOW)
+    MIN = 1400
+    MAX = 2112
+    speed = MIN
+    direction = 1
     while True:
+      #print("speed = {0}".format(speed))
+      #controlSpeed(DRIVE_PIN, speed)
+      sendSignal(DRIVE_PIN, 2100, 1.0/2.0, 50)
+      #time.sleep(1)
+      speed += (direction * 50)
+      if speed < MIN or speed > MAX:
+        direction *= -1
       leftVelocity, rightVelocity, potValue = consumeSerialData(ser)
       print('LV: {0}'.format(leftVelocity))
       print('RV: {0}'.format(rightVelocity))
       print('S: {0}'.format(potValue))
+      '''
       print('driveDutyCycle: {0}'.format(driveDutyCycle))
       print('turnDutyCycle: {0}'.format(turnDutyCycle))
       print('STATE: {0}'.format(STATE))
@@ -58,9 +76,12 @@ def main():
       controlSteering(turnMotorSignal, potValue)
       changeStates()
       time.sleep(1)
+      '''
+      #pass
   finally:
-    driveMotorSignal.stop()
-    turnMotorSignal.stop()
+    #driveMotorSignal.stop()
+    #turnMotorSignal.stop()
+    sendSignal(DRIVE_PIN, STOP, 1.0, 50)
     GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
@@ -73,11 +94,16 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
   '''
   global driveDutyCycle
 
+  driveDutyCycle += 1.0
+
+  if driveDutyCycle >= 100.0:
+    driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
+
   #for dc in range(100):
   #  print('duty cycle: {0}'.format(dc))
   #  driveMotorSignal.ChangeDutyCycle(dc)
   #  time.sleep(3)
-
+  '''
   if STATE[1] == SLOW:
     if (driveDutyCycle + 1.0) <= 0.0 or driveDutyCycle >= 100.0:
       driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 5.0
@@ -88,7 +114,7 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
       driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 15.0
     else:
       driveDutyCycle += 10.0
-    
+  ''' 
   #driveMotorSignal.ChangeDutyCycle(driveDutyCycle)
 
 #-------------------------------------------------------------------------------
@@ -205,22 +231,43 @@ def setup():
   ser = serial.Serial(ARDUINO_SERIAL_PORT, BAUDRATE)
   ser.baudrate = BAUDRATE
   GPIO.setwarnings(False)
-  GPIO.setmode(GPIO.BOARD)
+  #GPIO.setmode(GPIO.BOARD)
+  GPIO.setmode(GPIO.BCM)
 
   # Setup the drive motor
   dbg("DRIVE_PIN", DRIVE_PIN)
   GPIO.setup(DRIVE_PIN, GPIO.OUT)
-  driveMotorSignal = GPIO.PWM(DRIVE_PIN, HBRIDGE_MOTOR_FREQ)
-  driveMotorSignal.start(driveDutyCycle)
+  driveMotorSignal= None
+  #driveMotorSignal = GPIO.PWM(DRIVE_PIN, HBRIDGE_MOTOR_FREQ)
+  #driveMotorSignal.start(driveDutyCycle)
 
   # Setup the turn motor
   dbg("TURN_PIN", TURN_PIN)
   GPIO.setup(TURN_PIN, GPIO.OUT)
-  turnMotorSignal = GPIO.PWM(TURN_PIN, HBRIDGE_MOTOR_FREQ)
-  turnMotorSignal.start(turnDutyCycle)
+  turnMotorSignal = None
+  #turnMotorSignal = GPIO.PWM(TURN_PIN, HBRIDGE_MOTOR_FREQ)
+  #turnMotorSignal.start(turnDutyCycle)
 
   return ser, driveMotorSignal, turnMotorSignal
 
+
+#-------------------------------------------------------------------------------
+def sendSignal(pin, sleepTime, signalLength, timing):
+  # Keep sending signal until a new speed is read in
+  elapse = 0
+  while elapse < signalLength:
+    s = time.time()
+    controlSpeed(pin, sleepTime)
+    e = time.time()
+    elapse += (e - s)
+    time.sleep(timing * 10e-5)
+    #print("Timing: {0}".format(timing))
+
+#-------------------------------------------------------------------------------
+def controlSpeed(pin, sleepTime):
+  GPIO.output(pin, GPIO.HIGH)
+  time.sleep(sleepTime * 10e-7)
+  GPIO.output(pin, GPIO.LOW)
 
 #-------------------------------------------------------------------------------
 def dbg(name, value):
