@@ -35,8 +35,8 @@ STATE = [ STRAIGHT, SLOW ]
 stateCount = 1
 
 # duty cycles
-driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
-turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
+#driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
+#turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
 
 FORWARD = 650
 STOP = 1380
@@ -52,16 +52,23 @@ def main():
   
     #driveMotorSignal.ChangeDutyCycle(100)
     GPIO.output(DRIVE_PIN, GPIO.LOW)
-    MIN = 1400
-    MAX = 2112
+    GPIO.output(TURN_PIN, GPIO.LOW)
+    MIN = 1340
+    MAX = 1440
     speed = MIN
     direction = 1
+
+    # avg velocities
+    # goal velocities ( recv goals while running if possible)
+    # error = goal - avgVel
+    # valueToSend= currentSpeedValue + error * 100
+    # sleep 100ms
     while True:
-      #print("speed = {0}".format(speed))
+      print("speed = {0}".format(speed))
       #controlSpeed(DRIVE_PIN, speed)
-      sendSignal(DRIVE_PIN, 2100, 1.0/2.0, 50)
+      sendSignal(TURN_PIN, speed, 0.1, 50)
       #time.sleep(1)
-      speed += (direction * 50)
+      speed += (direction * 10)
       if speed < MIN or speed > MAX:
         direction *= -1
       leftVelocity, rightVelocity, potValue = consumeSerialData(ser)
@@ -94,16 +101,15 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
   '''
   global driveDutyCycle
 
-  driveDutyCycle += 1.0
+  #driveDutyCycle += 1.0
 
-  if driveDutyCycle >= 100.0:
-    driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
+  #if driveDutyCycle >= 100.0:
+  #  driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
 
   #for dc in range(100):
   #  print('duty cycle: {0}'.format(dc))
   #  driveMotorSignal.ChangeDutyCycle(dc)
   #  time.sleep(3)
-  '''
   if STATE[1] == SLOW:
     if (driveDutyCycle + 1.0) <= 0.0 or driveDutyCycle >= 100.0:
       driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 5.0
@@ -114,7 +120,6 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
       driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 15.0
     else:
       driveDutyCycle += 10.0
-  ''' 
   #driveMotorSignal.ChangeDutyCycle(driveDutyCycle)
 
 #-------------------------------------------------------------------------------
@@ -272,6 +277,14 @@ def controlSpeed(pin, sleepTime):
 #-------------------------------------------------------------------------------
 def dbg(name, value):
   print("DBG: {0} = {1}".format(name, value))
+
+
+#-------------------------------------------------------------------------------
+def recvGoal():
+  # Modify so this is on demand
+  velGoal = float(raw_input("Enter velocity goal: "))
+  turnGoal = float(raw_input("Enter turn goal: "))
+  return velGoal, turnGoal
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
