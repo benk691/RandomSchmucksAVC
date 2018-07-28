@@ -7,19 +7,19 @@ from decimal import Decimal
 #-------Constants----------
 ARDUINO_SERIAL_PORT = '/dev/ttyACM0'
 BAUDRATE = 9600
-HBRIDGE_S1_PIN = 3
-HBRIDGE_S2_PIN = 5
+HBRIDGE_S1_PIN = 12
+HBRIDGE_S2_PIN = 18
 DRIVE_PIN = HBRIDGE_S1_PIN
 TURN_PIN = HBRIDGE_S2_PIN
-HBRIDGE_MOTOR_FREQ = 5000
+HBRIDGE_MOTOR_FREQ = 100 #5000
 MAX_RIGHT_TURN_VALUE = 421
 CENTER_TURN_VALUE = 483
 MAX_LEFT_TURN_VALUE = 605
 TURN_TOLERANCE = 10
 DUTY_CYCLE_DEAD_ZONE = 50.0
-#--------------------------
 DUTY_CYCLE_LEFT = DUTY_CYCLE_DEAD_ZONE + 5.0
 DUTY_CYCLE_RIGHT = DUTY_CYCLE_DEAD_ZONE - 5.0
+#--------------------------
 
 # Turn States
 LEFT = 0
@@ -35,8 +35,8 @@ STATE = [ STRAIGHT, SLOW ]
 stateCount = 1
 
 # duty cycles
-driveDutyCycle = 0.0
-turnDutyCycle = 0.0
+driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
+turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
 
 #-------------------------------------------------------------------------------
 def main():
@@ -73,6 +73,11 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
   '''
   global driveDutyCycle
 
+  #for dc in range(100):
+  #  print('duty cycle: {0}'.format(dc))
+  #  driveMotorSignal.ChangeDutyCycle(dc)
+  #  time.sleep(3)
+
   if STATE[1] == SLOW:
     if (driveDutyCycle + 1.0) <= 0.0 or driveDutyCycle >= 100.0:
       driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 5.0
@@ -84,7 +89,7 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
     else:
       driveDutyCycle += 10.0
     
-  driveMotorSignal.ChangeDutyCycle(driveDutyCycle)
+  #driveMotorSignal.ChangeDutyCycle(driveDutyCycle)
 
 #-------------------------------------------------------------------------------
 def controlSteering(turnMotorSignal, potValue):
@@ -203,16 +208,23 @@ def setup():
   GPIO.setmode(GPIO.BOARD)
 
   # Setup the drive motor
+  dbg("DRIVE_PIN", DRIVE_PIN)
   GPIO.setup(DRIVE_PIN, GPIO.OUT)
   driveMotorSignal = GPIO.PWM(DRIVE_PIN, HBRIDGE_MOTOR_FREQ)
   driveMotorSignal.start(driveDutyCycle)
 
   # Setup the turn motor
+  dbg("TURN_PIN", TURN_PIN)
   GPIO.setup(TURN_PIN, GPIO.OUT)
   turnMotorSignal = GPIO.PWM(TURN_PIN, HBRIDGE_MOTOR_FREQ)
   turnMotorSignal.start(turnDutyCycle)
 
   return ser, driveMotorSignal, turnMotorSignal
+
+
+#-------------------------------------------------------------------------------
+def dbg(name, value):
+  print("DBG: {0} = {1}".format(name, value))
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':

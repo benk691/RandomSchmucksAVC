@@ -1,4 +1,4 @@
 *.pyc
 *~
-*.swo
+*.sw[a-z]
 .*.swp
