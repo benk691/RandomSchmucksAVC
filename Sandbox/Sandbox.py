@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.5
 
 DIST_SENSOR = False
 MOTOR = False
