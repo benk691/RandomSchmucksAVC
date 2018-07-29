@@ -3,6 +3,7 @@ import serial
 import time
 import RPi.GPIO as GPIO
 from decimal import Decimal
+from threading import Thread
 
 #-------Constants----------
 ARDUINO_SERIAL_PORT = '/dev/ttyACM0'
@@ -38,18 +39,30 @@ stateCount = 1
 #driveDutyCycle = DUTY_CYCLE_DEAD_ZONE
 #turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
 
+velGoal = 0
+turnGoal = 0
+
 FORWARD = 650
 STOP = 1380
 REV = 2112
+
+# TODO: Control slow down more gradually
+leftVelocity = 0.0
+rightVelocity = 0.0
+potValue = 0.0
+ser = None
 
 #-------------------------------------------------------------------------------
 def main():
   '''
   Main program
   '''
+  global ser
+  global potValue
+  global leftVelocity
+  global rightVelocity
   try:
     ser, driveMotorSignal, turnMotorSignal = setup()
-  
     #driveMotorSignal.ChangeDutyCycle(100)
     GPIO.output(DRIVE_PIN, GPIO.LOW)
     GPIO.output(TURN_PIN, GPIO.LOW)
@@ -58,23 +71,34 @@ def main():
     speed = MIN
     direction = 1
 
+    goalThread = Thread(target=recvGoal)
+    consumerThread = Thread(target=consumeSerialData)
+    goalThread.start()
+    consumerThread.start()
     # avg velocities
     # goal velocities ( recv goals while running if possible)
     # error = goal - avgVel
     # valueToSend= currentSpeedValue + error * 100
     # sleep 100ms
+    currentVelocity = 1380
+    currentTurn = 0
+    sendSignal(DRIVE_PIN, currentVelocity, 0.3, 50)
     while True:
-      print("speed = {0}".format(speed))
-      #controlSpeed(DRIVE_PIN, speed)
-      sendSignal(TURN_PIN, speed, 0.1, 50)
-      #time.sleep(1)
-      speed += (direction * 10)
-      if speed < MIN or speed > MAX:
-        direction *= -1
-      leftVelocity, rightVelocity, potValue = consumeSerialData(ser)
+      #print("speed = {0}".format(speed))
+      ##controlSpeed(DRIVE_PIN, speed)
+      #sendSignal(TURN_PIN, speed, 0.1, 50)
+      ##time.sleep(1)
+      #speed += (direction * 10)
+      #if speed < MIN or speed > MAX:
+      #  direction *= -1
+      #leftVelocity, rightVelocity, potValue = consumeSerialData(ser)
       print('LV: {0}'.format(leftVelocity))
       print('RV: {0}'.format(rightVelocity))
       print('S: {0}'.format(potValue))
+      currentVelocity = controlVelocity(currentVelocity, leftVelocity, rightVelocity)
+      currentTurn = controlSteering(currentTurn, potValue)
+      print('')
+      
       '''
       print('driveDutyCycle: {0}'.format(driveDutyCycle))
       print('turnDutyCycle: {0}'.format(turnDutyCycle))
@@ -89,17 +113,30 @@ def main():
     #driveMotorSignal.stop()
     #turnMotorSignal.stop()
     sendSignal(DRIVE_PIN, STOP, 1.0, 50)
+    goalThread.join(timeout=10)
     GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
-def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
+def controlVelocity(currentVelocity, leftVelocity, rightVelocity):
   '''
   Controls the vehicles velocity
   @param driveMotorSignal - the signal to control the drive speed
   @param leftVelocity - the velocity of the left wheel
   @param rightVelocity - the velocity of the right wheel
   '''
-  global driveDutyCycle
+  velAvg = (leftVelocity + rightVelocity) / 2.0
+  if currentVelocity < 1380:
+    velAvg *= -1.0
+  error = velGoal - velAvg
+  print("vel error = {0}".format(error))
+  print("velGoal = {0}".format(velGoal))
+  newVelocity = currentVelocity - error * 50.0
+  #sendSignal(DRIVE_PIN, newVelocity, 0.3, 50)
+  time.sleep(100 * 1e-3)
+  currentVelocity = newVelocity
+  print("currentVelocity = {0}".format(currentVelocity))
+
+  return currentVelocity
 
   #driveDutyCycle += 1.0
 
@@ -110,57 +147,67 @@ def controlVelocity(driveMotorSignal, leftVelocity, rightVelocity):
   #  print('duty cycle: {0}'.format(dc))
   #  driveMotorSignal.ChangeDutyCycle(dc)
   #  time.sleep(3)
-  if STATE[1] == SLOW:
-    if (driveDutyCycle + 1.0) <= 0.0 or driveDutyCycle >= 100.0:
-      driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 5.0
-    else:
-      driveDutyCycle += 1.0
-  elif STATE[1] == FAST:
-    if driveDutyCycle <= 0.0 or (driveDutyCycle + 10.0) >= 100.0:
-      driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 15.0
-    else:
-      driveDutyCycle += 10.0
+  #if STATE[1] == SLOW:
+  #  if (driveDutyCycle + 1.0) <= 0.0 or driveDutyCycle >= 100.0:
+  #    driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 5.0
+  #  else:
+  #    driveDutyCycle += 1.0
+  #elif STATE[1] == FAST:
+  #  if driveDutyCycle <= 0.0 or (driveDutyCycle + 10.0) >= 100.0:
+  #    driveDutyCycle = DUTY_CYCLE_DEAD_ZONE + 15.0
+  #  else:
+  #    driveDutyCycle += 10.0
   #driveMotorSignal.ChangeDutyCycle(driveDutyCycle)
 
 #-------------------------------------------------------------------------------
-def controlSteering(turnMotorSignal, potValue):
+def controlSteering(currentTurn, potValue):
   '''
   Controls the steering of the vehicle
   @param turnMotorSignal - the signal that controls the turn speed
   @param potValue - the potentiometer analog value
   '''
-  global turnDutyCycle
+  #global turnDutyCycle
+  terror = turnGoal - potValue
+  print("turn error = {0}".format(terror))
+  print("turnGoal = {0}".format(turnGoal))
+  newTurn = 1380 - terror * 5.0
+  sendSignal(TURN_PIN, newTurn, 0.3, 50)
+  time.sleep(100 * 1e-3)
+  currentTurn = newTurn
+  print("currentTurn = {0}".format(currentTurn))
 
-  if STATE[0] == STRAIGHT:
-    if potValue >= (CENTER_TURN_VALUE - TURN_TOLERANCE) and potValue <= (CENTER_TURN_VALUE + TURN_TOLERANCE):
-      turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
-    # To far right
-    elif potValue < (CENTER_TURN_VALUE - TURN_TOLERANCE):
-      turnDutyCycle = DUTY_CYCLE_LEFT
-    # To far left
-    else:
-      turnDutyCycle = DUTY_CYCLE_RIGHT
-  elif STATE[0] == LEFT:
-    if potValue >= (MAX_LEFT_TURN_VALUE - TURN_TOLERANCE) and potValue <= (MAX_LEFT_TURN_VALUE + TURN_TOLERANCE):
-      turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
-    # To far right
-    elif potValue < (MAX_LEFT_TURN_VALUE - TURN_TOLERANCE):
-      turnDutyCycle = DUTY_CYCLE_LEFT
-    # To far left
-    else:
-      turnDutyCycle = DUTY_CYCLE_RIGHT
-      
-  elif STATE[0] == RIGHT:
-    if potValue >= (MAX_RIGHT_TURN_VALUE - TURN_TOLERANCE) and potValue <= (MAX_RIGHT_TURN_VALUE + TURN_TOLERANCE):
-      turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
-    # To far left
-    elif potValue < (MAX_RIGHT_TURN_VALUE - TURN_TOLERANCE):
-      turnDutyCycle = DUTY_CYCLE_RIGHT
-    # To far right
-    else:
-      turnDutyCycle = DUTY_CYCLE_LEFT
+  return currentTurn
 
-  turnMotorSignal.ChangeDutyCycle(turnDutyCycle)
+  #if STATE[0] == STRAIGHT:
+  #  if potValue >= (CENTER_TURN_VALUE - TURN_TOLERANCE) and potValue <= (CENTER_TURN_VALUE + TURN_TOLERANCE):
+  #    turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
+  #  # To far right
+  #  elif potValue < (CENTER_TURN_VALUE - TURN_TOLERANCE):
+  #    turnDutyCycle = DUTY_CYCLE_LEFT
+  #  # To far left
+  #  else:
+  #    turnDutyCycle = DUTY_CYCLE_RIGHT
+  #elif STATE[0] == LEFT:
+  #  if potValue >= (MAX_LEFT_TURN_VALUE - TURN_TOLERANCE) and potValue <= (MAX_LEFT_TURN_VALUE + TURN_TOLERANCE):
+  #    turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
+  #  # To far right
+  #  elif potValue < (MAX_LEFT_TURN_VALUE - TURN_TOLERANCE):
+  #    turnDutyCycle = DUTY_CYCLE_LEFT
+  #  # To far left
+  #  else:
+  #    turnDutyCycle = DUTY_CYCLE_RIGHT
+  #    
+  #elif STATE[0] == RIGHT:
+  #  if potValue >= (MAX_RIGHT_TURN_VALUE - TURN_TOLERANCE) and potValue <= (MAX_RIGHT_TURN_VALUE + TURN_TOLERANCE):
+  #    turnDutyCycle = DUTY_CYCLE_DEAD_ZONE
+  #  # To far left
+  #  elif potValue < (MAX_RIGHT_TURN_VALUE - TURN_TOLERANCE):
+  #    turnDutyCycle = DUTY_CYCLE_RIGHT
+  #  # To far right
+  #  else:
+  #    turnDutyCycle = DUTY_CYCLE_LEFT
+
+  #turnMotorSignal.ChangeDutyCycle(turnDutyCycle)
 
 #-------------------------------------------------------------------------------
 def changeStates():
@@ -186,7 +233,7 @@ def changeStates():
   stateCount += 1
 
 #-------------------------------------------------------------------------------
-def consumeSerialData(ser):
+def consumeSerialData():
   '''
   Consumes the data off the serial line that the Arduino sends
   @param ser - the serial communication line
@@ -194,19 +241,35 @@ def consumeSerialData(ser):
   @return right wheel velocity
   @return pot steering value
   '''
-  leftVelocity = -1.0
-  rightVelocity = -1.0
-  potValue = -1.0
-  for i in range(3):
-    header, value = parseSerialLine(ser.readline().strip().decode('ascii'))
-    if header == 'LV':
-      leftVelocity = value
-    elif header == 'RV':
-      rightVelocity = value
-    elif header == 'S':
-      potValue = value
-  
-  return leftVelocity, rightVelocity, potValue
+  global leftVelocity
+  global rightVelocity
+  global potValue
+  global ser
+  leftVelocity = -0.0
+  rightVelocity = -0.0
+  potValue = -0.0
+
+  while True:
+    lVal = 0
+    rVal = 0
+    pVal = 0
+    line = "DEAD"
+    for i in range(24):
+      line = ser.readline()
+      #print("line = {0}".format(line))
+      header, value = parseSerialLine(line.strip().decode('ascii'))
+      if header == 'LV':
+        lVal = value
+        #print("lVal = {0}".format(lVal))
+      elif header == 'RV':
+        rVal = value
+        #print("rVal = {0}".format(rVal))
+      elif header == 'S':
+        pVal = value
+        #print("pVal = {0}".format(pVal))
+    leftVelocity = lVal
+    rightVelocity = rVal
+    potValue = pVal
 
 #-------------------------------------------------------------------------------
 def parseSerialLine(line):
@@ -265,13 +328,13 @@ def sendSignal(pin, sleepTime, signalLength, timing):
     controlSpeed(pin, sleepTime)
     e = time.time()
     elapse += (e - s)
-    time.sleep(timing * 10e-5)
+    time.sleep(abs(timing) * 10e-5)
     #print("Timing: {0}".format(timing))
 
 #-------------------------------------------------------------------------------
 def controlSpeed(pin, sleepTime):
   GPIO.output(pin, GPIO.HIGH)
-  time.sleep(sleepTime * 10e-7)
+  time.sleep(abs(sleepTime) * 10e-7)
   GPIO.output(pin, GPIO.LOW)
 
 #-------------------------------------------------------------------------------
@@ -282,9 +345,12 @@ def dbg(name, value):
 #-------------------------------------------------------------------------------
 def recvGoal():
   # Modify so this is on demand
-  velGoal = float(raw_input("Enter velocity goal: "))
-  turnGoal = float(raw_input("Enter turn goal: "))
-  return velGoal, turnGoal
+  global velGoal
+  global turnGoal
+  while True:
+    #velGoal = float(input("Enter velocity goal: "))
+    turnGoal = float(input("Enter turn goal: "))
+    
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
