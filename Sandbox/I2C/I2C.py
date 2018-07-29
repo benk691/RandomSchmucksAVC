@@ -10,6 +10,8 @@ PWM_ADDR = 0x40 # I2C Adress for Pulse Width Modulation (PWM) Module
 ADC_ADDR = 0x48 # Analog Digital Converter (ADC) Module
 IMU_ADDR = 0x28 # Inertial Measurement Unit (IMU) Module
 
+STOP = 775 
+
 #-------------------------------------------------------------------------------
 def main():
   '''
@@ -19,13 +21,15 @@ def main():
   pwm = Adafruit_PCA9685.PCA9685()
 
   # motor
-  motorChnl = 14
+  motorChnl = 15
   freq=60 * 2
   pwm.set_pwm_freq(freq)
   print("Freq = {0}".format(freq))
   #while True:
-  for pulse in [ i for i in range(450, 2001) if i % 5 == 0 ]:
+  for pulse in [ i for i in range(450, 1000) if i % 5 == 0 ]:
     controlChnl(pwm, motorChnl, pulse)
+  
+  controlChnl(pwm, motorChnl, STOP)
 
 #-------------------------------------------------------------------------------
 def controlChnl(pwm, chnl, pulse):
