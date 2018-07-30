@@ -137,15 +137,18 @@ def main():
       loopCount += 1
       #print(loopCount)
 
-      if (loopCount >= 50):
+      if (loopCount >= 25):
         elapsedTime = (time.time() * 1000) - startTime;
         startTime = (time.time() * 1000)
         rightVelocity = ((rightStripCount / 30.0) * 0.36 * math.pi) / (elapsedTime / 1000.0); 
         leftVelocity = ((leftStripCount / 30.0) * 0.36 * math.pi) / (elapsedTime / 1000.0);
 
         avgVelocity = (leftVelocity + rightVelocity) / 2.0
+        if pulseDuration > STOP:
+          avgVelocity *= -1
         error = velGoal - avgVelocity
-        pulseDuration = pulseDuration - error * 50.0
+        # gain
+        pulseDuration = pulseDuration - error * 60.0
 
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
@@ -183,6 +186,8 @@ def main():
     #  time.sleep(1)
     
   finally:
+    ramp(pwm, motorChnl, pulseDuration, STOP)
+    print("ramp done")
     controlChnl(pwm, motorChnl, STOP)
 
 #def getTime():
@@ -204,6 +209,25 @@ def recvGoal():
   while True:
     velGoal = float(input("Enter velocity goal: "))
     #turnGoal = float(input("Enter turn goal: "))
+
+#-------------------------------------------------------------------------------
+def ramp(pwm, chnl, curVal, rampVal):
+  '''
+  Ben's hacky way of doing a ramp function
+  '''
+  print("Ramp")
+  #rampList = []
+  #curVal = int(curVal)
+  #rampVal = int(rampVal)
+  #if curVal >= rampVal:
+  #  rampList = range(curVal, rampVal)
+  #else:
+  #  rampList = range(curVal, rampVal)
+  #  rampList = rampList[ ::-1]
+  #for pulse in rampList:
+  for pulse in range(int(curVal), int(rampVal)):
+    controlChnl(pwm, chnl, pulse)
+    time.sleep(0.01)
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
