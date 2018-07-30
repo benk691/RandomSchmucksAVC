@@ -13,7 +13,10 @@ PWM_ADDR = 0x40 # I2C Adress for Pulse Width Modulation (PWM) Module
 ADC_ADDR = 0x48 # Analog Digital Converter (ADC) Module
 IMU_ADDR = 0x28 # Inertial Measurement Unit (IMU) Module
 
-STOP = 775 
+STOP = 780 
+STRAIGHT = 19203
+RIGHT = 13800
+LEFT = 26000
 GAIN = 1
 
 # Tachometer Specific Data
@@ -50,6 +53,8 @@ fractional = 0;
 velGoal = 0.0
 turnGoal = 0.0
 
+MAX_LOOP_COUNT = 15
+
 #-------------------------------------------------------------------------------
 def main():
   '''
@@ -76,6 +81,7 @@ def main():
   global startTime
   global elapsedTime
   global fractional
+  global turnGoal
 
   # Setup bus
   pwm = Adafruit_PCA9685.PCA9685()
@@ -89,6 +95,7 @@ def main():
     values = [0] * 4
     # motor
     motorChnl = 14
+    turnChnl = 15
     freq=60 * 2
     pwm.set_pwm_freq(freq)
     print("Freq = {0}".format(freq))
@@ -102,6 +109,11 @@ def main():
     pulseDuration = STOP
     error = 0.0
     avgVelocity = 0.0
+
+    steeringError = 0.0
+    steeringDuration = STOP
+    turnGoal = STRAIGHT # straight
+    steeringAvg = 0.0
 
     while True:
       if (loopCount % 1 == 0):
@@ -117,6 +129,7 @@ def main():
       #print("ST: {0}".format(steeringPotValue))
 
       controlChnl(pwm, motorChnl, int(pulseDuration))
+      controlChnl(pwm, turnChnl, int(steeringDuration))
 
       if (rightHigh == 0 and  rightTachValue > rightThresholdHigh):
         rightStripCount += 0.5;
@@ -134,10 +147,11 @@ def main():
         leftStripCount += 0.5;
         leftHigh = 0;
       
+      steeringAvg += steeringPotValue
       loopCount += 1
       #print(loopCount)
 
-      if (loopCount >= 25):
+      if (loopCount >= MAX_LOOP_COUNT):
         elapsedTime = (time.time() * 1000) - startTime;
         startTime = (time.time() * 1000)
         rightVelocity = ((rightStripCount / 30.0) * 0.36 * math.pi) / (elapsedTime / 1000.0); 
@@ -150,6 +164,15 @@ def main():
         # gain
         pulseDuration = pulseDuration - error * 60.0
 
+        # Steering
+        steeringError = turnGoal - steeringAvg / MAX_LOOP_COUNT
+        steeringDuration = 775 - steeringError / 4.0
+        # Dead Zone
+        if steeringDuration > 895:
+          steeringDuration = 895
+        if steeringDuration < 670:
+          steeringDuration = 670
+
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
         print("S: {0}".format(steeringPotValue))
@@ -157,11 +180,15 @@ def main():
         print("PD: {0}".format(int(pulseDuration)))
         print("VG: {0}".format(velGoal))
         print("error: {0}".format(error))
+        print("SD: {0}".format(int(steeringDuration)))
+        print("SG: {0}".format(turnGoal))
+        print("steering error: {0}".format(steeringError))
         print('')
 
         loopCount = 0;
         rightStripCount = 0;
         leftStripCount = 0;
+        steeringAvg = 0.0
 
         #time.sleep(SLEEP_TIME);   
 
@@ -187,8 +214,10 @@ def main():
     
   finally:
     ramp(pwm, motorChnl, pulseDuration, STOP)
+    ramp(pwm, turnChnl, steeringDuration, STOP)
     print("ramp done")
     controlChnl(pwm, motorChnl, STOP)
+    controlChnl(pwm, turnChnl, STOP)
 
 #def getTime():
 #  return time.time()
@@ -208,7 +237,7 @@ def recvGoal():
   global turnGoal
   while True:
     velGoal = float(input("Enter velocity goal: "))
-    #turnGoal = float(input("Enter turn goal: "))
+    turnGoal = float(input("Enter turn goal: "))
 
 #-------------------------------------------------------------------------------
 def ramp(pwm, chnl, curVal, rampVal):
