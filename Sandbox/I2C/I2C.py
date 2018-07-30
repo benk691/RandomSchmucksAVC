@@ -5,6 +5,7 @@ import time
 import Adafruit_PCA9685
 import Adafruit_ADS1x15
 import math
+from threading import Thread
 
 # I2C Device Addresses
 I2C_BUS_ADDR = 0x1 # 0x1 Indicates /dev/i2c-1
@@ -46,6 +47,9 @@ startTime = 0;
 elapsedTime = 0;
 fractional = 0;
 
+velGoal = 0.0
+turnGoal = 0.0
+
 #-------------------------------------------------------------------------------
 def main():
   '''
@@ -76,6 +80,11 @@ def main():
   # Setup bus
   pwm = Adafruit_PCA9685.PCA9685()
   adc = Adafruit_ADS1x15.ADS1115()
+
+  # Thread
+  goalThread = Thread(target=recvGoal)
+  goalThread.start()
+
   try:
     values = [0] * 4
     # motor
@@ -90,6 +99,10 @@ def main():
     # Data Rate of ADC
     DATA_RATE = 860
 
+    pulseDuration = STOP
+    error = 0.0
+    avgVelocity = 0.0
+
     while True:
       if (loopCount % 1 == 0):
         prevRightTachValue = rightTachValue;
@@ -103,7 +116,7 @@ def main():
       #print("RT: {0}".format(leftTachValue))
       #print("ST: {0}".format(steeringPotValue))
 
-      controlChnl(pwm, motorChnl, 600)
+      controlChnl(pwm, motorChnl, int(pulseDuration))
 
       if (rightHigh == 0 and  rightTachValue > rightThresholdHigh):
         rightStripCount += 0.5;
@@ -124,16 +137,23 @@ def main():
       loopCount += 1
       #print(loopCount)
 
-      if (loopCount >= 100):
+      if (loopCount >= 50):
         elapsedTime = (time.time() * 1000) - startTime;
         startTime = (time.time() * 1000)
         rightVelocity = ((rightStripCount / 30.0) * 0.36 * math.pi) / (elapsedTime / 1000.0); 
         leftVelocity = ((leftStripCount / 30.0) * 0.36 * math.pi) / (elapsedTime / 1000.0);
 
+        avgVelocity = (leftVelocity + rightVelocity) / 2.0
+        error = velGoal - avgVelocity
+        pulseDuration = pulseDuration - error * 50.0
+
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
         print("S: {0}".format(steeringPotValue))
         print("ET: {0}".format(elapsedTime))
+        print("PD: {0}".format(int(pulseDuration)))
+        print("VG: {0}".format(velGoal))
+        print("error: {0}".format(error))
         print('')
 
         loopCount = 0;
@@ -175,6 +195,15 @@ def main():
 def controlChnl(pwm, chnl, pulse):
     pwm.set_pwm(chnl, 0, pulse)
     #print("Chnl {0}: Pulse: {1}".format(chnl, pulse))
+
+#-------------------------------------------------------------------------------
+def recvGoal():
+  # Modify so this is on demand
+  global velGoal
+  global turnGoal
+  while True:
+    velGoal = float(input("Enter velocity goal: "))
+    #turnGoal = float(input("Enter turn goal: "))
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
