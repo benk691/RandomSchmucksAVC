@@ -11,17 +11,13 @@ class Vehicle:
   decMatch = re.compile(r'\d+\.\d+')
 
   #-------------------------------------------------------------------------------
-  def __init__(self, GPIO, serial):
+  def __init__(self, GPIO):
     '''
     Initializes the basics of the vehicle
     @param GPIO - the current instance of the RPi.GPIO import that is being used
-    @param serial - the serial communication line
     '''
     self.leftVelocity = 0
     self.rightVelocity = 0
-    self.driveMotor = Motor(GPIO, Constants.HBRIDGE_S1_DRIVE_PIN, Constants.HBRIDGE_MOTOR_FREQ, 0)
-    self.turnMotor = Motor(GPIO, Constants.HBRIDGE_S2_TURN_PIN, Constants.HBRIDGE_MOTOR_FREQ, 0)
-    self.serial = serial
     self.tabs = 0
 
   #-------------------------------------------------------------------------------
@@ -40,17 +36,8 @@ class Vehicle:
     @return speed of the vehicle. This is the analog value being feed into the 
             Sabertooth H-Bridge
     '''
-    velLine = str(self.serial.readline())
-    if 'LV' in velLine and 'RV' in velLine:
-      left, right = velLine.split(',')
-      lSearch = decMatch.search(left)
-      rSearch = decMatch.search(right)
-      if lSearch:
-        self.leftVelocity = float(lValues[lSearch.start() : lSearch.end()])
+    pass 
 
-      if rValues:
-        self.rightVelocity = float(rValues[rSearch.start() : rSearch.end()])
-  
   #-------------------------------------------------------------------------------
   def drive(self):
     '''

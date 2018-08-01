@@ -3,17 +3,17 @@ class Constants:
   '''
   Defines constants for the Rasberry Pi
   '''
-  # Arduino Serial Port
-  ARDUINO_SERIAL_PORT = '/dev/ttyACM0'
-  
   # Baudrate of the program
   BAUDRATE = 9600
   
-  # The pin for signal 1 to the H-Bridge this pin will control the rear wheel speed
-  HBRIDGE_S1_DRIVE_PIN = 3
-
-  # The pin for signal 2 to the H-Bridge this pin will control the servo motor to turn the vehicle
-  HBRIDGE_S2_TURN_PIN = 5
-
-  # Initial PWM frequency for the H-Bridge motors (Hz)
-  HBRIDGE_MOTOR_FREQ = 5000
+  # ADC data/sample rate
+  #   Valid Dat Rates and their mappings per the Adafrutii_Python_ADS1x15 repo
+  #     8   ->  0x00
+  #     16  ->  0x20
+  #     32  ->  0x40
+  #     64  ->  0x60
+  #     128 ->  0x80
+  #     250 ->  0xA0
+  #     475 ->  0xC0
+  #     860 ->  0xE0
+  ADC_DATA_RATE = 860
