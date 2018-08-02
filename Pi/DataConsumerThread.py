@@ -1,39 +1,43 @@
+from Sensors import Sensors
 from threading import Thread
 
 class DataConsumerThread(Thread):
   '''
   Overrides the Thread class to consume data
+  This class will also setup the sensors needed. We want to do this so that the sensors only exist while consuming data, there is no otehr place in the code where they will be needed
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, serial=None):
+  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None):
     '''
     Initializes the data consumer thread
     @param Refer to the Python Thread class for documentation on all thread specific parameters
-    @param serial - the serial communication line
     '''
     super(DataConsumerThread, self).__init__(group=group, target=target, name=name, daemon=daemon)
     self.args = args
     self.kwargs = kwargs
-    self.serial = serial
     self.shutDown = False
+    self.sensors = Sensors()
 
   #-------------------------------------------------------------------------------
   def run(self):
     '''
-    Consumer function. This is the target of the thread that will be run continously until shutdown. This consumes data off of the serial line between the Arduino and the Raspberry Pi as well as any sensors connected to the Raspberry Pi
-    @param serial - the serial communication line
+    Consumer function. This is the target of the thread that will be run continously until shutdown. 
+    This consumes data off of the I2C bus as well as the distance sensors
     '''
-    print("DBG: consumer function called")
     while not self.shutDown:
-      print("DBG: consumer attempting to read serial line")
-      line = self.serial.read(4)
-      print("Received: '{0}'".format(line))
+     self.sensors.read() 
 
   #-------------------------------------------------------------------------------
   def shutdown(self):
     '''
     Shutdown the consumer thread
     '''
-    print("DBG: Shuttingdown consumer thread")
     self.shutDown = True
+
+  #-------------------------------------------------------------------------------
+  def __del__(self):
+    '''
+    Destructor
+    '''
+    self.join(timeout=5)
 

@@ -3,26 +3,24 @@ import time
 import RPi.GPIO as GPIO
 from Constants import Constants
 from Vehicle import Vehicle
-from DataConsumer import DataConsumer
+from DataConsumerThread import DataConsumerThread
 
 #-------------------------------------------------------------------------------
 def main():
   '''
   Main program
   '''
-
   try:
-    vehicle = setup()
-    #dataConsumer = DataConsumer(ser)
-    #dataConsumer.start()
+    #vehicle = setup()
+    dataConsumerThread = DataConsumerThread(daemon=True)
+    dataConsumerThread.start()
     while True:
-      pass
-      #vehicle.getSpeed()
-      #print(vehicle)
-      #time.sleep(1)
+      print(str(dataConsumerThread.sensors))
+      time.sleep(1)
+      print()
       
   finally:
-    #dataConsumer.shutdown()
+    dataConsumerThread.shutdown()
     GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
