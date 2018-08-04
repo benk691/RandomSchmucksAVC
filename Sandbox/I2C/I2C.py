@@ -128,7 +128,7 @@ def main():
       #print("RT: {0}".format(leftTachValue))
       #print("ST: {0}".format(steeringPotValue))
 
-      controlChnl(pwm, motorChnl, int(pulseDuration))
+      #controlChnl(pwm, motorChnl, int(pulseDuration))
       controlChnl(pwm, turnChnl, int(steeringDuration))
 
       if (rightHigh == 0 and  rightTachValue > rightThresholdHigh):
@@ -166,12 +166,19 @@ def main():
 
         # Steering
         steeringError = turnGoal - steeringAvg / MAX_LOOP_COUNT
-        steeringDuration = 775 - steeringError / 4.0
+        steeringGain = 100
+        if steeringError > 0:
+          #steeringDuration = 670
+          steeringDuration = 680 - steeringError / steeringGain
+        elif steeringError < 0:
+          #steeringDuration = 890
+          steeringDuration = 880 - steeringError / steeringGain
+        #steeringDuration = 775 - steeringError / 7.0
         # Dead Zone
-        if steeringDuration > 895:
-          steeringDuration = 895
-        if steeringDuration < 670:
-          steeringDuration = 670
+        if steeringDuration > 930:
+          steeringDuration = 930
+        if steeringDuration < 630:
+          steeringDuration = 630
 
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
@@ -235,9 +242,17 @@ def recvGoal():
   # Modify so this is on demand
   global velGoal
   global turnGoal
+  LEFT_TURN_MAX = 24000
+  RIGHT_TURN_MAX = 15000
   while True:
-    velGoal = float(input("Enter velocity goal: "))
+    #velGoal = float(input("Enter velocity goal: "))
     turnGoal = float(input("Enter turn goal: "))
+    if turnGoal > LEFT_TURN_MAX:
+      turnGoal = LEFT_TURN_MAX
+
+    if turnGoal < RIGHT_TURN_MAX:
+      turnGoal = RIGHT_TURN_MAX
+      
 
 #-------------------------------------------------------------------------------
 def ramp(pwm, chnl, curVal, rampVal):
