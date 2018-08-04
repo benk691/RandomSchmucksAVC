@@ -6,14 +6,11 @@ class Vehicle:
   '''
   Controls the Fisher Price Vehicle
   '''
-  # Regex to get floating point values
-  decMatch = re.compile(r'\d+\.\d+')
 
   #-------------------------------------------------------------------------------
-  def __init__(self, GPIO):
+  def __init__(self):
     '''
     Initializes the basics of the vehicle
-    @param GPIO - the current instance of the RPi.GPIO import that is being used
     '''
     self.leftVelocity = 0
     self.rightVelocity = 0
