@@ -11,7 +11,6 @@ def main():
   Main program
   '''
   try:
-    #vehicle = setup()
     dataConsumerThread = DataConsumerThread(daemon=True)
     dataConsumerThread.start()
     while True:
@@ -27,14 +26,8 @@ def main():
 def setup():
   '''
   Setup the Raspberry Pi to run
-  @return the vehicle object
-  @return the serial communication line
   '''
-  GPIO.setwarnings(False)
-  GPIO.setmode(GPIO.BOARD)
-
-  vehicle = Vehicle(GPIO)
-  return vehicle
+  pass
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':

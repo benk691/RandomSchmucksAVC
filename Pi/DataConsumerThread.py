@@ -4,7 +4,6 @@ from threading import Thread
 class DataConsumerThread(Thread):
   '''
   Overrides the Thread class to consume data
-  This class will also setup the sensors needed. We want to do this so that the sensors only exist while consuming data, there is no otehr place in the code where they will be needed
   '''
   #-------------------------------------------------------------------------------
   def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None):
