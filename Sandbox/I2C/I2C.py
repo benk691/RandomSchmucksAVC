@@ -5,6 +5,7 @@ import time
 import Adafruit_PCA9685
 import Adafruit_ADS1x15
 import math
+from PID import PID
 from threading import Thread
 
 # I2C Device Addresses
@@ -53,7 +54,7 @@ fractional = 0;
 velGoal = 0.0
 turnGoal = 0.0
 
-MAX_LOOP_COUNT = 15
+MAX_LOOP_COUNT = 15.0
 
 #-------------------------------------------------------------------------------
 def main():
@@ -115,6 +116,8 @@ def main():
     turnGoal = STRAIGHT # straight
     steeringAvg = 0.0
 
+    steeringPID = PID(1.0, 0.5, 0.0, 15.0)
+
     while True:
       if (loopCount % 1 == 0):
         prevRightTachValue = rightTachValue;
@@ -124,12 +127,15 @@ def main():
       rightTachValue = adc.read_adc(rightWheelChnl, gain=GAIN, data_rate=DATA_RATE)
       leftTachValue = adc.read_adc(leftWheelChnl, gain=GAIN, data_rate=DATA_RATE)
 
+      steeringPID.setCurrentMeasurement((steeringAvg / MAX_LOOP_COUNT) / 1000.0)
+      steeringPID.setGoal(turnGoal / 1000.0)
+
       #print("LT: {0}".format(rightTachValue))
       #print("RT: {0}".format(leftTachValue))
       #print("ST: {0}".format(steeringPotValue))
 
       #controlChnl(pwm, motorChnl, int(pulseDuration))
-      controlChnl(pwm, turnChnl, int(steeringDuration))
+      #controlChnl(pwm, turnChnl, int(steeringDuration))
 
       if (rightHigh == 0 and  rightTachValue > rightThresholdHigh):
         rightStripCount += 0.5;
@@ -165,20 +171,23 @@ def main():
         pulseDuration = pulseDuration - error * 60.0
 
         # Steering
-        steeringError = turnGoal - steeringAvg / MAX_LOOP_COUNT
-        steeringGain = 100
-        if steeringError > 0:
+        steeringDuration = steeringPID.control()
+        #steeringError = turnGoal - steeringAvg / MAX_LOOP_COUNT
+        #steeringGain = 100
+        if steeringDuration > 0:
           #steeringDuration = 670
-          steeringDuration = 680 - steeringError / steeringGain
-        elif steeringError < 0:
+          steeringDuration = 648 - steeringDuration
+        elif steeringDuration < 0:
           #steeringDuration = 890
-          steeringDuration = 880 - steeringError / steeringGain
+          steeringDuration = 907 - steeringDuration
         #steeringDuration = 775 - steeringError / 7.0
         # Dead Zone
         if steeringDuration > 930:
           steeringDuration = 930
         if steeringDuration < 630:
           steeringDuration = 630
+
+        controlChnl(pwm, turnChnl, int(steeringDuration))
 
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
@@ -190,6 +199,8 @@ def main():
         print("SD: {0}".format(int(steeringDuration)))
         print("SG: {0}".format(turnGoal))
         print("steering error: {0}".format(steeringError))
+        print('')
+        print(steeringPID)
         print('')
 
         loopCount = 0;
@@ -220,10 +231,10 @@ def main():
     #  time.sleep(1)
     
   finally:
-    ramp(pwm, motorChnl, pulseDuration, STOP)
-    ramp(pwm, turnChnl, steeringDuration, STOP)
-    print("ramp done")
-    controlChnl(pwm, motorChnl, STOP)
+    #ramp(pwm, motorChnl, pulseDuration, STOP)
+    #ramp(pwm, turnChnl, steeringDuration, STOP)
+    #print("ramp done")
+    #controlChnl(pwm, motorChnl, STOP)
     controlChnl(pwm, turnChnl, STOP)
 
 #def getTime():
