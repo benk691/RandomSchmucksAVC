@@ -119,6 +119,11 @@ def main():
 
     steeringPID = PID(2.0, 1.5, 1.0, 10.0)
     steeringFilter = Filter(0.9)
+    
+    velocityPID = PID(50.0, 100.0, 0.0, 3.0)
+    velocityFilter = Filter(0.9)
+
+    velocityPID.setGoal(0.0)
 
     while True:
       if (loopCount % 1 == 0):
@@ -140,7 +145,7 @@ def main():
       #print("RT: {0}".format(leftTachValue))
       #print("ST: {0}".format(steeringPotValue))
 
-      #controlChnl(pwm, motorChnl, int(pulseDuration))
+      controlChnl(pwm, motorChnl, int(pulseDuration))
       #controlChnl(pwm, turnChnl, int(steeringDuration))
 
       if (rightHigh == 0 and  rightTachValue > rightThresholdHigh):
@@ -191,13 +196,22 @@ def main():
         avgVelocity = (leftVelocity + rightVelocity) / 2.0
         if pulseDuration > STOP:
           avgVelocity *= -1
-        error = velGoal - avgVelocity
+        #error = velGoal - avgVelocity
         # gain
-        pulseDuration = pulseDuration - error * 60.0
-
+        #pulseDuration = pulseDuration - error * 60.0
+        velocityFilter.recvMeasurement(avgVelocity)
+        avgVelocity = velocityFilter.filter()
+        velocityPID.setCurrentMeasurement(avgVelocity)
+        velocityPID.setGoal(velGoal)
+        pulseDuration = STOP - velocityPID.control()
+        if pulseDuration < 550:
+          pulseDuration = 550
+        if pulseDuration > 1000:
+          pulseDuration = 1000
         
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
+        print("Avg Vel: {0}".format(avgVelocity))
         print("S: {0}".format(steeringPotValue))
         print("ET: {0}".format(elapsedTime))
         print("PD: {0}".format(int(pulseDuration)))
@@ -206,8 +220,10 @@ def main():
         print("SD: {0}".format(int(steeringDuration)))
         print("SG: {0}".format(turnGoal))
         print("steering error: {0}".format(steeringError))
-        print('')
-        print(steeringPID)
+        #print('Steering PID:')
+        #print(steeringPID)
+        print('Velocity PID')
+        print(velocityPID)
         print('')
 
         loopCount = 0;
@@ -238,11 +254,13 @@ def main():
     #  time.sleep(1)
     
   finally:
+    ramp(pwm, motorChnl, pulseDuration, STOP, 1, 5)
     #ramp(pwm, motorChnl, pulseDuration, STOP)
     #ramp(pwm, turnChnl, steeringDuration, STOP)
     #print("ramp done")
-    #controlChnl(pwm, motorChnl, STOP)
+    controlChnl(pwm, motorChnl, STOP)
     controlChnl(pwm, turnChnl, STOP)
+    goalThread.join(timeout=2)
 
 #def getTime():
 #  return time.time()
@@ -252,7 +270,7 @@ def main():
 
 #-------------------------------------------------------------------------------
 def controlChnl(pwm, chnl, pulse):
-    pwm.set_pwm(chnl, 0, pulse)
+    pwm.set_pwm(chnl, 0, int(pulse))
     #print("Chnl {0}: Pulse: {1}".format(chnl, pulse))
 
 #-------------------------------------------------------------------------------
@@ -263,8 +281,8 @@ def recvGoal():
   LEFT_TURN_MAX = 24000
   RIGHT_TURN_MAX = 15000
   while True:
-    #velGoal = float(input("Enter velocity goal: "))
-    turnGoal = float(input("Enter turn goal: "))
+    velGoal = float(input("Enter velocity goal: "))
+    #turnGoal = float(input("Enter turn goal: "))
     if turnGoal > LEFT_TURN_MAX:
       turnGoal = LEFT_TURN_MAX
 
@@ -273,7 +291,7 @@ def recvGoal():
       
 
 #-------------------------------------------------------------------------------
-def ramp(pwm, chnl, curVal, rampVal):
+def ramp(pwm, chnl, curVal, rampVal, rampTime, velInc):
   '''
   Ben's hacky way of doing a ramp function
   '''
@@ -287,9 +305,11 @@ def ramp(pwm, chnl, curVal, rampVal):
   #  rampList = range(curVal, rampVal)
   #  rampList = rampList[ ::-1]
   #for pulse in rampList:
-  for pulse in range(int(curVal), int(rampVal)):
-    controlChnl(pwm, chnl, pulse)
-    time.sleep(0.01)
+  pulse = (rampVal - curVal) / velInc
+  for i in range(0, velInc):
+    curVal += pulse
+    controlChnl(pwm, chnl, curVal)
+    time.sleep(rampTime / velInc)
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
