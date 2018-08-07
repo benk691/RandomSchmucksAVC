@@ -117,7 +117,9 @@ def main():
     turnGoal = STRAIGHT # straight
     steeringAvg = 0.0
 
-    steeringPID = PID(2.0, 1.5, 1.0, 10.0)
+    # slow turn
+    #steeringPID = PID(0.0, 0.5, 0.5, 25.0)
+    steeringPID = PID(10.0, 4.0, 1.0, 25.0)
     steeringFilter = Filter(0.9)
     
     velocityPID = PID(50.0, 100.0, 0.0, 3.0)
@@ -145,9 +147,6 @@ def main():
       #print("RT: {0}".format(leftTachValue))
       #print("ST: {0}".format(steeringPotValue))
 
-      controlChnl(pwm, motorChnl, int(pulseDuration))
-      #controlChnl(pwm, turnChnl, int(steeringDuration))
-
       if (rightHigh == 0 and  rightTachValue > rightThresholdHigh):
         rightStripCount += 0.5;
         rightHigh = 1;
@@ -174,17 +173,19 @@ def main():
       #steeringGain = 100
       if steeringDuration > 0:
         #steeringDuration = 670
-        steeringDuration = 648 - steeringDuration
+        # Dead Band
+        steeringDuration = 675 - steeringDuration
       elif steeringDuration < 0:
         #steeringDuration = 890
-        steeringDuration = 907 - steeringDuration
+        steeringDuration = 875 - steeringDuration
       #steeringDuration = 775 - steeringError / 7.0
-      # Dead Zone
+      # Max Zone
       if steeringDuration > 930:
         steeringDuration = 930
       if steeringDuration < 630:
         steeringDuration = 630
 
+      controlChnl(pwm, motorChnl, int(pulseDuration))
       controlChnl(pwm, turnChnl, int(steeringDuration))
 
       if (loopCount >= MAX_LOOP_COUNT):
@@ -193,6 +194,7 @@ def main():
         rightVelocity = ((rightStripCount / 30.0) * 0.36 * math.pi) / (elapsedTime / 1000.0); 
         leftVelocity = ((leftStripCount / 30.0) * 0.36 * math.pi) / (elapsedTime / 1000.0);
 
+        # Velocity
         avgVelocity = (leftVelocity + rightVelocity) / 2.0
         if pulseDuration > STOP:
           avgVelocity *= -1
@@ -208,7 +210,25 @@ def main():
           pulseDuration = 550
         if pulseDuration > 1000:
           pulseDuration = 1000
-        
+
+        '''
+        # Steering
+        steeringDuration = steeringPID.control()
+        #steeringError = turnGoal - steeringAvg / MAX_LOOP_COUNT
+        #steeringGain = 100
+        if steeringDuration > 0:
+          #steeringDuration = 670
+          steeringDuration = 648 - steeringDuration
+        elif steeringDuration < 0:
+          #steeringDuration = 890
+          steeringDuration = 907 - steeringDuration
+        #steeringDuration = 775 - steeringError / 7.0
+        # Dead Zone
+        if steeringDuration > 930:
+          steeringDuration = 930
+        if steeringDuration < 630:
+          steeringDuration = 630
+        '''
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
         print("Avg Vel: {0}".format(avgVelocity))
@@ -220,9 +240,9 @@ def main():
         print("SD: {0}".format(int(steeringDuration)))
         print("SG: {0}".format(turnGoal))
         print("steering error: {0}".format(steeringError))
-        #print('Steering PID:')
-        #print(steeringPID)
-        print('Velocity PID')
+        print('Steering PID:')
+        print(steeringPID)
+        print('Velocity PID:')
         print(velocityPID)
         print('')
 
@@ -256,7 +276,7 @@ def main():
   finally:
     ramp(pwm, motorChnl, pulseDuration, STOP, 1, 5)
     #ramp(pwm, motorChnl, pulseDuration, STOP)
-    #ramp(pwm, turnChnl, steeringDuration, STOP)
+    ramp(pwm, turnChnl, steeringDuration, STOP, 1, 5)
     #print("ramp done")
     controlChnl(pwm, motorChnl, STOP)
     controlChnl(pwm, turnChnl, STOP)
@@ -282,7 +302,7 @@ def recvGoal():
   RIGHT_TURN_MAX = 15000
   while True:
     velGoal = float(input("Enter velocity goal: "))
-    #turnGoal = float(input("Enter turn goal: "))
+    turnGoal = float(input("Enter turn goal: "))
     if turnGoal > LEFT_TURN_MAX:
       turnGoal = LEFT_TURN_MAX
 
