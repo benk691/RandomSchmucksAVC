@@ -4,7 +4,7 @@ class Constants:
   Defines constants for the Rasberry Pi
   '''
   # ADC data/sample rate
-  #   Valid Dat Rates and their mappings per the Adafrutii_Python_ADS1x15 repo
+  #   Valid Data Rates and their mappings per the Adafruit_Python_ADS1x15 repo
   #     8   ->  0x00
   #     16  ->  0x20
   #     32  ->  0x40
