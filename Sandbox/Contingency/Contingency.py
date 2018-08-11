@@ -8,7 +8,6 @@ import math
 from gpiozero import DistanceSensor
 from PID import PID
 from Filter import Filter
-from threading import Thread
 
 # Constants
 POT_CHNL = 0
@@ -18,7 +17,7 @@ MOTOR_CHNL = 14
 TURN_CHNL = 15
 DATA_RATE = 860
 
-FREQ = 60 * 2
+FREQ = 4096
 GAIN = 1
 TACH_THRESHOLD = 40;
 MAX_LOOP_COUNT = 15.0
@@ -37,7 +36,7 @@ DIST_RIGHT_TRIGGER_PIN = 26
 
 # e-  19
 # t-  26
-DIST_MAX_DISTANCE = 2.0
+DIST_MAX_DISTANCE = 2
 DIST_QUEUE_LENGTH = 10
 
 MAX_WALL_DIST = 0.7
@@ -94,8 +93,14 @@ def main():
   velocityPID.setGoal(velGoal)
 
   # Distance sensors
-  leftDistSensor = DistanceSensor(echo=DIST_LEFT_ECHO_PIN, trigger=DIST_LEFT_TRIGGER_PIN, max_distance=DIST_QUEUE_LENGTH)
-  rightDistSensor = DistanceSensor(echo=DIST_RIGHT_ECHO_PIN, trigger=DIST_RIGHT_TRIGGER_PIN, max_distance=DIST_QUEUE_LENGTH)
+  #leftDistSensor = DistanceSensor(echo=DIST_LEFT_ECHO_PIN, trigger=DIST_LEFT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
+  #rightDistSensor = DistanceSensor(echo=DIST_RIGHT_ECHO_PIN, trigger=DIST_RIGHT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
+
+  leftDistSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
+  rightDistSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
+
+  leftDist = 0.0
+  rightDist = 0.0
 
   # Line Following Setup
   wallFollowPID = PID(1000.0, 0.0, 0.0, 0.0)
@@ -119,7 +124,13 @@ def main():
       rightTachValue = adc.read_adc(RIGHT_WHEEL_CHNL, gain=GAIN, data_rate=DATA_RATE)
       leftTachValue = adc.read_adc(LEFT_WHEEL_CHNL, gain=GAIN, data_rate=DATA_RATE)
 
-      wallFollowPID.setCurrentMeasurement(rightDistSensor.distance)
+      #rightDist = rightDistSensor.distance
+      #leftDist = leftDistSensor.distance
+
+      print('Left Distance: ', leftDistSensor.distance * 100)
+      print('Right Distance: ', rightDistSensor.distance * 100)
+
+      wallFollowPID.setCurrentMeasurement(rightDist)
       turnGoal = (- wallFollowPID.control() + STRAIGHT)
 
       steeringFilter.recvMeasurement(steeringPotValue)
@@ -145,7 +156,6 @@ def main():
         leftHigh = 0;
       
       loopCount += 1
-
       # Steering
       steeringDuration = steeringPID.control()
       if steeringDuration > 0:
@@ -161,13 +171,21 @@ def main():
       if steeringDuration < 630:
         steeringDuration = 630
 
-      controlChnl(pwm, MOTOR_CHNL, int(velDuration))
-      controlChnl(pwm, TURN_CHNL, int(steeringDuration))
+      #controlChnl(pwm, MOTOR_CHNL, int(velDuration))
+      #controlChnl(pwm, TURN_CHNL, int(steeringDuration))
+      #controlChnl(pwm, TURN_CHNL, 930)
+      controlChnl(pwm, TURN_CHNL, 785)
+      #controlChnl(pwm, TURN_CHNL, 780)
+      #controlChnl(pwm, TURN_CHNL, velDuration)
+      #controlChnl(pwm, TURN_CHNL, s)
+
+      #print("VD: {0}".format(int(velDuration)))
+      #print("SD: {0}".format(int(steeringDuration)))
 
       # Wall follow PID
       #wallFollowPID.setCurrentMeasurement(leftDistSensor.distance)
       #turnGoal = wallFollowPID.control()
-
+      '''
       if (loopCount >= MAX_LOOP_COUNT):
         elapsedTime = (time.time() * 1000) - startTime;
         startTime = (time.time() * 1000)
@@ -189,8 +207,12 @@ def main():
         if velDuration > 1000:
           velDuration = 1000
 
-        print("LDist: {0}".format(leftDistSensor.distance))
-        print("RDist: {0}".format(rightDistSensor.distance))
+        print('Left Distance: ', leftDistSensor.distance * 100)
+        print('Right Distance: ', rightDistSensor.distance * 100)
+        print("LDist: {0}".format(leftDist))
+        print("RDist: {0}".format(rightDist))
+        #print("LDist: {0}".format(leftDistSensor.distance * 100))
+        #print("RDist: {0}".format(rightDistSensor.distance * 100))
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
         print("Avg Vel: {0}".format(avgVelocity))
@@ -212,7 +234,7 @@ def main():
         rightStripCount = 0;
         leftStripCount = 0;
         steeringAvg = 0.0
-
+      '''
 
   finally:
     ramp(pwm, MOTOR_CHNL, velDuration, STOP, 1, 5)
