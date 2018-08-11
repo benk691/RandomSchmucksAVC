@@ -17,7 +17,7 @@ MOTOR_CHNL = 14
 TURN_CHNL = 15
 DATA_RATE = 860
 
-FREQ = 4096
+FREQ = 2000
 GAIN = 1
 TACH_THRESHOLD = 40;
 MAX_LOOP_COUNT = 15.0
@@ -27,12 +27,12 @@ STRAIGHT = 19203
 RIGHT = 13800
 LEFT = 26000
 
-DIST_LEFT_ECHO_PIN = 13
-DIST_LEFT_TRIGGER_PIN = 6
+DIST_LEFT_ECHO_PIN = 27
+DIST_LEFT_TRIGGER_PIN = 17
 # e-  13
 # t-  6
-DIST_RIGHT_ECHO_PIN = 19
-DIST_RIGHT_TRIGGER_PIN = 26
+DIST_RIGHT_ECHO_PIN = 22
+DIST_RIGHT_TRIGGER_PIN = 18
 
 # e-  19
 # t-  26
@@ -93,11 +93,11 @@ def main():
   velocityPID.setGoal(velGoal)
 
   # Distance sensors
-  #leftDistSensor = DistanceSensor(echo=DIST_LEFT_ECHO_PIN, trigger=DIST_LEFT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
-  #rightDistSensor = DistanceSensor(echo=DIST_RIGHT_ECHO_PIN, trigger=DIST_RIGHT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
+  leftDistSensor = DistanceSensor(echo=DIST_LEFT_ECHO_PIN, trigger=DIST_LEFT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
+  rightDistSensor = DistanceSensor(echo=DIST_RIGHT_ECHO_PIN, trigger=DIST_RIGHT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
 
-  leftDistSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
-  rightDistSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
+  #leftDistSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
+  #rightDistSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
 
   leftDist = 0.0
   rightDist = 0.0
@@ -114,7 +114,7 @@ def main():
   
   try:
     pwm.set_pwm_freq(FREQ)
-    
+    print("Start")
     while True:
       if (loopCount % 1 == 0):
         prevRightTachValue = rightTachValue;
@@ -158,6 +158,7 @@ def main():
       loopCount += 1
       # Steering
       steeringDuration = steeringPID.control()
+      '''
       if steeringDuration > 0:
         #steeringDuration = 670
         # Dead Band
@@ -170,11 +171,12 @@ def main():
         steeringDuration = 930
       if steeringDuration < 630:
         steeringDuration = 630
-
+      '''
       #controlChnl(pwm, MOTOR_CHNL, int(velDuration))
+      controlChnl(pwm, MOTOR_CHNL, 0.75)
       #controlChnl(pwm, TURN_CHNL, int(steeringDuration))
       #controlChnl(pwm, TURN_CHNL, 930)
-      controlChnl(pwm, TURN_CHNL, 785)
+      #controlChnl(pwm, TURN_CHNL, 0.0)
       #controlChnl(pwm, TURN_CHNL, 780)
       #controlChnl(pwm, TURN_CHNL, velDuration)
       #controlChnl(pwm, TURN_CHNL, s)
@@ -237,14 +239,15 @@ def main():
       '''
 
   finally:
-    ramp(pwm, MOTOR_CHNL, velDuration, STOP, 1, 5)
-    ramp(pwm, TURN_CHNL, steeringDuration, STOP, 1, 5)
-    controlChnl(pwm, MOTOR_CHNL, STOP)
-    controlChnl(pwm, TURN_CHNL, STOP)
+    #ramp(pwm, MOTOR_CHNL, velDuration, STOP, 1, 5)
+    #ramp(pwm, TURN_CHNL, steeringDuration, STOP, 1, 5)
+    #controlChnl(pwm, MOTOR_CHNL, STOP)
+    #controlChnl(pwm, TURN_CHNL, STOP)
+    pass
 
 #-------------------------------------------------------------------------------
 def controlChnl(pwm, chnl, pulse):
-    pwm.set_pwm(chnl, 0, int(pulse))
+    pwm.set_pwm(chnl, 0, int(pulse / FREQ * 10000000.0 * 5.0 / 6.0))
 
 #-------------------------------------------------------------------------------
 def ramp(pwm, chnl, curVal, rampVal, rampTime, velInc):
