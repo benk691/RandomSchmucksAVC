@@ -22,7 +22,8 @@ GAIN = 1
 TACH_THRESHOLD = 40;
 MAX_LOOP_COUNT = 15.0
 
-STOP = 780 
+#STOP = 780 
+STOP = 0 
 STRAIGHT = 19203
 RIGHT = 13800
 LEFT = 26000
@@ -39,7 +40,7 @@ DIST_RIGHT_TRIGGER_PIN = 18
 DIST_MAX_DISTANCE = 2
 DIST_QUEUE_LENGTH = 10
 
-MAX_WALL_DIST = 0.7
+MAX_WALL_DIST = 0.65
 
 #-------------------------------------------------------------------------------
 def main():
@@ -77,7 +78,7 @@ def main():
   turnGoal = STRAIGHT
   steeringAvg = 0.0
 
-  steeringPID = PID(10.0, 4.0, 1.0, 25.0)
+  steeringPID = PID(0.5, 0.0, 0.0, 10.0)
   steeringFilter = Filter(0.9)
 
   steeringPID.setGoal(turnGoal)
@@ -95,6 +96,7 @@ def main():
   # Distance sensors
   leftDistSensor = DistanceSensor(echo=DIST_LEFT_ECHO_PIN, trigger=DIST_LEFT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
   rightDistSensor = DistanceSensor(echo=DIST_RIGHT_ECHO_PIN, trigger=DIST_RIGHT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
+  distFilter = Filter(0.8)
 
   #leftDistSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
   #rightDistSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
@@ -103,7 +105,7 @@ def main():
   rightDist = 0.0
 
   # Line Following Setup
-  wallFollowPID = PID(1000.0, 0.0, 0.0, 0.0)
+  wallFollowPID = PID(7000.0, 5000.0, 0.0, 0.8)
   wallFollowPID.setGoal(MAX_WALL_DIST)
 
   #---------------------------------
@@ -124,14 +126,19 @@ def main():
       rightTachValue = adc.read_adc(RIGHT_WHEEL_CHNL, gain=GAIN, data_rate=DATA_RATE)
       leftTachValue = adc.read_adc(LEFT_WHEEL_CHNL, gain=GAIN, data_rate=DATA_RATE)
 
-      #rightDist = rightDistSensor.distance
-      #leftDist = leftDistSensor.distance
+      #distFilter.recvMeasurement(rightDistSensor.distance)
+      #rightDist = distFilter.filter()
 
-      print('Left Distance: ', leftDistSensor.distance * 100)
-      print('Right Distance: ', rightDistSensor.distance * 100)
+      #distFilter.recvMeasurement(leftDistSensor.distance)
+      #leftDist = distFilter.filter()
+      rightDist = rightDistSensor.distance
+      leftDist = leftDistSensor.distance
+
+      #print('Left Distance: ', leftDistSensor.distance * 100)
+      #print('Right Distance: ', rightDistSensor.distance * 100)
 
       wallFollowPID.setCurrentMeasurement(rightDist)
-      turnGoal = (- wallFollowPID.control() + STRAIGHT)
+      turnGoal = (wallFollowPID.control() + STRAIGHT)
 
       steeringFilter.recvMeasurement(steeringPotValue)
       steeringPotValue = steeringFilter.filter()
@@ -157,7 +164,7 @@ def main():
       
       loopCount += 1
       # Steering
-      steeringDuration = steeringPID.control()
+      steeringDuration = - steeringPID.control() + 0.5
       '''
       if steeringDuration > 0:
         #steeringDuration = 670
@@ -172,9 +179,12 @@ def main():
       if steeringDuration < 630:
         steeringDuration = 630
       '''
-      #controlChnl(pwm, MOTOR_CHNL, int(velDuration))
-      controlChnl(pwm, MOTOR_CHNL, 0.75)
-      #controlChnl(pwm, TURN_CHNL, int(steeringDuration))
+      controlChnl(pwm, MOTOR_CHNL, velDuration)
+      #controlChnl(pwm, MOTOR_CHNL, 0.75)
+
+      #print("SD: {0}".format(steeringDuration))
+      controlChnl(pwm, TURN_CHNL, steeringDuration)
+      #controlChnl(pwm, TURN_CHNL, 0.99)
       #controlChnl(pwm, TURN_CHNL, 930)
       #controlChnl(pwm, TURN_CHNL, 0.0)
       #controlChnl(pwm, TURN_CHNL, 780)
@@ -187,7 +197,7 @@ def main():
       # Wall follow PID
       #wallFollowPID.setCurrentMeasurement(leftDistSensor.distance)
       #turnGoal = wallFollowPID.control()
-      '''
+
       if (loopCount >= MAX_LOOP_COUNT):
         elapsedTime = (time.time() * 1000) - startTime;
         startTime = (time.time() * 1000)
@@ -204,25 +214,25 @@ def main():
         velocityPID.setCurrentMeasurement(avgVelocity)
         velocityPID.setGoal(velGoal)
         velDuration = STOP - velocityPID.control()
-        if velDuration < 550:
-          velDuration = 550
-        if velDuration > 1000:
-          velDuration = 1000
+        #if velDuration < 550:
+        #  velDuration = 550
+        #if velDuration > 1000:
+        #  velDuration = 1000
 
         print('Left Distance: ', leftDistSensor.distance * 100)
         print('Right Distance: ', rightDistSensor.distance * 100)
         print("LDist: {0}".format(leftDist))
         print("RDist: {0}".format(rightDist))
-        #print("LDist: {0}".format(leftDistSensor.distance * 100))
-        #print("RDist: {0}".format(rightDistSensor.distance * 100))
+        print("LDist: {0}".format(leftDistSensor.distance * 100))
+        print("RDist: {0}".format(rightDistSensor.distance * 100))
         print("LV: {0}".format(leftVelocity))
         print("RV: {0}".format(rightVelocity))
         print("Avg Vel: {0}".format(avgVelocity))
         print("S: {0}".format(steeringPotValue))
         print("ET: {0}".format(elapsedTime))
-        print("VD: {0}".format(int(velDuration)))
+        print("VD: {0}".format(velDuration))
         print("VG: {0}".format(velGoal))
-        print("SD: {0}".format(int(steeringDuration)))
+        print("SD: {0}".format(steeringDuration))
         print("SG: {0}".format(turnGoal))
         print('Steering PID:')
         print(steeringPID)
@@ -236,7 +246,6 @@ def main():
         rightStripCount = 0;
         leftStripCount = 0;
         steeringAvg = 0.0
-      '''
 
   finally:
     #ramp(pwm, MOTOR_CHNL, velDuration, STOP, 1, 5)
@@ -247,6 +256,10 @@ def main():
 
 #-------------------------------------------------------------------------------
 def controlChnl(pwm, chnl, pulse):
+    if pulse > 0.97:
+      pulse = 0.97
+    if pulse < 0:
+      pulse = 0
     pwm.set_pwm(chnl, 0, int(pulse / FREQ * 10000000.0 * 5.0 / 6.0))
 
 #-------------------------------------------------------------------------------

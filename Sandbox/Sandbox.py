@@ -1,6 +1,6 @@
 #!/usr/bin/python3.5
 
-DIST_SENSOR = False
+DIST_SENSOR = True
 MOTOR = False
 ARDUINO_PI = True
 TENSOR_FLOW = False
@@ -22,14 +22,19 @@ def runDist():
   '''
   Distance Sensor Play Area
   '''
-  from gpiozero import DistanceSensor, MotionSensor
+  from gpiozero import DistanceSensor
   from time import sleep
 
-  distSensor = DistanceSensor(echo=15, trigger=14, max_distance=2, queue_len=10)
+  #distSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
+  #distSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
+
+  leftDistSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
+  rightDistSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
 
   try:
     while True:
-      print('Distance: ', distSensor.distance * 100)
+      print('Left Distance: ', leftDistSensor.distance * 100)
+      print('Right Distance: ', rightDistSensor.distance * 100)
       sleep(0.1)
   except KeyboardInterrupt:
     pass
