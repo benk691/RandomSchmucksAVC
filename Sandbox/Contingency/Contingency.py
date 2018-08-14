@@ -78,7 +78,7 @@ def main():
   turnGoal = STRAIGHT
   steeringAvg = 0.0
 
-  steeringPID = PID(0.5, 0.0, 0.0, 10.0)
+  steeringPID = PID(1.0, 0.2, 0.0, 3.0)
   steeringFilter = Filter(0.9)
 
   steeringPID.setGoal(turnGoal)
@@ -98,14 +98,11 @@ def main():
   rightDistSensor = DistanceSensor(echo=DIST_RIGHT_ECHO_PIN, trigger=DIST_RIGHT_TRIGGER_PIN, max_distance=DIST_MAX_DISTANCE, queue_len=DIST_QUEUE_LENGTH)
   distFilter = Filter(0.8)
 
-  #leftDistSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
-  #rightDistSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
-
   leftDist = 0.0
   rightDist = 0.0
 
   # Line Following Setup
-  wallFollowPID = PID(7000.0, 5000.0, 0.0, 0.8)
+  wallFollowPID = PID(10000.0, 0.0, 0.0, 0.8)
   wallFollowPID.setGoal(MAX_WALL_DIST)
 
   #---------------------------------
@@ -137,6 +134,7 @@ def main():
       #print('Left Distance: ', leftDistSensor.distance * 100)
       #print('Right Distance: ', rightDistSensor.distance * 100)
 
+      # Wall follow PID
       wallFollowPID.setCurrentMeasurement(rightDist)
       turnGoal = (wallFollowPID.control() + STRAIGHT)
 
@@ -193,10 +191,6 @@ def main():
 
       #print("VD: {0}".format(int(velDuration)))
       #print("SD: {0}".format(int(steeringDuration)))
-
-      # Wall follow PID
-      #wallFollowPID.setCurrentMeasurement(leftDistSensor.distance)
-      #turnGoal = wallFollowPID.control()
 
       if (loopCount >= MAX_LOOP_COUNT):
         elapsedTime = (time.time() * 1000) - startTime;
