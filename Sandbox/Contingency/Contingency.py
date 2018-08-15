@@ -40,7 +40,7 @@ DIST_RIGHT_TRIGGER_PIN = 18
 DIST_MAX_DISTANCE = 2
 DIST_QUEUE_LENGTH = 10
 
-MAX_WALL_DIST = 0.65
+MAX_WALL_DIST = 1.5
 
 #-------------------------------------------------------------------------------
 def main():
@@ -69,6 +69,10 @@ def main():
 
   steeringPotValue = 0
 
+  distTraveled = 0.0
+  distStartTime = 0.0
+  distEndTime = 0.0
+
   # Timer
   startTime = 0;
   elapsedTime = 0;
@@ -85,7 +89,7 @@ def main():
 
   # Velocity Setup
   velDuration = STOP
-  avgVel = 0.0
+  avgVelocity = 0.0
   velGoal = 0.5
 
   velocityPID = PID(50.0, 100.0, 0.0, 3.0)
@@ -114,6 +118,7 @@ def main():
   try:
     pwm.set_pwm_freq(FREQ)
     print("Start")
+    distStartTime = time.time()
     while True:
       if (loopCount % 1 == 0):
         prevRightTachValue = rightTachValue;
@@ -122,6 +127,8 @@ def main():
       steeringPotValue = adc.read_adc(POT_CHNL, gain=GAIN, data_rate=DATA_RATE) 
       rightTachValue = adc.read_adc(RIGHT_WHEEL_CHNL, gain=GAIN, data_rate=DATA_RATE)
       leftTachValue = adc.read_adc(LEFT_WHEEL_CHNL, gain=GAIN, data_rate=DATA_RATE)
+
+      distTraveled += (avgVelocity / (time.time() - distStartTime))
 
       #distFilter.recvMeasurement(rightDistSensor.distance)
       #rightDist = distFilter.filter()
@@ -213,6 +220,7 @@ def main():
         #if velDuration > 1000:
         #  velDuration = 1000
 
+        print('Total Distance: ', distTraveled)
         print('Left Distance: ', leftDistSensor.distance * 100)
         print('Right Distance: ', rightDistSensor.distance * 100)
         print("LDist: {0}".format(leftDist))
