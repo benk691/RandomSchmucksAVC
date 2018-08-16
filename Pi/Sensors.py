@@ -1,6 +1,5 @@
 from Constants import Constants
 from gpiozero import DistanceSensor
-import Adafruit_PCA9685
 import Adafruit_ADS1x15
 from Adafruit_BNO055 import BNO055
 
@@ -14,7 +13,6 @@ class Sensors:
     Initializes all the sensors we want to consume data from
     '''
     # I2C bus readers
-    self.pwm = Adafruit_PCA9685.PCA9685()
     self.adc = Adafruit_ADS1x15.ADS1115()
     self.imu = BNO055.BNO055()
     if not self.imu.begin():
@@ -51,6 +49,10 @@ class Sensors:
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
+    '''
+    Generates debugging information about the sensors
+    @return string describing debug information
+    '''
     desc = "Sensor Info:\n"
     desc += "\tSteering Pot = {0}".format(self.steeringPotValue)
     desc += "\tRight Tach = {0}".format(self.rightTachValue)
