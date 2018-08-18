@@ -54,3 +54,8 @@ class Constants:
   # The length of the queue in the distance sensor we want to use to store values
   DIST_QUEUE_LENGTH = 10
 
+  # X index in a coordinate list
+  X = 0
+
+  # Y index in a coordinate list
+  Y = 1

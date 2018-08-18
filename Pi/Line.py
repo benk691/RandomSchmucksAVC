@@ -1,3 +1,4 @@
+from Constants import Constants
 
 class Line:
   '''
@@ -13,6 +14,51 @@ class Line:
     self.startPoint = startPoint
     self.endPoint = endPoint
     self.tabs = 0
+
+  #-------------------------------------------------------------------------------
+  def intersection(self, line):
+    '''
+    Determines if and where the line intersects with the given line
+    Code Credit: Stack Overflow how do you detect where two line segments intersect by Kris
+    @param line - the line to determine intersection with
+    @return the point where the line intersects with the line, or None if line does not intersect
+    '''
+    myXDiff = self.endPoint[Constants.X] - self.startPoint[Constants.X]
+    myYDiff = self.endPoint[Constants.Y] - self.startPoint[Constants.Y]
+    inXDiff = line.endPoint[Constants.X] - line.startPoint[Constants.X]
+    inYDiff = line.endPoint[Constants.Y] - line.startPoint[Constants.Y]
+
+    denom = myXDiff * inYDiff - inXDiff * myYDiff
+
+    if denom == 0: 
+      # collinear
+      return None 
+    
+    denomIsPositive = denom > 0
+
+    xDiff = self.startPoint[Constants.X] - line.startPoint[Constants.X]
+    yDiff = self.startPoint[Constants.Y] - line.startPoint[Constants.Y]
+
+    sNumer = myXDiff * yDiff - myYDiff * xDiff
+
+    if (sNumer < 0) == denomIsPositive:
+      # no collision
+      return None
+
+    tNumer = inXDiff * yDiff - inYDiff * xDiff
+
+    if (tNumer < 0) == denomIsPositive:
+      # no collision
+      return None
+
+    if (sNumer > denom) == denomIsPositive or (tNumer > denom) == denomIsPositive:
+      # no collision
+      return None
+
+    # collsion detected
+    t = tNumer / denom
+    intersectionPoint = [ self.startPoint[Constants.X] + (t * myXDiff), self.startPoint[Constants.Y] + (t * myYDiff) ]
+    return intersectionPoint
 
   #-------------------------------------------------------------------------------
   def setTabs(self, tabs):
