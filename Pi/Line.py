@@ -12,6 +12,14 @@ class Line:
     '''
     self.startPoint = startPoint
     self.endPoint = endPoint
+    self.tabs = 0
+
+  #-------------------------------------------------------------------------------
+  def setTabs(self, tabs):
+    '''
+    Sets the number of tabs used for print out
+    '''
+    self.tabs = tabs
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -19,9 +27,9 @@ class Line:
     Generates debugging information about the line
     @return string describing debug information
     '''
-    desc = "Line:\n"
-    desc += "\tstartPoint = {0}\n".format(self.startPoint)
-    desc += "\tendPoint = {0}\n".format(self.endPoint)
+    desc = "{0}Line:\n".format('\t' * self.tabs)
+    desc += "{0}\tstartPoint = {1}\n".format('\t' * self.tabs, self.startPoint)
+    desc += "{0}\tendPoint = {1}\n".format('\t' * self.tabs, self.endPoint)
     return desc
 
   #-------------------------------------------------------------------------------

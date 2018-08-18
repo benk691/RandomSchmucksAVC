@@ -4,20 +4,19 @@ class Circle:
   General circle definition
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, centerX, centerY, radius, startAngle, stopAngle):
+  def __init__(self, center, radius, startAngle, stopAngle):
     '''
     Initializes the circle
-    @param centerX - the X coordinate of the center of the circle
-    @param centerY - the Y coordinate of the center of the circle
+    @param center - the center (X, Y) of the circle
     @radius - the circle radius
-    @startAngle - the start angle to start drawing the circle
-    @stopAngle - the stop angle to stop drawing the circle 
+    @startAngle - the start angle to start drawing the circle [radians]
+    @stopAngle - the stop angle to stop drawing the circle [radians]
     '''
-    self.centerX = centerX
-    self.centerY = centerY
+    self.center = center
     self.radius = radius
     self.startAngle = startAngle
     self.stopAngle = stopAngle
+    self.tabs = 0
 
   #-------------------------------------------------------------------------------
   def intersect(self, line):
@@ -38,15 +37,22 @@ class Circle:
     pass
 
   #-------------------------------------------------------------------------------
+  def setTabs(self, tabs):
+    '''
+    Sets the number of tabs used for print out
+    '''
+    self.tabs = tabs
+
+  #-------------------------------------------------------------------------------
   def _debugDescription(self):
     '''
     Generates debugging information about the circle
     @return string describing debug information
     '''
-    desc = "Circle:\n"
-    desc += "\tCenter(X, Y) = ({0}, {1})\n".format(self.centerX, self.centerY)
-    desc += "\tRadius = {0}\n".format(self.radius)
-    desc += "\tangleRange(start, stop) = ({0}, {1})\n".format(self.startAngle, self.stopAngle)
+    desc = "{0}Circle:\n".format('\t' * self.tabs)
+    desc += "{0}\tCenter = {1}\n".format('\t' * self.tabs, self.center)
+    desc += "{0}\tRadius = {1}\n".format('\t' * self.tabs, self.radius)
+    desc += "{0}\tangleRange(start, stop) = ({1}, {2})\n".format('\t' * self.tabs, self.startAngle, self.stopAngle)
     return desc
 
   #-------------------------------------------------------------------------------
@@ -64,3 +70,4 @@ class Circle:
     @return string representation of the class
     '''
     return self._debugDescription()
+
