@@ -96,6 +96,9 @@ class Constants:
   # Noise that is applied to account for sensor inaccuracies in the velocity
   VELOCITY_NOISE = 0.0
 
+  # Noise that is applied to account for sensor inaccuracies in the distance
+  DISTANCE_NOISE = 0.0
+
   # Update rate for the particle filter (Hz)
   PARTICLE_FILTER_UPDATE_RATE = 10
   

@@ -1,6 +1,7 @@
 import random
 import math
 import time
+from scipy.stats import norm
 from Constants import Constants
 
 class ParticleFilter:
@@ -65,18 +66,16 @@ class ParticleFilter:
     Calculates the weights for each particle
     '''
     for i in range(self.particleNumber):
-      self.particles[i][Constants.WEIGHT] *= 1.0
+      # TODO: Calculate distance line of sight and intersections
+      particleDistLeft = 0.0
+      particleDistRight = 0.0
+      # PDF(measurement, mean, std_dev)
+      self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
+      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
+      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
 
   #-------------------------------------------------------------------------------
   def measure(self):
-    pass
-
-  #-------------------------------------------------------------------------------
-  def calculateHeadingWeights(self):
-    pass
-
-  #-------------------------------------------------------------------------------
-  def calculateDistanceWeights(self):
     pass
 
   #-------------------------------------------------------------------------------
