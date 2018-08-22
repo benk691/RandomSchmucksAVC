@@ -21,7 +21,7 @@ class Circle:
     self.tabs = 0
 
   #-------------------------------------------------------------------------------
-  def intersection(self, line):
+  def findIntersection(self, line):
     '''
     Determines if and where the circle intersects with the given line
     Code Credit: Stack Overflow circle line segment collision detection algorithm by Duq

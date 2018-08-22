@@ -16,7 +16,7 @@ class Line:
     self.tabs = 0
 
   #-------------------------------------------------------------------------------
-  def intersection(self, line):
+  def findIntersection(self, line):
     '''
     Determines if and where the line intersects with the given line
     Code Credit: Stack Overflow how do you detect where two line segments intersect by Kris
