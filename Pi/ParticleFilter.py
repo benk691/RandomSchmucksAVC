@@ -26,6 +26,7 @@ class ParticleFilter:
     self.vehicleLeftDistance = 0.0
     self.vehicleRightDistance = 0.0
     self.vehicleSteeringAngle = 0.0
+    self.cumulativeSum = []
     self._maxSteeringAngle = max(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     self._minSteeringAngle = min(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     # Particle index: [x, y, heading, weight]
@@ -77,9 +78,29 @@ class ParticleFilter:
     self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
 
   #-------------------------------------------------------------------------------
+  def _generateNewParticleList(self):
+    '''
+    Calculate the cumulative sum of the particle weights, then generates new particles using the cumulative sum over a random distribution
+    '''
+    self.cumulativeSum = [ sum([ p[Constants.WEIGHT] for p in self.particles[ : i + 1] ]) for i in range(self.particleNumber) ]
+    genParticles = []
+    for i in range(self.particleNumber):
+      genCumSum = random.uniform(0.0, self.cumulativeSum[-1])
+      # Get the index of the particle we want to generate
+      particleIndex = 0
+      for csi in range(len(self.cumulativeSum)):
+        if self.cumulativeSum[csi] >= genCumSum:
+          particleIndex = csi
+          break
+      genParticles.append(particleIndex)
+
+    # Generate particles
+    self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0 ] for genP in genParticles ]
+
+  #-------------------------------------------------------------------------------
   def _calcualteDistanceLineOfSight(self, particle):
     '''
-    Calcualte the distance line of sight and intersection of the given particle
+    Calculate the distance line of sight and intersection of the given particle
     @param particle - list describing the particle [X, Y, Heading, Weight]
     '''
     # TODO: Calculate distance line of sight and intersections
@@ -158,6 +179,7 @@ class ParticleFilter:
     desc += "\tvehicleLeftDistance = {0}\n".format(self.vehicleLeftDistance)
     desc += "\tvehicleRightDistance = {0}\n".format(self.vehicleRightDistance)
     desc += "\tvehicleSteeringAngle = {0}\n".format(self.vehicleSteeringAngle)
+    desc += "\tcumulativeSum = {0}\n".format(self.cumulativeSum)
     desc += "\tparticles:\n"
     for p in self.particles:
       desc += "\t\t[X = {0}, Y = {1}, H = {2}, W = {3}]\n".format(p[0], p[1], p[2], p[3])
