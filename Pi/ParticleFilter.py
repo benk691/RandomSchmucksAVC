@@ -2,21 +2,24 @@ import random
 import math
 import time
 from scipy.stats import norm
+from Line import Line
 from Constants import Constants
 
 class ParticleFilter:
   #-------------------------------------------------------------------------------
-  def __init__(self, particleNumber, startBox, headingRange):
+  def __init__(self, particleNumber, startBox, headingRange, course):
     '''
     Initializes the particle filter
     @param particleNumber - number of particles to generate
     @param startBox - the inital box to create particles in. List of two X, Y coordinates defining the corners of the box
     @param headingRange - the range of headings to create particles with. List of two doubles.
+    @param course - the course map
     '''
     random.seed()
     self.particleNumber = particleNumber
     self.prevTime = time.time()
     self.currentTime = time.time()
+    self.course = course
     self.dt = 0.0
     self.vehicleVelocity = 0.0
     self.vehicleHeading = 0.0
@@ -66,13 +69,28 @@ class ParticleFilter:
     Calculates the weights for each particle
     '''
     for i in range(self.particleNumber):
-      # TODO: Calculate distance line of sight and intersections
-      particleDistLeft = 0.0
-      particleDistRight = 0.0
+      particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particle[i])
       # PDF(measurement, mean, std_dev)
       self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
       self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
       self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
+
+  #-------------------------------------------------------------------------------
+  def _calcualteDistanceLineOfSight(self, particle):
+    '''
+    Calcualte the distance line of sight and intersection of the given particle
+    @param particle - list describing the particle [X, Y, Heading, Weight]
+    '''
+    # TODO: Calculate distance line of sight and intersections
+    particleDistLeft, particleDistRight = 0.0, 0.0
+    startPoint = [particle[Constants.X], particle[Constants.Y]]
+    # TODO: What is the end point ?
+    leftLine = Line(startPoint)
+    rightLine = Line(startPoint)
+
+    leftIntersections = [ c.findIntersection() for c in self.course.circles ]
+    leftIntersections.extend([ l.findIntersection() for l in self.course.lines ])
+    return particleDistLeft, particleDistRight
 
   #-------------------------------------------------------------------------------
   def measure(self):
