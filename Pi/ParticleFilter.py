@@ -38,42 +38,43 @@ class ParticleFilter:
     '''
     while True:
       self._getVehicleMeasurements()
-      self._predict()
-      self._weight()
+      self.dt = self.currentTime - self.prevTime
+      for i in range(self.particleNumber):
+        self._predict(i)
+        self._weight(i)
 
   #-------------------------------------------------------------------------------
-  def _predict(self):
+  def _predict(self, i):
     '''
-    Perform the prediction step. This will predict where the particles are going to go 
+    Perform the prediction step. This will predict where the particle is going to go 
     based on the most recent values read in from the vehicle
+    @param i - the index in the particle list to predict
     '''
-    self.dt = self.currentTime - self.prevTime
-    for i in range(self.particleNumber):
-      # Generate a steering angle for the particles
-      genSteeringAngle = random.guass(mu=self.vehicleSteeringAngle, sigma=Constants.STEERING_ANGLE_NOISE)
-      if genSteeringAngle > self._maxSteeringAngle:
-        genSteeringAngle = self._maxSteeringAngle
-      if genSteeringAngle < selg._minSteeringAngle:
-        genSteeringAngle = self,_minSteeringAngle
-      turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
-      # Generate a velocity for the particles
-      genVelocity = random.guass(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
-      rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), -turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
-      self.particles[i][Constants.X] += rotatedX
-      self.particles[i][Constants.Y] += rotatedY
-      self.particles[i][Constants.HEADING] += genVelocity / turnRadius
+    # Generate a steering angle for the particles
+    genSteeringAngle = random.gauss(mu=self.vehicleSteeringAngle, sigma=Constants.STEERING_ANGLE_NOISE)
+    if genSteeringAngle > self._maxSteeringAngle:
+      genSteeringAngle = self._maxSteeringAngle
+    if genSteeringAngle < self._minSteeringAngle:
+      genSteeringAngle = self,_minSteeringAngle
+    turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
+    # Generate a velocity for the particles
+    genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
+    rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), -turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
+    self.particles[i][Constants.X] += rotatedX
+    self.particles[i][Constants.Y] += rotatedY
+    self.particles[i][Constants.HEADING] += genVelocity / turnRadius
 
   #-------------------------------------------------------------------------------
-  def _weight(self):
+  def _weight(self, i):
     '''
-    Calculates the weights for each particle
+    Calculates the weights for the given particle
+    @param i - the index in the particle list to predict
     '''
-    for i in range(self.particleNumber):
-      particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particle[i])
-      # PDF(measurement, mean, std_dev)
-      self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
-      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
-      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
+    particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particles[i])
+    # PDF(measurement, mean, std_dev)
+    self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
+    self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
+    self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
 
   #-------------------------------------------------------------------------------
   def _calcualteDistanceLineOfSight(self, particle):
@@ -85,11 +86,16 @@ class ParticleFilter:
     particleDistLeft, particleDistRight = 0.0, 0.0
     startPoint = [particle[Constants.X], particle[Constants.Y]]
     # TODO: What is the end point ?
-    leftLine = Line(startPoint)
-    rightLine = Line(startPoint)
+    endPoint = [0.0, 0.0]
+    leftLine = Line(startPoint, endPoint)
+    rightLine = Line(startPoint, endPoint)
 
-    leftIntersections = [ c.findIntersection() for c in self.course.circles ]
-    leftIntersections.extend([ l.findIntersection() for l in self.course.lines ])
+    leftIntersections = [ c.findIntersection(leftLine) for c in self.course.circles ]
+    leftIntersections.extend([ l.findIntersection(leftLine) for l in self.course.lines ])
+
+    rightIntersections = [ c.findIntersection(rightLine) for c in self.course.circles ]
+    rightIntersections.extend([ l.findIntersection(rightLine) for l in self.course.lines ])
+
     return particleDistLeft, particleDistRight
 
   #-------------------------------------------------------------------------------

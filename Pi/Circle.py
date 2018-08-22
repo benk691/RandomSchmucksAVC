@@ -33,7 +33,7 @@ class Circle:
     shiftedEndPoint = [ line.endPoint[Constants.X] - self.center[Constants.X], line.endPoint[Constants.Y] - self.center[Constants.Y] ]
 
     # Slope of the line
-    m = (shiftedEndPoint[Constants.Y] - shiftedStartPoint[Constants.Y]) / (shiftedEndPoint[Constants.X] - shiftedStartPoint(Constants.X))
+    m = (shiftedEndPoint[Constants.Y] - shiftedStartPoint[Constants.Y]) / (shiftedEndPoint[Constants.X] - shiftedStartPoint[Constants.X])
     # Y-Intercept of line
     b = shiftedStartPoint[Constants.Y] - m * shiftedStartPoint[Constants.X]
     # Value to be square rooted
