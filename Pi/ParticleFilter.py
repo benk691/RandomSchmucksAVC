@@ -26,23 +26,53 @@ class ParticleFilter:
     self.vehicleLeftDistance = 0.0
     self.vehicleRightDistance = 0.0
     self.vehicleSteeringAngle = 0.0
+    self.estVehicleX = 0.0
+    self.estVehicleY = 0.0
+    self.estVehicleHeading = 0.0
+    self.varVehicleX = 0.0
+    self.varVehicleY = 0.0
+    self.varVehicleHeading = 0.0
     self.cumulativeSum = []
     self._maxSteeringAngle = max(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     self._minSteeringAngle = min(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     # Particle index: [x, y, heading, weight]
     self.particles = [ [random.uniform(startBox[0][Constants.X], startBox[1][Constants.X]), random.uniform(startBox[0][Constants.Y], startBox[1][Constants.Y]), random.uniform(headingRange[0], headingRange[1]), 1.0] for i in range(self.particleNumber) ]
 
+
   #-------------------------------------------------------------------------------
-  def run(self):
+  def getEstiamtedVehicleLocation(self):
     '''
-    Run the praticle filter
+    Gets the estimated vehicle location based on the particles
+    @return mean(X), mean(Y), mean(heading), variance(x), variance(y), variance(heading)
     '''
-    while True:
-      self._getVehicleMeasurements()
-      self.dt = self.currentTime - self.prevTime
-      for i in range(self.particleNumber):
-        self._predict(i)
-        self._weight(i)
+    self.currentTime = time.time()
+    self._getVehicleMeasurements()
+    self.dt = self.currentTime - self.prevTime
+    for i in range(self.particleNumber):
+      self._predict(i)
+      self._weight(i)
+    self._generateNewParticleList()
+    # Calculate Estimates and Variances
+    self.estVehicleX = sum([ p[Constants.X] for p in self.particles]) / float(len(self.particles))
+    self.estVehicleY = sum([ p[Constants.Y] for p in self.particles]) / float(len(self.particles))
+    self.estVehicleHeading = sum([ p[Constants.HEADING] for p in self.particles]) / float(len(self.particles))
+    self.varVehicleX = 0.0
+    self.varVehicleY = 0.0
+    self.varVehicleHeading = 0.0
+    self.prevTime = self.currentTime
+    return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.varVehicleX, self.varVehicleY, self.varVehicleHeading
+
+  #-------------------------------------------------------------------------------
+  def _getVehicleMeasurements(self):
+    '''
+    Read the sensor measurements from the vehicle
+    '''
+    # TODO: Connect this with the sensor conversion/filtered reading thread
+    self.vehicleVelocity = 0.0
+    self.vehicleHeading = 0.0
+    self.vehicleLeftDistance = 0.0
+    self.vehicleRightDistance = 0.0
+    self.vehicleSteeringAngle = 0.0
 
   #-------------------------------------------------------------------------------
   def _predict(self, i):
@@ -120,26 +150,6 @@ class ParticleFilter:
     return particleDistLeft, particleDistRight
 
   #-------------------------------------------------------------------------------
-  def measure(self):
-    pass
-
-  #-------------------------------------------------------------------------------
-  def normalizeWeights(self):
-    pass
-
-  #-------------------------------------------------------------------------------
-  def checksumParticles(self):
-    pass
-
-  #-------------------------------------------------------------------------------
-  def distributeNewParticles(self):
-    pass
-
-  #-------------------------------------------------------------------------------
-  def getEstiamtedLocation(self):
-    pass
-
-  #-------------------------------------------------------------------------------
   def _rotate(self, x, y, theta):
     '''
     Rotates the X, Y coordinate by theta
@@ -149,19 +159,6 @@ class ParticleFilter:
     '''
     # TODO: Implement rotation
     return x, y
-
-  #-------------------------------------------------------------------------------
-  def _getVehicleMeasurements(self):
-    '''
-    Read the sensor measurements from the vehicle
-    '''
-    # TODO: Connect this with the sensor conversion/filtered reading thread
-    self.currentTime = time.time()
-    self.vehicleVelocity = 0.0
-    self.vehicleHeading = 0.0
-    self.vehicleLeftDistance = 0.0
-    self.vehicleRightDistance = 0.0
-    self.vehicleSteeringAngle = 0.0
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -183,6 +180,12 @@ class ParticleFilter:
     desc += "\tparticles:\n"
     for p in self.particles:
       desc += "\t\t[X = {0}, Y = {1}, H = {2}, W = {3}]\n".format(p[0], p[1], p[2], p[3])
+    desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
+    desc += "\testVehicleY = {0}\n".format(self.estVehicleY)
+    desc += "\testVehicleHeading = {0}\n".format(self.estVehicleHeading)
+    desc += "\tvarVehicleX = {0}\n".format(self.varVehicleX)
+    desc += "\tvarVehicleY = {0}\n".format(self.varVehicleY)
+    desc += "\tvarVehicleHeading = {0}\n".format(self.varVehicleHeading)
     return desc
 
   #-------------------------------------------------------------------------------
