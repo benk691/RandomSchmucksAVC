@@ -197,7 +197,8 @@ class ParticleFilter:
     y - the Y coordinate
     theta - the amount to rotate (radians)
     '''
-    # TODO: Implement rotation
+    x = x * math.cos(theta) - y * math.sin(theta)
+    y = x * math.sin(theta) + y * math.cos(theta)
     return x, y
 
   #-------------------------------------------------------------------------------
