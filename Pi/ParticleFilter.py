@@ -17,7 +17,6 @@ class ParticleFilter:
     @param course - the course map
     '''
     random.seed()
-    self.particleNumber = particleNumber
     self.prevTime = time.time()
     self.currentTime = time.time()
     self.course = course
@@ -35,8 +34,7 @@ class ParticleFilter:
     self._maxSteeringAngle = max(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     self._minSteeringAngle = min(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     # Particle index: [x, y, heading, weight]
-    self.particles = [ [random.uniform(startBox[0][Constants.X], startBox[1][Constants.X]), random.uniform(startBox[0][Constants.Y], startBox[1][Constants.Y]), random.uniform(headingRange[0], headingRange[1]), 1.0] for i in range(self.particleNumber) ]
-
+    self.particles = [ [random.uniform(startBox[0][Constants.X], startBox[1][Constants.X]), random.uniform(startBox[0][Constants.Y], startBox[1][Constants.Y]), random.uniform(headingRange[0], headingRange[1]), 1.0] for i in range(particleNumber) ]
 
   #-------------------------------------------------------------------------------
   def getEstiamtedVehicleLocation(self):
@@ -48,7 +46,7 @@ class ParticleFilter:
     self._getVehicleMeasurements()
     self.dt = self.currentTime - self.prevTime
     # Perform particle calculations
-    for i in range(self.particleNumber):
+    for i in range(len(self.particles)):
       self._predict(i)
       self._weight(i)
     self._generateNewParticleList()
@@ -120,9 +118,9 @@ class ParticleFilter:
     '''
     Calculate the cumulative sum of the particle weights, then generates new particles using the cumulative sum over a random distribution
     '''
-    self.cumulativeSum = [ sum([ p[Constants.WEIGHT] for p in self.particles[ : i + 1] ]) for i in range(self.particleNumber) ]
+    self.cumulativeSum = [ sum([ p[Constants.WEIGHT] for p in self.particles[ : i + 1] ]) for i in range(len(self.particles)) ]
     genParticles = []
-    for i in range(self.particleNumber):
+    for i in range(len(self.particles)):
       genCumSum = random.uniform(0.0, self.cumulativeSum[-1])
       # Get the index of the particle we want to generate
       particleIndex = 0
@@ -139,7 +137,9 @@ class ParticleFilter:
   def _calcualteDistanceLineOfSight(self, particle):
     '''
     Calculate the distance line of sight and intersection of the given particle
-    @param particle - list describing the particle [X, Y, Heading, Weight]
+    @param particle - list describing the particle distance line of sight [X, Y, Heading, Weight]
+    @return particle closest distance intersection on its left side
+    @return particle closest distance intersection on its right side
     '''
     particleDistLeft, particleDistRight = 0.0, 0.0
 
@@ -178,9 +178,15 @@ class ParticleFilter:
     rightIntersections += [ l.findIntersection(rightDistLine) for l in self.course.lines ]
 
     # Calculate distances
-    particleDistLeft = math.sqrt(min([ math.pow(li[Constants.X] - leftStartPoint[Constants.X], 2.0) + math.pow(li[Constants.Y] - leftStartPoint[Constants.Y], 2.0) for li in leftIntersections ]))
+    try:
+      particleDistLeft = math.sqrt(min([ math.pow(li[Constants.X] - leftStartPoint[Constants.X], 2.0) + math.pow(li[Constants.Y] - leftStartPoint[Constants.Y], 2.0) for li in leftIntersections if li is not None]))
+    except:
+      particleDistLeft = None
 
-    particleDistRight = math.sqrt(min([ math.pow(li[Constants.X] - rightStartPoint[Constants.X], 2.0) + math.pow(li[Constants.Y] - rightStartPoint[Constants.Y], 2.0) for li in rightIntersections ]))
+    try:
+      particleDistRight = math.sqrt(min([ math.pow(ri[Constants.X] - rightStartPoint[Constants.X], 2.0) + math.pow(ri[Constants.Y] - rightStartPoint[Constants.Y], 2.0) for ri in rightIntersections if ri is not None ]))
+    except:
+      particleDistRight = None
 
     # Sanity check
     if particleDistLeft is None or particleDistLeft > Constants.DIST_MAX_DISTANCE:
@@ -210,7 +216,7 @@ class ParticleFilter:
     @return string describing debug information
     '''
     desc = "Particle Filter:\n"
-    desc += "\tparticleNumber = {0}\n".format(self.particleNumber)
+    desc += "\tparticleNumber = {0}\n".format(len(self.particles))
     desc += "\tprevTime = {0}\n".format(self.prevTime)
     desc += "\tcurrentTime = {0}\n".format(self.currentTime)
     desc += "\tdt = {0}\n".format(self.dt)
