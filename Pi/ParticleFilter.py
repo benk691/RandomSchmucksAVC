@@ -1,6 +1,7 @@
 import random
 import math
 import time
+import numpy
 from scipy.stats import norm
 from Line import Line
 from Constants import Constants
@@ -29,9 +30,7 @@ class ParticleFilter:
     self.estVehicleX = 0.0
     self.estVehicleY = 0.0
     self.estVehicleHeading = 0.0
-    self.varVehicleX = 0.0
-    self.varVehicleY = 0.0
-    self.varVehicleHeading = 0.0
+    self.covarVehicle = []
     self.cumulativeSum = []
     self._maxSteeringAngle = max(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     self._minSteeringAngle = min(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
@@ -43,24 +42,27 @@ class ParticleFilter:
   def getEstiamtedVehicleLocation(self):
     '''
     Gets the estimated vehicle location based on the particles
-    @return mean(X), mean(Y), mean(heading), variance(x), variance(y), variance(heading)
+    @return mean(X), mean(Y), mean(heading), covariance
     '''
     self.currentTime = time.time()
     self._getVehicleMeasurements()
     self.dt = self.currentTime - self.prevTime
+    # Perform particle calculations
     for i in range(self.particleNumber):
       self._predict(i)
       self._weight(i)
     self._generateNewParticleList()
-    # Calculate Estimates and Variances
+    # Calculate estimates
     self.estVehicleX = sum([ p[Constants.X] for p in self.particles]) / float(len(self.particles))
     self.estVehicleY = sum([ p[Constants.Y] for p in self.particles]) / float(len(self.particles))
     self.estVehicleHeading = sum([ p[Constants.HEADING] for p in self.particles]) / float(len(self.particles))
-    self.varVehicleX = 0.0
-    self.varVehicleY = 0.0
-    self.varVehicleHeading = 0.0
+    # Calculate covariance
+    x = [ p[Constants.X] for p in self.particles ]
+    y = [ p[Constants.Y] for p in self.particles ]
+    h = [ p[Constants.HEADING] for p in self.particles ]
+    self.covarVehicle = numpy.cov(numpy.vstack((x,y,h)))
     self.prevTime = self.currentTime
-    return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.varVehicleX, self.varVehicleY, self.varVehicleHeading
+    return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covariance
 
   #-------------------------------------------------------------------------------
   def _getVehicleMeasurements(self):
@@ -224,9 +226,9 @@ class ParticleFilter:
     desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
     desc += "\testVehicleY = {0}\n".format(self.estVehicleY)
     desc += "\testVehicleHeading = {0}\n".format(self.estVehicleHeading)
-    desc += "\tvarVehicleX = {0}\n".format(self.varVehicleX)
-    desc += "\tvarVehicleY = {0}\n".format(self.varVehicleY)
-    desc += "\tvarVehicleHeading = {0}\n".format(self.varVehicleHeading)
+    desc += "\tcovarVehicle:\n"
+    for c in self.covarVehicle:
+      desc += "\t\t{0}\n".format(c)
     return desc
 
   #-------------------------------------------------------------------------------
