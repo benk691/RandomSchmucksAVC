@@ -51,6 +51,9 @@ class Constants:
   # The max distance we want the sensors to detect (meters)
   DIST_MAX_DISTANCE = 2.0
 
+  # The min distance we want the sensors to detect (meters)
+  DIST_MIN_DISTANCE = 0.0
+
   # The length of the queue in the distance sensor we want to use to store values
   DIST_QUEUE_LENGTH = 10
 
@@ -108,3 +111,15 @@ class Constants:
   # Right Most Steering Angle
   MAX_RIGHT_STEERING_ANGLE = 0
 
+  # The position of the left distance sensor on the vehicle (relative to the vehicle)
+  DIST_LEFT_SENSOR_POSITION = [0.0, 0.0]
+
+  # The orientation of the left distance sensor (relative to the vehicle)
+  DIST_LEFT_SENSOR_OREINTATION = 90
+
+  # The position of the right distance sensor on the vehicle (relative to the vehicle)
+  DIST_RIGHT_SENSOR_POSITION = [0.0, 0.0]
+
+  # The orientation of the right distance sensor (relative to the vehicle)
+  DIST_RIGHT_SENSOR_OREINTATION = 90
+  

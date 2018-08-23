@@ -73,6 +73,12 @@ class ParticleFilter:
     self.vehicleLeftDistance = 0.0
     self.vehicleRightDistance = 0.0
     self.vehicleSteeringAngle = 0.0
+    # TODO: Put this in the sensor conversion thread
+    if self.vehicleLeftDistance >= Constants.DIST_MAX_DISTANCE:
+      self.vehicleLeftDistance = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
+
+    if self.vehicleRightDistance >= Constants.DIST_MAX_DISTANCE:
+      self.vehicleRightDistance = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
 
   #-------------------------------------------------------------------------------
   def _predict(self, i):
@@ -133,19 +139,53 @@ class ParticleFilter:
     Calculate the distance line of sight and intersection of the given particle
     @param particle - list describing the particle [X, Y, Heading, Weight]
     '''
-    # TODO: Calculate distance line of sight and intersections
     particleDistLeft, particleDistRight = 0.0, 0.0
-    startPoint = [particle[Constants.X], particle[Constants.Y]]
-    # TODO: What is the end point ?
-    endPoint = [0.0, 0.0]
-    leftLine = Line(startPoint, endPoint)
-    rightLine = Line(startPoint, endPoint)
 
-    leftIntersections = [ c.findIntersection(leftLine) for c in self.course.circles ]
-    leftIntersections.extend([ l.findIntersection(leftLine) for l in self.course.lines ])
+    # Left Distance
+    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], Constants.DIST_LEFT_SENSOR_OREINTATION)
+    leftStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
 
-    rightIntersections = [ c.findIntersection(rightLine) for c in self.course.circles ]
-    rightIntersections.extend([ l.findIntersection(rightLine) for l in self.course.lines ])
+    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, Constants.DIST_MIN_DISTANCE, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_OREINTATION )
+    leftEndPoint = [ leftStartPoint[Constants.X] + rX,  leftStartPoint[Constants.Y] + rY ]
+    leftDistLine = Line(leftStartPoint, leftEndPoint)
+
+    # Right Distance
+    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], Constants.DIST_RIGHT_SENSOR_OREINTATION)
+    rightStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
+
+    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, Constants.DIST_MIN_DISTANCE, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_OREINTATION )
+    rightEndPoint = [ rightStartPoint[Constants.X] + rX,  rightStartPoint[Constants.Y] + rY ]
+    rightDistLine = Line(rightStartPoint, rightEndPoint)
+
+    # Get left intersections with map walls
+    leftIntersections = []
+    for c in self.course.circles:
+      i = c.findIntersection(leftDistLine) 
+      if i is not None:
+        leftIntersections += [ c[0], c[1] ]
+
+    leftIntersections += [ l.findIntersection(leftDistLine) for l in self.course.lines ]
+
+    # Get right intersections with map walls
+    rightIntersections = []
+    for c in self.course.circles:
+      i = c.findIntersection(rightDistLine) 
+      if i is not None:
+        rightIntersections += [ c[0], c[1] ]
+
+    rightIntersections += [ l.findIntersection(rightDistLine) for l in self.course.lines ]
+
+    # Calculate distances
+    particleDistLeft = math.sqrt(min([ math.pow(li[Constants.X] - leftStartPoint[Constants.X], 2.0) + math.pow(li[Constants.Y] - leftStartPoint[Constants.Y], 2.0) for li in leftIntersections ]))
+
+    particleDistRight = math.sqrt(min([ math.pow(li[Constants.X] - rightStartPoint[Constants.X], 2.0) + math.pow(li[Constants.Y] - rightStartPoint[Constants.Y], 2.0) for li in rightIntersections ]))
+
+    # Sanity check
+    if particleDistLeft is None or particleDistLeft > Constants.DIST_MAX_DISTANCE:
+      particleDistLeft = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
+
+    if particleDistRight is None or particleDistRight > Constants.DIST_MAX_DISTANCE:
+      particleDistRight = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
 
     return particleDistLeft, particleDistRight
 
