@@ -27,9 +27,13 @@ Constants.VELOCITY_NOISE = 0.1
 
 pf.vehicleVelocity = 1.0
 pf.vehicleSteeringAngle = 0.0
+pf.dt = 1.0
 
 print(pf)
 pf._scatterPlotParticles(filename)
 pf._predict()
 print(pf)
 pf._scatterPlotParticles(updateFName())
+pf._weight()
+pf._scatterPlotParticles(updateFName())
+print(pf)

@@ -93,10 +93,17 @@ class ParticleFilter:
         genSteeringAngle = self._maxSteeringAngle
       if genSteeringAngle < self._minSteeringAngle:
         genSteeringAngle = self._minSteeringAngle
-      turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
+      # TODO: Check solution to division of zero with Brian
+      turnRadius = 0.00001
+      if math.tan(genSteeringAngle) != 0.0:
+        turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
       # Generate a velocity for the particles
       genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
       rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), -turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
+      print("DBG: genSteeringAngle = {0}".format(genSteeringAngle))
+      print("DBG: turnRadius = {0}".format(turnRadius))
+      print("DBG: genVelocity = {0}".format(genVelocity))
+      print("DBG: rotatedX, rotatedY = ({0}, {1})\n".format(rotatedX, rotatedY))
       self.particles[i][Constants.X] += rotatedX
       self.particles[i][Constants.Y] += rotatedY
       self.particles[i][Constants.HEADING] += genVelocity / turnRadius
@@ -108,8 +115,11 @@ class ParticleFilter:
     '''
     for i in range(len(self.particles)):
       particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particles[i])
+      print("DBG: particleDistLeft = {0}".format(particleDistLeft))
+      print("DBG: particleDistRight = {0}".format(particleDistRight))
       # PDF(measurement, mean, std_dev)
       self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
+
       self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
       self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
 
@@ -164,7 +174,7 @@ class ParticleFilter:
     for c in self.course.circles:
       i = c.findIntersection(leftDistLine) 
       if i is not None:
-        leftIntersections += [ c[0], c[1] ]
+        leftIntersections += [ i[0], i[1] ]
 
     leftIntersections += [ l.findIntersection(leftDistLine) for l in self.course.lines ]
 
@@ -173,7 +183,7 @@ class ParticleFilter:
     for c in self.course.circles:
       i = c.findIntersection(rightDistLine) 
       if i is not None:
-        rightIntersections += [ c[0], c[1] ]
+        rightIntersections += [ i[0], i[1] ]
 
     rightIntersections += [ l.findIntersection(rightDistLine) for l in self.course.lines ]
 
