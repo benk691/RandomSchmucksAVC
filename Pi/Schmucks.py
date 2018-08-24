@@ -1,7 +1,7 @@
 #!/usr/bin/python3.5
 import time
 import RPi.GPIO as GPIO
-from Constants import Constants
+import Constants
 from Vehicle import Vehicle
 from DataConsumerThread import DataConsumerThread
 

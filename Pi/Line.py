@@ -1,4 +1,4 @@
-from Constants import Constants
+import Constants
 
 class Line:
   '''

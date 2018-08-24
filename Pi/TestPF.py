@@ -1,4 +1,5 @@
 #!/usr/bin/python3.5
+import Constants
 from Map import Map
 from ParticleFilter import ParticleFilter
 
@@ -20,8 +21,15 @@ startBox = [[0.0, 0.0], [1.0, 1.0]]
 headingRange = [5.0, 10.0]
 pf = ParticleFilter(N, startBox, headingRange, m)
 
+Constants.VEHICLE_AXLE_LEN = 1.0
+Constants.STEERING_ANGLE_NOISE = 100.0
+Constants.VELOCITY_NOISE = 0.1
+
+pf.vehicleVelocity = 1.0
+pf.vehicleSteeringAngle = 0.0
+
 print(pf)
 pf._scatterPlotParticles(filename)
-pf._generateNewParticleList()
+pf._predict()
 print(pf)
 pf._scatterPlotParticles(updateFName())

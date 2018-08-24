@@ -1,6 +1,6 @@
 import time
 import re
-from Constants import Constants
+import Constants
 
 class Vehicle:
   '''

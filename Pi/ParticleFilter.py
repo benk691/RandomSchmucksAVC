@@ -3,9 +3,9 @@ import math
 import time
 import numpy
 import matplotlib.pyplot as matplot
+import Constants
 from scipy.stats import norm
 from Line import Line
-from Constants import Constants
 
 class ParticleFilter:
   #-------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ class ParticleFilter:
       if genSteeringAngle > self._maxSteeringAngle:
         genSteeringAngle = self._maxSteeringAngle
       if genSteeringAngle < self._minSteeringAngle:
-        genSteeringAngle = self,_minSteeringAngle
+        genSteeringAngle = self._minSteeringAngle
       turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
       # Generate a velocity for the particles
       genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt

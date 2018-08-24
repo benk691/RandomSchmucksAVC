@@ -1,5 +1,5 @@
 import math
-from Constants import Constants
+import Constants
 
 class Circle:
   '''

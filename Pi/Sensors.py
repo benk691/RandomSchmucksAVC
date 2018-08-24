@@ -1,4 +1,4 @@
-from Constants import Constants
+import Constants
 from gpiozero import DistanceSensor
 import Adafruit_ADS1x15
 from Adafruit_BNO055 import BNO055
