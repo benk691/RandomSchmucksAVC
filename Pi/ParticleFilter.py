@@ -118,10 +118,18 @@ class ParticleFilter:
       print("DBG: particleDistLeft = {0}".format(particleDistLeft))
       print("DBG: particleDistRight = {0}".format(particleDistRight))
       # PDF(measurement, mean, std_dev)
-      self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
+      headingPDF = norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
+      self.particles[i][Constants.WEIGHT] *= headingPDF
 
-      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
-      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
+      leftDistPDF = norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
+      self.particles[i][Constants.WEIGHT] *= leftDistPDF
+
+      rightDistPDF = norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
+      self.particles[i][Constants.WEIGHT] *= rightDistPDF
+
+      print("DBG: headingPDF = {0}".format(headingPDF))
+      print("DBG: leftDistPDF = {0}".format(leftDistPDF))
+      print("DBG: rightDistPDF = {0}".format(rightDistPDF))
 
   #-------------------------------------------------------------------------------
   def _generateNewParticleList(self):
@@ -151,22 +159,31 @@ class ParticleFilter:
     @return particle closest distance intersection on its left side
     @return particle closest distance intersection on its right side
     '''
+    print("DBG: _calcualteDistanceLineOfSight called")
     particleDistLeft, particleDistRight = 0.0, 0.0
 
     # Left Distance
     rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], Constants.DIST_LEFT_SENSOR_OREINTATION)
+    print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
+    print("DBG: leftStartPoint(X, Y) = {0}".format(leftStartPoint))
 
     rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, Constants.DIST_MIN_DISTANCE, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_OREINTATION )
+    print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftEndPoint = [ leftStartPoint[Constants.X] + rX,  leftStartPoint[Constants.Y] + rY ]
+    print("DBG: leftEndPoint(X, Y) = {0}".format(leftEndPoint))
     leftDistLine = Line(leftStartPoint, leftEndPoint)
 
     # Right Distance
     rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], Constants.DIST_RIGHT_SENSOR_OREINTATION)
+    print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
+    print("DBG: rightStartPoint(X, Y) = {0}".format(rightStartPoint))
 
     rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, Constants.DIST_MIN_DISTANCE, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_OREINTATION )
+    print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightEndPoint = [ rightStartPoint[Constants.X] + rX,  rightStartPoint[Constants.Y] + rY ]
+    print("DBG: rightEndPoint(X, Y) = {0}".format(rightEndPoint))
     rightDistLine = Line(rightStartPoint, rightEndPoint)
 
     # Get left intersections with map walls
@@ -178,6 +195,8 @@ class ParticleFilter:
 
     leftIntersections += [ l.findIntersection(leftDistLine) for l in self.course.lines ]
 
+    print("DBG: leftIntersections = {0}".format(leftIntersections))
+
     # Get right intersections with map walls
     rightIntersections = []
     for c in self.course.circles:
@@ -186,6 +205,7 @@ class ParticleFilter:
         rightIntersections += [ i[0], i[1] ]
 
     rightIntersections += [ l.findIntersection(rightDistLine) for l in self.course.lines ]
+    print("DBG: rightIntersections = {0}".format(rightIntersections))
 
     # Calculate distances
     try:

@@ -16,24 +16,25 @@ def updateFName():
 
 #-------------------------------------------------------------------------------
 m = Map()
-N = 10
+N = 30
 startBox = [[0.0, 0.0], [1.0, 1.0]]
 headingRange = [5.0, 10.0]
 pf = ParticleFilter(N, startBox, headingRange, m)
 
 Constants.VEHICLE_AXLE_LEN = 1.0
-Constants.STEERING_ANGLE_NOISE = 100.0
+Constants.STEERING_ANGLE_NOISE = 5
 Constants.VELOCITY_NOISE = 0.1
 
 pf.vehicleVelocity = 1.0
 pf.vehicleSteeringAngle = 0.0
 pf.dt = 1.0
 
+pf.particles = [ [0.0, 0.0, 0.0, 1.0] for p in range(N) ]
 print(pf)
 pf._scatterPlotParticles(filename)
 pf._predict()
 print(pf)
 pf._scatterPlotParticles(updateFName())
-pf._weight()
-pf._scatterPlotParticles(updateFName())
-print(pf)
+#pf._weight()
+#pf._scatterPlotParticles(updateFName())
+#print(pf)
