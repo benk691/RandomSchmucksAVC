@@ -2,6 +2,7 @@ import random
 import math
 import time
 import numpy
+import matplotlib.pyplot as matplot
 from scipy.stats import norm
 from Line import Line
 from Constants import Constants
@@ -207,6 +208,33 @@ class ParticleFilter:
     x = x * math.cos(theta) - y * math.sin(theta)
     y = x * math.sin(theta) + y * math.cos(theta)
     return x, y
+
+
+  #-------------------------------------------------------------------------------
+  def _createPlot(self):
+    '''
+    Create the plot to put the particles on
+    '''
+    matplot.plot(1, 2 ,3)
+    
+  #-------------------------------------------------------------------------------
+  def _scatterPlotParticles(self):
+    '''
+    Create a scatter plot of the particle positions, headings and weight
+    '''
+    x = [ p[Constants.X] for p in self.particles ]
+    y = [ p[Constants.Y] for p in self.particles ]
+    h = [ p[Constants.HEADING] for p in self.particles ]
+    w = [ p[Constants.WEIGHT] for p in self.particles ]
+    matplot.scatter(x, y, c=w)
+
+  #-------------------------------------------------------------------------------
+  def _saveFigure(self, filename):
+    '''
+    Saves the figure to the given filename
+    @param filename - the SVG filename to write the scatterplot to
+    '''
+    matplot.savefig(filename)
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
