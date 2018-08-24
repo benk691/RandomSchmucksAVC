@@ -46,9 +46,8 @@ class ParticleFilter:
     self._getVehicleMeasurements()
     self.dt = self.currentTime - self.prevTime
     # Perform particle calculations
-    for i in range(len(self.particles)):
-      self._predict(i)
-      self._weight(i)
+    self._predict()
+    self._weight()
     self._generateNewParticleList()
     # Calculate estimates
     self.estVehicleX = sum([ p[Constants.X] for p in self.particles]) / float(len(self.particles))
@@ -81,37 +80,37 @@ class ParticleFilter:
       self.vehicleRightDistance = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
 
   #-------------------------------------------------------------------------------
-  def _predict(self, i):
+  def _predict(self):
     '''
     Perform the prediction step. This will predict where the particle is going to go 
     based on the most recent values read in from the vehicle
-    @param i - the index in the particle list to predict
     '''
-    # Generate a steering angle for the particles
-    genSteeringAngle = random.gauss(mu=self.vehicleSteeringAngle, sigma=Constants.STEERING_ANGLE_NOISE)
-    if genSteeringAngle > self._maxSteeringAngle:
-      genSteeringAngle = self._maxSteeringAngle
-    if genSteeringAngle < self._minSteeringAngle:
-      genSteeringAngle = self,_minSteeringAngle
-    turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
-    # Generate a velocity for the particles
-    genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
-    rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), -turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
-    self.particles[i][Constants.X] += rotatedX
-    self.particles[i][Constants.Y] += rotatedY
-    self.particles[i][Constants.HEADING] += genVelocity / turnRadius
+    for i in range(len(self.particles)):
+      # Generate a steering angle for the particles
+      genSteeringAngle = random.gauss(mu=self.vehicleSteeringAngle, sigma=Constants.STEERING_ANGLE_NOISE)
+      if genSteeringAngle > self._maxSteeringAngle:
+        genSteeringAngle = self._maxSteeringAngle
+      if genSteeringAngle < self._minSteeringAngle:
+        genSteeringAngle = self,_minSteeringAngle
+      turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
+      # Generate a velocity for the particles
+      genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
+      rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), -turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
+      self.particles[i][Constants.X] += rotatedX
+      self.particles[i][Constants.Y] += rotatedY
+      self.particles[i][Constants.HEADING] += genVelocity / turnRadius
 
   #-------------------------------------------------------------------------------
-  def _weight(self, i):
+  def _weight(self):
     '''
     Calculates the weights for the given particle
-    @param i - the index in the particle list to predict
     '''
-    particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particles[i])
-    # PDF(measurement, mean, std_dev)
-    self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
-    self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
-    self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
+    for i in range(len(self.particles)):
+      particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particles[i])
+      # PDF(measurement, mean, std_dev)
+      self.particles[i][Constants.WEIGHT] *= norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
+      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
+      self.particles[i][Constants.WEIGHT] *= norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
 
   #-------------------------------------------------------------------------------
   def _generateNewParticleList(self):
