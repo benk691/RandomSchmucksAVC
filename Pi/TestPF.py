@@ -20,10 +20,8 @@ startBox = [[0.0, 0.0], [1.0, 1.0]]
 headingRange = [5.0, 10.0]
 pf = ParticleFilter(N, startBox, headingRange, m)
 
-pf._createPlot()
-pf._scatterPlotParticles()
+print(pf)
+pf._scatterPlotParticles(filename)
 pf._generateNewParticleList()
-pf._scatterPlotParticles()
-pf._generateNewParticleList()
-pf._scatterPlotParticles()
-pf._saveFigure(filename)
+print(pf)
+pf._scatterPlotParticles(updateFName())
