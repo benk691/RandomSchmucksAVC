@@ -94,7 +94,7 @@ class ParticleFilter:
       if genSteeringAngle < self._minSteeringAngle:
         genSteeringAngle = self._minSteeringAngle
       # TODO: Check solution to division of zero with Brian
-      turnRadius = 0.00001
+      turnRadius = 10000000.0
       if math.tan(genSteeringAngle) != 0.0:
         turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
       # Generate a velocity for the particles

@@ -1,3 +1,5 @@
+import math
+
 '''
 Defines constants for the Rasberry Pi
 '''
@@ -104,10 +106,10 @@ DISTANCE_NOISE = 0.0
 PARTICLE_FILTER_UPDATE_RATE = 10
 
 # Left Most Steering Angle
-MAX_LEFT_STEERING_ANGLE = 180
+MAX_LEFT_STEERING_ANGLE = math.pi / 4.0
 
 # Right Most Steering Angle
-MAX_RIGHT_STEERING_ANGLE = 0
+MAX_RIGHT_STEERING_ANGLE = -math.pi / 4.0
 
 # The position of the left distance sensor on the vehicle (relative to the vehicle)
 DIST_LEFT_SENSOR_POSITION = [0.0, 0.0]
