@@ -64,6 +64,7 @@ class Line:
   def setTabs(self, tabs):
     '''
     Sets the number of tabs used for print out
+    @param tabs - number of tabs to use in print out
     '''
     self.tabs = tabs
 
