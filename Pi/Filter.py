@@ -16,6 +16,7 @@ class Filter:
     self.A = A
     self.prevY = "DEAD"
     self.measurement = 0.0
+    self.tabs = 0
 
   #-------------------------------------------------------------------------------
   def filter(self, measurement):
@@ -32,16 +33,24 @@ class Filter:
     return self.Y
 
   #-------------------------------------------------------------------------------
+  def setTabs(self, tabs):
+    '''
+    Sets the number of tabs used for print out
+    @param tabs - number of tabs to use in print out
+    '''
+    self.tabs = tabs
+
+  #-------------------------------------------------------------------------------
   def _debugDescription(self):
     '''
     Generates debugging information about the filter
     @return string describing debug information
     '''
-    desc = "Filter:\n"
-    desc += "\tA = {0}\n".format(self.A)
-    desc += "\tprevY = {0}\n".format(self.prevY)
-    desc += "\tY = {0}\n".format(self.Y)
-    desc += "\tmeasurement = {0}\n".format(self.measurement)
+    desc = "{0}Filter:\n".format('\t' * self.tabs)
+    desc += "{0}\tA = {0}\n".format('\t' * self.tabs, self.A)
+    desc += "{0}\tprevY = {0}\n".format('\t' * self.tabs, self.prevY)
+    desc += "{0}\tY = {0}\n".format('\t' * self.tabs, self.Y)
+    desc += "{0}\tmeasurement = {0}\n".format('\t' * self.tabs, self.measurement)
     return desc
 
   #-------------------------------------------------------------------------------
