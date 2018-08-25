@@ -8,7 +8,7 @@ class CourseMap(Map):
   '''
   # TODO: Draw ASCII Map Here
 
-  # TODO: Measurements in feet. Convert to meters. Degrees, need radians
+  # TODO: Degrees, need radians
 
   #--------------------------------------------------------
   #                    CIRCLES
@@ -20,26 +20,26 @@ class CourseMap(Map):
   # OQ3C : Outer Quadrant 3 Circle
 
   # IQ1C Constants
-  IQ1C_CENTER = [ 31.0, 31.0 ] 
-  IQ1C_RADIUS = 23.0
+  IQ1C_CENTER = [ 31.0 / 0.254, 31.0 / 0.254 ] 
+  IQ1C_RADIUS = 23.0 / 0.254
   IQ1C_START_ANGLE = -90.0
   IQ1C_STOP_ANGLE = 180.0
 
   # OQ1C Constants
-  OQ1C_CENTER = [ 31.0, 31.0 ]
-  OQ1C_RADIUS = 39.0
+  OQ1C_CENTER = [ 31.0 / 0.254, 31.0 / 0.254 ]
+  OQ1C_RADIUS = 39.0 / 0.254
   OQ1C_START_ANGLE = -90.0
   OQ1C_STOP_ANGLE = 180.0
 
   # IQ3C Constants
-  IQ3C_CENTER = [ -31.0, -31.0 ]
-  IQ3C_RADIUS = 23.0
+  IQ3C_CENTER = [ -31.0 / 0.254, -31.0 / 0.254 ]
+  IQ3C_RADIUS = 23.0 / 0.254
   IQ3C_START_ANGLE = 90.0
   IQ3C_STOP_ANGLE = 360.0
 
   # OQ3C Constants
-  OQ3C_CENTER = [ -31.0, -31.0 ]
-  OQ3C_RADIUS = 39.0
+  OQ3C_CENTER = [ -31.0 / 0.254, -31.0 / 0.254 ]
+  OQ3C_RADIUS = 39.0 / 0.254
   OQ3C_START_ANGLE = 90.0
   OQ3C_STOP_ANGLE = 360.0
 
@@ -57,36 +57,36 @@ class CourseMap(Map):
   # OQ4YL : Outer Quadrant 4 Y Parallel Line
 
   # IQ1XL Constants
-  IQ1XL_START_POINT = [ 8.0, 8.0 ]
-  IQ1XL_END_POINT = [ 31.0, 8.0 ]
+  IQ1XL_START_POINT = [ 8.0 / 0.254, 8.0 / 0.254 ]
+  IQ1XL_END_POINT = [ 31.0 / 0.254, 8.0 / 0.254 ]
 
   # IQ1YL Constants
-  IQ1YL_START_POINT = [ 8.0, 8.0 ]
-  IQ1YL_END_POINT = [ 8.0, 31.0 ]
+  IQ1YL_START_POINT = [ 8.0 / 0.254, 8.0 / 0.254 ]
+  IQ1YL_END_POINT = [ 8.0 / 0.254, 31.0 / 0.254 ]
 
   # OQ2XL Constants
-  OQ2XL_START_POINT = [ -8.0, 8.0 ]
-  OQ2XL_END_POINT = [ -31.0, 8.0 ]
+  OQ2XL_START_POINT = [ -8.0 / 0.254, 8.0 / 0.254 ]
+  OQ2XL_END_POINT = [ -31.0 / 0.254, 8.0 / 0.254 ]
 
   # OQ2YL Constants
-  OQ2YL_START_POINT = [ -8.0, 8.0 ]
-  OQ2YL_END_POINT = [ -8.0, 31.0 ]
+  OQ2YL_START_POINT = [ -8.0 / 0.254, 8.0 / 0.254 ]
+  OQ2YL_END_POINT = [ -8.0 / 0.254, 31.0 / 0.254 ]
 
   # IQ3XL Constants
-  IQ3XL_START_POINT = [ -8.0, -8.0 ]
-  IQ3XL_END_POINT = [ -31.0, -8.0 ]
+  IQ3XL_START_POINT = [ -8.0 / 0.254, -8.0 / 0.254 ]
+  IQ3XL_END_POINT = [ -31.0 / 0.254, -8.0 / 0.254 ]
 
   # IQ3YL Constants
-  IQ3YL_START_POINT = [ -8.0, -8.0 ]
-  IQ3YL_END_POINT = [ -8.0, -31.0 ]
+  IQ3YL_START_POINT = [ -8.0 / 0.254, -8.0 / 0.254 ]
+  IQ3YL_END_POINT = [ -8.0 / 0.254, -31.0 / 0.254 ]
 
   # OQ4XL Constants
-  OQ4XL_START_POINT = [ 8.0, -8.0 ]
-  OQ4XL_END_POINT = [ 31.0, -8.0 ]
+  OQ4XL_START_POINT = [ 8.0 / 0.254, -8.0 / 0.254 ]
+  OQ4XL_END_POINT = [ 31.0 / 0.254, -8.0 / 0.254 ]
 
   # OQ4YL Constants
-  OQ4YL_START_POINT = [ 8.0, -8.0 ]
-  OQ4YL_END_POINT = [ 8.0, -31.0 ]
+  OQ4YL_START_POINT = [ 8.0 / 0.254, -8.0 / 0.254 ]
+  OQ4YL_END_POINT = [ 8.0 / 0.254, -31.0 / 0.254 ]
 
   #-------------------------------------------------------------------------------
   def __init__(self):

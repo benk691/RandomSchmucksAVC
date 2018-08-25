@@ -4,6 +4,7 @@ import time
 import numpy
 import matplotlib.pyplot as matplot
 import Constants
+from matplotlib.colors import Normalize
 from scipy.stats import norm
 from Line import Line
 
@@ -35,7 +36,7 @@ class ParticleFilter:
     self._maxSteeringAngle = max(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     self._minSteeringAngle = min(Constants.MAX_LEFT_STEERING_ANGLE, Constants.MAX_RIGHT_STEERING_ANGLE)
     # Particle index: [x, y, heading, weight]
-    self.particles = [ [random.uniform(startBox[0][Constants.X], startBox[1][Constants.X]), random.uniform(startBox[0][Constants.Y], startBox[1][Constants.Y]), random.uniform(headingRange[0], headingRange[1]), 1.0] for i in range(particleNumber) ]
+    self.particles = [ [random.uniform(startBox[0][Constants.X], startBox[1][Constants.X]), random.uniform(startBox[0][Constants.Y], startBox[1][Constants.Y]), random.uniform(headingRange[0], headingRange[1]), 1.0, 0.0, 0.0] for i in range(particleNumber) ]
 
   #-------------------------------------------------------------------------------
   def getEstiamtedVehicleLocation(self):
@@ -123,25 +124,32 @@ class ParticleFilter:
       print("DBG: self.vehicleHeading = {0}".format(self.vehicleHeading))
       print("DBG: Constants.HEADING_NOISE = {0}".format(Constants.HEADING_NOISE))
       headingPDF = norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
-      self.particles[i][Constants.WEIGHT] *= headingPDF
-
+      # Adding a fraction times the peak probability
+      # Chances that the measurment is bad
+      self.particles[i][Constants.WEIGHT] *= headingPDF + 0.03 * 7.62
 
       print("DBG: particleDistLeft = {0}".format(particleDistLeft))
       print("DBG: self.vehicleLeftDistance = {0}".format(self.vehicleLeftDistance))
       print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
       leftDistPDF = norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
-      self.particles[i][Constants.WEIGHT] *= leftDistPDF
-
+      # Adding a fraction times the peak probability
+      # Chances that the measurment is bad
+      self.particles[i][Constants.WEIGHT] *= leftDistPDF + 0.003 * 1.33
 
       print("DBG: particleDistRight = {0}".format(particleDistRight))
       print("DBG: self.vehicleRightDistance = {0}".format(self.vehicleRightDistance))
       print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
       rightDistPDF = norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
-      self.particles[i][Constants.WEIGHT] *= rightDistPDF
+      # Adding a fraction times the peak probability
+      # Chances that the measurment is bad
+      self.particles[i][Constants.WEIGHT] *= rightDistPDF + 0.003 * 1.33
 
       print("DBG: headingPDF = {0}".format(headingPDF))
       print("DBG: leftDistPDF = {0}".format(leftDistPDF))
       print("DBG: rightDistPDF = {0}\n".format(rightDistPDF))
+
+      self.particles[i][4] = particleDistLeft
+      self.particles[i][5] = particleDistRight
 
   #-------------------------------------------------------------------------------
   def _generateNewParticleList(self):
@@ -161,7 +169,7 @@ class ParticleFilter:
       genParticles.append(particleIndex)
 
     # Generate particles
-    self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0 ] for genP in genParticles ]
+    self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0, 0.0, 0.0 ] for genP in genParticles ]
 
   #-------------------------------------------------------------------------------
   def _calcualteDistanceLineOfSight(self, particle):
@@ -231,10 +239,10 @@ class ParticleFilter:
       particleDistRight = None
 
     # Sanity check
-    if particleDistLeft is None or particleDistLeft > Constants.DIST_MAX_DISTANCE:
+    if particleDistLeft is None or particleDistLeft >= Constants.DIST_MAX_DISTANCE:
       particleDistLeft = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
 
-    if particleDistRight is None or particleDistRight > Constants.DIST_MAX_DISTANCE:
+    if particleDistRight is None or particleDistRight >= Constants.DIST_MAX_DISTANCE:
       particleDistRight = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
 
     return particleDistLeft, particleDistRight
@@ -258,13 +266,24 @@ class ParticleFilter:
     Create a scatter plot of the particle positions, headings and weight
     @param filename - the SVG filename to write the scatterplot to
     '''
+    matplot.xlim(-0.5,25.5)
+    matplot.ylim(-25.0,-15.0)
     x = [ p[Constants.X] for p in self.particles ]
     y = [ p[Constants.Y] for p in self.particles ]
     h = [ p[Constants.HEADING] for p in self.particles ]
     totalWeight = sum([ p[Constants.WEIGHT] for p in self.particles ])
     w = [ p[Constants.WEIGHT] / totalWeight for p in self.particles ]
+
     matplot.scatter(x, y, c=w)
     matplot.savefig(filename)
+    #maxWeight = max([ p[Constants.WEIGHT] for p in self.particles ])
+    #w = [ p[Constants.WEIGHT] / maxWeight for p in self.particles ]
+    #
+    ## RGBA
+    #colors = [ [ g, 0, 1-g, 0.2] for g in w ]
+    #matplot.scatter(x, y, c=colors)
+    #matplot.savefig(filename)
+    matplot.clf()
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -284,8 +303,8 @@ class ParticleFilter:
     desc += "\tvehicleSteeringAngle = {0}\n".format(self.vehicleSteeringAngle)
     desc += "\tcumulativeSum = {0}\n".format(self.cumulativeSum)
     desc += "\tparticles:\n"
-    for p in sorted(self.particles, key=lambda x: x[Constants.WEIGHT]):
-      desc += "\t\t[X = {0:.4f}, Y = {1:.4f}, H = {2:.4f}, W = {3:.4f}]\n".format(p[0], p[1], math.degrees(p[2]), p[3])
+    for p in sorted(self.particles, key=lambda x: x[Constants.WEIGHT], reverse=True):
+      desc += "\t\t[X = {0:.4f}, Y = {1:.4f}, H = {2:.4f}, W = {3:.4f}, LD = {4:.4f}, RD = {5:.4f}]\n".format(p[0], p[1], math.degrees(p[2]), p[3], p[4], p[5])
     desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
     desc += "\testVehicleY = {0}\n".format(self.estVehicleY)
     desc += "\testVehicleHeading = {0}\n".format(self.estVehicleHeading)

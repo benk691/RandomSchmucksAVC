@@ -20,8 +20,11 @@ class TestMap(Map):
   #--------------------------------------------------------
  
   # Test Constants
-  T_START_POINT = [ -5.0, -18.5 ]
-  T_END_POINT = [ 5.0, -18.5 ]
+  T1_START_POINT = [ -5.0, -17.0 ]
+  T1_END_POINT = [ 50.0, -17.0 ]
+
+  T2_START_POINT = [ -5.0, -23.0 ]
+  T2_END_POINT = [ 50.0, -23.0 ]
 
   #-------------------------------------------------------------------------------
   def __init__(self):
@@ -32,8 +35,9 @@ class TestMap(Map):
     # Course Circles
     self.circles = []
     # Course Lines
-    self.tl = Line(TestMap.T_START_POINT, TestMap.T_END_POINT)
-    self.lines = [self.tl]
+    self.t1 = Line(TestMap.T1_START_POINT, TestMap.T1_END_POINT)
+    self.t2 = Line(TestMap.T2_START_POINT, TestMap.T2_END_POINT)
+    self.lines = [self.t1, self.t2]
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -48,7 +52,8 @@ class TestMap(Map):
     for l in self.lines:
       l.setTabs(tabs)
     desc = "Map:\n"
-    desc += "\tTL: {0}\n".format(self.tl)
+    desc += "\tT1: {0}\n".format(self.t1)
+    desc += "\tT2: {0}\n".format(self.t2)
     return desc
 
   #-------------------------------------------------------------------------------
