@@ -99,7 +99,7 @@ class ParticleFilter:
         turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
       # Generate a velocity for the particles
       genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
-      rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), -turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
+      rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
       print("DBG: genSteeringAngle = {0}".format(genSteeringAngle))
       print("DBG: turnRadius = {0}".format(turnRadius))
       print("DBG: genVelocity = {0}".format(genVelocity))
@@ -114,22 +114,34 @@ class ParticleFilter:
     Calculates the weights for the given particle
     '''
     for i in range(len(self.particles)):
+      print("DBG: vehicleHeading = {0}".format(self.vehicleHeading))
       particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particles[i])
       print("DBG: particleDistLeft = {0}".format(particleDistLeft))
       print("DBG: particleDistRight = {0}".format(particleDistRight))
       # PDF(measurement, mean, std_dev)
+      print("DBG: self.particles[{0}][Constants.HEADING] = {1}".format(i, self.particles[i][Constants.HEADING]))
+      print("DBG: self.vehicleHeading = {0}".format(self.vehicleHeading))
+      print("DBG: Constants.HEADING_NOISE = {0}".format(Constants.HEADING_NOISE))
       headingPDF = norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
       self.particles[i][Constants.WEIGHT] *= headingPDF
 
+
+      print("DBG: particleDistLeft = {0}".format(particleDistLeft))
+      print("DBG: self.vehicleLeftDistance = {0}".format(self.vehicleLeftDistance))
+      print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
       leftDistPDF = norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
       self.particles[i][Constants.WEIGHT] *= leftDistPDF
 
+
+      print("DBG: particleDistRight = {0}".format(particleDistRight))
+      print("DBG: self.vehicleRightDistance = {0}".format(self.vehicleRightDistance))
+      print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
       rightDistPDF = norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
       self.particles[i][Constants.WEIGHT] *= rightDistPDF
 
       print("DBG: headingPDF = {0}".format(headingPDF))
       print("DBG: leftDistPDF = {0}".format(leftDistPDF))
-      print("DBG: rightDistPDF = {0}".format(rightDistPDF))
+      print("DBG: rightDistPDF = {0}\n".format(rightDistPDF))
 
   #-------------------------------------------------------------------------------
   def _generateNewParticleList(self):
@@ -245,11 +257,11 @@ class ParticleFilter:
     Create a scatter plot of the particle positions, headings and weight
     @param filename - the SVG filename to write the scatterplot to
     '''
-    matplot.plot(1, 2 ,3)
     x = [ p[Constants.X] for p in self.particles ]
     y = [ p[Constants.Y] for p in self.particles ]
     h = [ p[Constants.HEADING] for p in self.particles ]
-    w = [ p[Constants.WEIGHT] for p in self.particles ]
+    totalWeight = sum([ p[Constants.WEIGHT] for p in self.particles ])
+    w = [ p[Constants.WEIGHT] / totalWeight for p in self.particles ]
     matplot.scatter(x, y, c=w)
     matplot.savefig(filename)
 
@@ -272,7 +284,7 @@ class ParticleFilter:
     desc += "\tcumulativeSum = {0}\n".format(self.cumulativeSum)
     desc += "\tparticles:\n"
     for p in self.particles:
-      desc += "\t\t[X = {0}, Y = {1}, H = {2}, W = {3}]\n".format(p[0], p[1], p[2], p[3])
+      desc += "\t\t[X = {0:.4f}, Y = {1:.4f}, H = {2:.4f}, W = {3:.4f}]\n".format(p[0], p[1], math.degrees(p[2]), p[3])
     desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
     desc += "\testVehicleY = {0}\n".format(self.estVehicleY)
     desc += "\testVehicleHeading = {0}\n".format(self.estVehicleHeading)
