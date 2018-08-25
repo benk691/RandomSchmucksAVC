@@ -63,12 +63,12 @@ class SensorConversion(Thread):
     self._distStartTime = time.time()
     self._startTime = time.time()
     while not self.shutDown:
-      self.getSensorValues()
+      self._getSensorValues()
 
       # TODO: Modularize this
       if (self._loopCount % 1 == 0):
-        self._prevRightTachValue = self.rightTachValue;
-        self._prevLeftTachValue = self.leftTachValue;
+        self._prevRightTachValue = self._rightTachValue;
+        self._prevLeftTachValue = self._leftTachValue;
 
       self.distTraveled += (self.velocity / (time.time() - self._distStartTime))
 
@@ -105,15 +105,26 @@ class SensorConversion(Thread):
         self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
         self.velocity = self.velocityFilter.filter(self.velocity)
 
+        # Reset counts
+        self._loopCount = 0
+        self._rightStripCount = 0.0
+        self._leftStripCount = 0.0
 
   #-------------------------------------------------------------------------------
-  def getSensorValues(self):
+  def shutdown(self):
+    '''
+    Shutdown the thread
+    '''
+    self.shutDown = True
+
+  #-------------------------------------------------------------------------------
+  def _getSensorValues(self):
     '''
     Get the raw sensor values
     '''
     self.steeringPotValue = self.dataConsumerThread.sensors.steeringPotValue
-    self.leftTachValue =  self.dataConsumerThread.sensors.leftTachValue
-    self.rightTachValue = self.dataConsumerThread.sensors.rightTachValue
+    self._leftTachValue =  self.dataConsumerThread.sensors.leftTachValue
+    self._rightTachValue = self.dataConsumerThread.sensors.rightTachValue
     self.leftDistance = self.dataConsumerThread.sensors.leftDistance
     self.rightDistance = self.dataConsumerThread.sensors.rightDistance
     self.heading = self.dataConsumerThread.sensors.heading
@@ -125,11 +136,59 @@ class SensorConversion(Thread):
     self.magCal = self.dataConsumerThread.sensors.magCal
 
   #-------------------------------------------------------------------------------
-  def shutdown(self):
+  def _debugDescription(self):
     '''
-    Shutdown the thread
+    Generates debugging information about the sensor conversion
+    @return string describing debug information
     '''
-    self.shutDown = True
+    desc = "Sensor Conversion:\n"
+    desc += "\tshutDown = {0}\n".format(self.shutDown)
+    desc += "\tsteeringPotValue = {0}\n".format(self.steeringPotValue)
+    desc += "\tvelocity = {0}\n".format(self.velocity)
+    desc += "\tsteeringAngle = {0}\n".format(self.steeringAngle)
+    desc += "\tleftDistance = {0}\n".format(self.leftDistance)
+    desc += "\trightDistance = {0}\n".format(self.rightDistance)
+    desc += "\theading = {0}\n".format(self.heading)
+    desc += "\troll = {0}\n".format(self.roll)
+    desc += "\tpitch = {0}\n".format(self.pitch)
+    desc += "\tsysCal = {0}\n".format(self.sysCal)
+    desc += "\tgyroCal = {0}\n".format(self.gyroCal)
+    desc += "\taccelCal = {0}\n".format(self.accelCal)
+    desc += "\tmagCal = {0}\n".format(self.magCal)
+    desc += "\tdistTraveled = {0}\n".format(self.distTraveled)
+    desc += "\tvelocityFilter = {0}\n".format(self.velocityFilter)
+    desc += "\tsteeringFilter = {0}\n".format(self.steeringFilter)
+    desc += "\t_loopCount = {0}\n".format(self._loopCount)
+    desc += "\t_prevRightTachValue = {0}\n".format(self._prevRightTachValue)
+    desc += "\t_prevLeftTachValue = {0}\n".format(self._prevLeftTachValue)
+    desc += "\t_leftTachValue = {0}\n".format(self._leftTachValue)
+    desc += "\t_rightTachValue = {0}\n".format(self._rightTachValue)
+    desc += "\t_distStartTime = {0}\n".format(self._distStartTime)
+    desc += "\t_rightHigh = {0}\n".format(self._rightHigh)
+    desc += "\t_leftHigh = {0}\n".format(self._leftHigh)
+    desc += "\t_rightStripCount = {0}\n".format(self._rightStripCount)
+    desc += "\t_leftStripCount = {0}\n".format(self._leftStripCount)
+    desc += "\t_elapsedTime = {0}\n".format(self._elapsedTime)
+    desc += "\t_startTime = {0}\n".format(self._startTime)
+    desc += "\t_rightVelocity = {0}\n".format(self._rightVelocity)
+    desc += "\t_leftVelocity = {0}\n".format(self._leftVelocity)
+    return desc
+
+  #-------------------------------------------------------------------------------
+  def __repr__(self):
+    '''
+    Gets the string representation of the class
+    @return string representation of the class
+    '''
+    return self._debugDescription()
+  
+  #-------------------------------------------------------------------------------
+  def __str__(self):
+    '''
+    Gets the string representation of the class
+    @return string representation of the class
+    '''
+    return self._debugDescription()
 
   #-------------------------------------------------------------------------------
   def __del__(self):
