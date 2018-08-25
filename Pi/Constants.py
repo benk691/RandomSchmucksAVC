@@ -66,6 +66,12 @@ STEERING_FILTER_A = 0.9
 # The max loop count in the SensorConversion class
 MAX_LOOP_COUNT = 15.0
 
+# Number of milliseconds in a second
+MILLI_SEC_IN_SEC = 1000.0
+
+# Number of tape strips on each wheel
+TACH_TOTAL_STRIPS = 30.0
+
 # Right Tachometer high value
 TACH_RIGHT_THRESHOLD_HIGH = 10000
 

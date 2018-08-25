@@ -1,6 +1,7 @@
-import Constants
 import math
 import time
+from Constants import Constants
+from GeneralFunctions import GeneralFunctions
 from Filter import Filter
 from threading import Thread
 
@@ -40,19 +41,19 @@ class SensorConversion(Thread):
     self.velocityFilter = Filter(Constants.VELOCITY_FILTER_A)
     self.steeringFilter = Filter(Constants.STEERING_FILTER_A)
     self._loopCount = 0
-    self._prevRightTachValue = 0
-    self._prevLeftTachValue = 0
+    self._prevRightTachValue = -0.0
+    self._prevLeftTachValue = -0.0
     self._leftTachValue = -0.0
     self._rightTachValue = -0.0
     self._distStartTime = 0
     self._rightHigh = 0
     self._leftHigh = 0
-    self._rightStripCount = 0.0
-    self._leftStripCount = 0.0
+    self._rightStripCount = -0.0
+    self._leftStripCount = -0.0
     self._elapsedTime = 0
     self._startTime = 0
-    self._rightVelocity = 0.0
-    self._leftVelocity = 0.0
+    self._rightVelocity = -0.0
+    self._leftVelocity = -0.0
 
   #-------------------------------------------------------------------------------
   def run(self):
@@ -95,10 +96,11 @@ class SensorConversion(Thread):
       self._loopCount += 1
 
       if self._loopCount >= Constants.MAX_LOOP_COUNT:
-        self._elapsedTime = (time.time() * 1000) - self._startTime
-        self._startTime = (time.time() * 1000)
-        self._rightVelocity = ((self._rightStripCount / 30.0) * 0.36 * math.pi) / (self._elapsedTime / 1000.0)
-        self._leftVelocity = ((self._leftStripCount / 30.0) * 0.36 * math.pi) / (self._elapsedTime / 1000.0)
+        self._elapsedTime = convertSecToMilliSec(time.time()) - self._startTime
+        self._startTime = convertSecToMilliSec(time.time())
+        # TODO: What is 0.36?
+        self._rightVelocity = ((self._rightStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
+        self._leftVelocity = ((self._leftStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
 
         self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
         self.velocity = self.velocityFilter.filter(self.velocity)
