@@ -27,6 +27,7 @@ class SensorConversion(Thread):
     self.shutDown = False
     self.steeringPotValue = -0.0
     self.velocity = -0.0
+    # NOTE: Angle is in radians
     self.steeringAngle = -0.0
     self.leftDistance = -0.0
     self.rightDistance = -0.0
@@ -141,11 +142,13 @@ class SensorConversion(Thread):
     Generates debugging information about the sensor conversion
     @return string describing debug information
     '''
+    self.velocityFilter.setTabs(1)
+    self.steeringFilter.setTabs(1)
     desc = "Sensor Conversion:\n"
     desc += "\tshutDown = {0}\n".format(self.shutDown)
     desc += "\tsteeringPotValue = {0}\n".format(self.steeringPotValue)
     desc += "\tvelocity = {0}\n".format(self.velocity)
-    desc += "\tsteeringAngle = {0}\n".format(self.steeringAngle)
+    desc += "\tsteeringAngle = {0}\n".format(math.degrees(self.steeringAngle))
     desc += "\tleftDistance = {0}\n".format(self.leftDistance)
     desc += "\trightDistance = {0}\n".format(self.rightDistance)
     desc += "\theading = {0}\n".format(self.heading)

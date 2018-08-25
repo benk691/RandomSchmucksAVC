@@ -15,6 +15,7 @@ class IIRFilter:
     self.A = A
     self.prevY = "DEAD"
     self.measurement = 0.0
+    self.tabs = 0
 
   #-------------------------------------------------------------------------------
   def filter(self, measurement):
@@ -29,6 +30,14 @@ class IIRFilter:
     self.Y = (1 - self.A) * self.measurement + self.A * self.prevY
     self.prevY = self.Y
     return self.Y
+
+  #-------------------------------------------------------------------------------
+  def setTabs(self, tabs):
+    '''
+    Sets the number of tabs used for print out
+    @param tabs - number of tabs to use in print out
+    '''
+    self.tabs = tabs
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
