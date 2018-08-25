@@ -175,24 +175,24 @@ class ParticleFilter:
     particleDistLeft, particleDistRight = 0.0, 0.0
 
     # Left Distance
-    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], Constants.DIST_LEFT_SENSOR_OREINTATION)
+    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
     print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
     print("DBG: leftStartPoint(X, Y) = {0}".format(leftStartPoint))
 
-    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, Constants.DIST_MIN_DISTANCE, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_OREINTATION )
+    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_OREINTATION )
     print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftEndPoint = [ leftStartPoint[Constants.X] + rX,  leftStartPoint[Constants.Y] + rY ]
     print("DBG: leftEndPoint(X, Y) = {0}".format(leftEndPoint))
     leftDistLine = Line(leftStartPoint, leftEndPoint)
 
     # Right Distance
-    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], Constants.DIST_RIGHT_SENSOR_OREINTATION)
+    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
     print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
     print("DBG: rightStartPoint(X, Y) = {0}".format(rightStartPoint))
 
-    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, Constants.DIST_MIN_DISTANCE, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_OREINTATION )
+    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_OREINTATION )
     print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightEndPoint = [ rightStartPoint[Constants.X] + rX,  rightStartPoint[Constants.Y] + rY ]
     print("DBG: rightEndPoint(X, Y) = {0}".format(rightEndPoint))
@@ -247,9 +247,10 @@ class ParticleFilter:
     y - the Y coordinate
     theta - the amount to rotate (radians)
     '''
-    x = x * math.cos(theta) - y * math.sin(theta)
-    y = x * math.sin(theta) + y * math.cos(theta)
-    return x, y
+    print("DBG: x = {0}, y = {1}, theta = {2}".format(x, y, theta))
+    outX = x * math.cos(theta) - y * math.sin(theta)
+    outY = x * math.sin(theta) + y * math.cos(theta)
+    return outX, outY
 
   #-------------------------------------------------------------------------------
   def _scatterPlotParticles(self, filename):
@@ -283,7 +284,7 @@ class ParticleFilter:
     desc += "\tvehicleSteeringAngle = {0}\n".format(self.vehicleSteeringAngle)
     desc += "\tcumulativeSum = {0}\n".format(self.cumulativeSum)
     desc += "\tparticles:\n"
-    for p in self.particles:
+    for p in sorted(self.particles, key=lambda x: x[Constants.WEIGHT]):
       desc += "\t\t[X = {0:.4f}, Y = {1:.4f}, H = {2:.4f}, W = {3:.4f}]\n".format(p[0], p[1], math.degrees(p[2]), p[3])
     desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
     desc += "\testVehicleY = {0}\n".format(self.estVehicleY)

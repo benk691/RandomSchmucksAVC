@@ -112,14 +112,14 @@ MAX_LEFT_STEERING_ANGLE = math.pi / 4.0
 MAX_RIGHT_STEERING_ANGLE = -math.pi / 4.0
 
 # The position of the left distance sensor on the vehicle (relative to the vehicle)
-DIST_LEFT_SENSOR_POSITION = [0.0, 0.0]
+DIST_LEFT_SENSOR_POSITION = [0.5, 0.3]
 
 # The orientation of the left distance sensor (relative to the vehicle)
-DIST_LEFT_SENSOR_OREINTATION = 90
+DIST_LEFT_SENSOR_OREINTATION = math.radians(90.0)
 
 # The position of the right distance sensor on the vehicle (relative to the vehicle)
-DIST_RIGHT_SENSOR_POSITION = [0.0, 0.0]
+DIST_RIGHT_SENSOR_POSITION = [0.5, -0.3]
 
 # The orientation of the right distance sensor (relative to the vehicle)
-DIST_RIGHT_SENSOR_OREINTATION = 90
+DIST_RIGHT_SENSOR_OREINTATION = math.radians(-90.0)
 
