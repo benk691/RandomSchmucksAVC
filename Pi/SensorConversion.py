@@ -78,8 +78,8 @@ class SensorConversion(Thread):
         self._rightStripCount += 0.5
         self._rightHigh = 1
 
-      # TODO: Should the comparison be with low instead of high?
-      if self._rightHigh == 1 and self._rightTachValue < Constants.TACH_RIGHT_THRESHOLD_HIGH:
+      # TODO: Changed the comparison to low, needs testing
+      if self._rightHigh == 1 and self._rightTachValue < Constants.TACH_RIGHT_THRESHOLD_LOW:
         self._rightStripCount += 0.5
         self._rightHigh = 0
 
@@ -87,8 +87,8 @@ class SensorConversion(Thread):
         self._leftStripCount += 0.5
         self._leftHigh = 1
 
-      # TODO: Should the comparison be with low instead of high?
-      if self._leftHigh == 1 and self._leftTachValue < Constants.TACH_LEFT_THRESHOLD_HIGH:
+      # TODO: Changed the comparison to low, needs testing
+      if self._leftHigh == 1 and self._leftTachValue < Constants.TACH_LEFT_THRESHOLD_LOW:
         self._leftStripCount += 0.5
         self._leftHigh = 0
 
