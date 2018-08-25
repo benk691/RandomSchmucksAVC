@@ -57,6 +57,27 @@ DIST_MIN_DISTANCE = 0.0
 # The length of the queue in the distance sensor we want to use to store values
 DIST_QUEUE_LENGTH = 10
 
+# The velocity filter A value
+VELOCITY_FILTER_A = 0.9
+
+# The steering filter A value
+STEERING_FILTER_A = 0.9
+
+# The max loop count in the SensorConversion class
+MAX_LOOP_COUNT = 15.0
+
+# Right Tachometer high value
+TACH_RIGHT_THRESHOLD_HIGH = 10000
+
+# Right Tachometer low value
+TACH_RIGHT_THRESHOLD_LOW = 8000
+
+# Left Tachometer high value
+TACH_LEFT_THRESHOLD_HIGH = 8500
+
+# Left Tachometer low value
+TACH_LEFT_THRESHOLD_LOW = 6500
+
 # X index in a coordinate list
 X = 0
 
