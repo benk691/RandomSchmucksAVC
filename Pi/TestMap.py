@@ -4,7 +4,7 @@ from Line import Line
 
 class TestMap(Map):
   '''
-  Hard-coded course map
+  Test course
   '''
   # TODO: Draw ASCII Map Here
 
