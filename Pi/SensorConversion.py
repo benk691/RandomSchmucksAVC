@@ -82,14 +82,7 @@ class SensorConversion(Thread):
       self._loopCount += 1
 
       if self._loopCount >= Constants.MAX_LOOP_COUNT:
-        self._elapsedTime = convertSecToMilliSec(time.time()) - self._startTime
-        self._startTime = convertSecToMilliSec(time.time())
-        # TODO: What is 0.36?
-        self._rightVelocity = ((self._rightStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
-        self._leftVelocity = ((self._leftStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
-
-        self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
-        self.velocity = self.velocityFilter.filter(self.velocity)
+        self._calculateVelocity()
 
         # Reset counts
         self._loopCount = 0
@@ -102,6 +95,21 @@ class SensorConversion(Thread):
     Shutdown the thread
     '''
     self.shutDown = True
+
+  #-------------------------------------------------------------------------------
+  def _calculateVelocity(self):
+    '''
+    Calcualtes the vehicles velocity in m/s
+    '''
+    self._elapsedTime = convertSecToMilliSec(time.time()) - self._startTime
+    self._startTime = convertSecToMilliSec(time.time())
+    # TODO: What is 0.36?
+    self._rightVelocity = ((self._rightStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
+    self._leftVelocity = ((self._leftStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
+
+    # Take the average of the left and right velocity to get the vehicle velocity
+    self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
+    self.velocity = self.velocityFilter.filter(self.velocity)
 
   #-------------------------------------------------------------------------------
   def _calculateStripCount(self):
