@@ -19,7 +19,6 @@ class ControlPlanner(Thread):
     self.vehicle = vehicle
     self.particleFilter = particleFilter
     self.courseMap = courseMap
-    self.waypoints = []
     self.shutDown = False
     self.estVehicleX = 0.0
     self.estVehicleY = 0.0
