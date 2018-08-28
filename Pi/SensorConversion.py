@@ -109,7 +109,6 @@ class SensorConversion(Thread):
 
     self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi)
 
-<<<<<<< HEAD
   #-------------------------------------------------------------------------------
   def _calculateStripCount(self):
     '''
