@@ -61,7 +61,7 @@ class ParticleFilter:
     h = [ p[Constants.HEADING] for p in self.particles ]
     self.covarVehicle = numpy.cov(numpy.vstack((x,y,h)))
     self.prevTime = self.currentTime
-    return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covariance
+    return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle
 
   #-------------------------------------------------------------------------------
   def _getVehicleMeasurements(self):
