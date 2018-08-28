@@ -16,13 +16,20 @@ class ControlPlanner(Thread):
     self.vehicle = vehicle
     self.particleFilter = particleFilter
     self.courseMap = courseMap
+    self.waypoints = []
+    self.shutDown = False
+    self.estVehicleX = 0.0
+    self.estVehicleY = 0.0
+    self.estVehicleHeading = 0.0
+    self.covarVehicle = None
 
   #-------------------------------------------------------------------------------
   def run(self):
     '''
     Runs the planner to set goals for where the vehicle is going to go
     '''
-    pass
+    while not self.shutDown:
+      self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -33,9 +40,17 @@ class ControlPlanner(Thread):
     desc = "ControlPlanner:\n"
     vehicle.setTabs(1)
     # TODO: add in setTabs for particle filter and course map
+    desc += "\tshutDown = {0}\n".format(self.shutDown)
     desc += "\tvehicle = {0}\n".format(self.vehicle)
     desc += "\tparticleFilter = {0}\n".format(self.particleFilter)
     desc += "\tcourseMap = {0}\n".format(self.courseMap)
+    desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
+    desc += "\testVehicleY = {0}\n".format(self.estVehicleY)
+    desc += "\testVehicleHeading = {0}\n".format(self.estVehicleHeading)
+    desc += "\tcovarVehicle = {0}\n".format(self.covarVehicle)
+    desc += "\twaypoints:\n"
+    for wp in self.waypoints
+      desc += "\t\t{0}\n".format(wp)
     return desc
 
   #-------------------------------------------------------------------------------
@@ -53,4 +68,11 @@ class ControlPlanner(Thread):
     @return string representation of the class
     '''
     return self._debugDescription()
+
+  #-------------------------------------------------------------------------------
+  def __del__(self):
+    '''
+    Destructor
+    '''
+    self.join(timeout=5)
 

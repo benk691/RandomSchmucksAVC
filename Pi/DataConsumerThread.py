@@ -38,5 +38,6 @@ class DataConsumerThread(Thread):
     '''
     Destructor
     '''
+    # TODO: Consider creating a timeout constant
     self.join(timeout=5)
 
