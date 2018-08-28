@@ -10,18 +10,18 @@ from Line import Line
 
 class ParticleFilter:
   #-------------------------------------------------------------------------------
-  def __init__(self, particleNumber, startBox, headingRange, course):
+  def __init__(self, particleNumber, startBox, headingRange, courseMap):
     '''
     Initializes the particle filter
     @param particleNumber - number of particles to generate
     @param startBox - the inital box to create particles in. List of two X, Y coordinates defining the corners of the box
     @param headingRange - the range of headings to create particles with. List of two doubles.
-    @param course - the course map
+    @param courseMap - the course map
     '''
     random.seed()
     self.prevTime = time.time()
     self.currentTime = time.time()
-    self.course = course
+    self.courseMap = courseMap
     self.dt = 0.0
     self.vehicleVelocity = 0.0
     self.vehicleHeading = 0.0
@@ -208,23 +208,23 @@ class ParticleFilter:
 
     # Get left intersections with map walls
     leftIntersections = []
-    for c in self.course.circles:
+    for c in self.courseMap.circles:
       i = c.findIntersection(leftDistLine) 
       if i is not None:
         leftIntersections += [ i[0], i[1] ]
 
-    leftIntersections += [ l.findIntersection(leftDistLine) for l in self.course.lines ]
+    leftIntersections += [ l.findIntersection(leftDistLine) for l in self.courseMap.lines ]
 
     print("DBG: leftIntersections = {0}".format(leftIntersections))
 
     # Get right intersections with map walls
     rightIntersections = []
-    for c in self.course.circles:
+    for c in self.courseMap.circles:
       i = c.findIntersection(rightDistLine) 
       if i is not None:
         rightIntersections += [ i[0], i[1] ]
 
-    rightIntersections += [ l.findIntersection(rightDistLine) for l in self.course.lines ]
+    rightIntersections += [ l.findIntersection(rightDistLine) for l in self.courseMap.lines ]
     print("DBG: rightIntersections = {0}".format(rightIntersections))
 
     # Calculate distances
