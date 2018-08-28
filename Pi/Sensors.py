@@ -44,6 +44,7 @@ class Sensors:
     self.leftTachValue = self.adc.read_adc(Constants.ADC_LEFT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
     self.rightDistance = self.rightDistSensor.distance
     self.leftDistance = self.leftDistSensor.distance
+    # TODO: third front distance sensor?
     self.heading, self.roll, self.pitch = self.imu.read_euler()
     self.sysCal, self.gyroCal, self.accelCal, self.magCal = self.imu.get_calibration_status()
 
