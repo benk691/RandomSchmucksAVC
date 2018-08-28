@@ -8,8 +8,8 @@ from threading import Thread
 class SensorConversion(Thread):
   '''
   Converts the incoming raw sensor values.
-  Tachometer => Convert to a velocity
-  Potentiometer => Steering Angle
+  Tachometer => Convert to a velocity (m/s)
+  Potentiometer => Steering Angle (radians)
   Distance => No change needed
   IMU => No change needed
   After converting the values the filter of the values is applied
@@ -74,7 +74,7 @@ class SensorConversion(Thread):
       self.distTraveled += (self.velocity / (time.time() - self._distStartTime))
 
       # TODO: Clean this up
-      # TODO: Convert the pot value into a steering anlg that is in radians
+      # TODO: Convert the pot value into a steering anlog that is in radians
       self.steeringPotValue = self.steeringFilter.filter(self.steeringPotValue)
 
       self._calculateStripCount()
@@ -99,11 +99,11 @@ class SensorConversion(Thread):
   #-------------------------------------------------------------------------------
   def _calculateVelocity(self):
     '''
-    Calcualtes the vehicles velocity in m/s
+    Calculates the vehicles velocity in m/s
     '''
     self._elapsedTime = convertSecToMilliSec(time.time()) - self._startTime
     self._startTime = convertSecToMilliSec(time.time())
-    # TODO: What is 0.36?
+    # TODO: What is 0.36? wheel diameter in meters
     self._rightVelocity = ((self._rightStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
     self._leftVelocity = ((self._leftStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
 
