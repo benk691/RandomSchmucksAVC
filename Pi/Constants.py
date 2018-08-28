@@ -69,6 +69,27 @@ HEADING = 2
 # Weight index in a coordinate list
 WEIGHT = 3
 
+# Distance away from the waypoint we want to start checking if we are at waypoint or not
+WAYPOINT_CHECK_DIST = 1.0
+
+# Number of checks we want to perform t oconfirm the vehicle is at a waypoint or not
+WAYPOINT_MAX_CHECKS = 3
+
+# Slowest we ever want the vehicle to go
+MIN_VEHICLE_VELOCITY = 0.5
+
+# Fastest we ever want the vehicle to go
+MAX_VEHICLE_VELOCITY = 1.8
+
+# Velocity scale factor. Scaled to decrease speed when the vehicle's heading is off from the waypoint's heading. This uses a degree that we want to be within before we start speeding above min velocity
+VELOCITY_SCALE_FACTOR = (MAX_VEHICLE_VELOCITY - MIN_VEHICLE_VELOCITY) / math.radians(45.0)
+
+# Control Planner update rate (Hz)
+CONTROL_UPDATE_RATE = 10.0
+
+# Update rate sleep threshold
+CONTROL_SLEEP_THRESHOLD = 1.0e-3
+
 #--------------------------------
 #         Particle Filter
 #--------------------------------
