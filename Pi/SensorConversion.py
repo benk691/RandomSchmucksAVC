@@ -41,16 +41,20 @@ class SensorConversion(Thread):
     self.distTraveled = 0.0
     self.velocityFilter = Filter(Constants.VELOCITY_FILTER_A)
     self.steeringFilter = Filter(Constants.STEERING_FILTER_A)
+    # TODO: Distance Filter IIR
+    # Check dist >= MAX then set to # higher than max then feed it into filter
+    # TODO: IMU Filter
+    # TODO: Feed all into median filter then int IIR
+    # Median(order) median( queue(order) )
     self._loopCount = 0
-    self._prevRightTachValue = -0.0
-    self._prevLeftTachValue = -0.0
     self._leftTachValue = -0.0
     self._rightTachValue = -0.0
-    self._distStartTime = 0
     self._rightHigh = 0
     self._leftHigh = 0
     self._rightStripCount = -0.0
     self._leftStripCount = -0.0
+    self._totalRightStripCount = -0.0
+    self._totalLeftStripCount = -0.0
     self._elapsedTime = 0
     self._startTime = 0
     self._rightVelocity = -0.0
@@ -61,22 +65,16 @@ class SensorConversion(Thread):
     '''
     Runs the conversion thread
     '''
-    self._distStartTime = time.time()
     self._startTime = time.time()
     while not self.shutDown:
       self._getSensorValues()
 
       # TODO: Modularize this
-      if (self._loopCount % 1 == 0):
-        self._prevRightTachValue = self._rightTachValue;
-        self._prevLeftTachValue = self._leftTachValue;
-
-      self.distTraveled += (self.velocity / (time.time() - self._distStartTime))
-
       # TODO: Clean this up
       # TODO: Convert the pot value into a steering anlog that is in radians
       self.steeringPotValue = self.steeringFilter.filter(self.steeringPotValue)
 
+      # TODO: Move this into the consumer thread
       self._calculateStripCount()
       
       self._loopCount += 1
@@ -111,6 +109,8 @@ class SensorConversion(Thread):
     self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
     self.velocity = self.velocityFilter.filter(self.velocity)
 
+    self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi)
+
   #-------------------------------------------------------------------------------
   def _calculateStripCount(self):
     '''
@@ -118,20 +118,24 @@ class SensorConversion(Thread):
     '''
     if self._rightHigh == 0 and self._rightTachValue > Constants.TACH_RIGHT_THRESHOLD_HIGH:
       self._rightStripCount += 0.5
+      self._totalRightStripCount += self._rightStripCount
       self._rightHigh = 1
 
     # TODO: Changed the comparison to low, needs testing
     if self._rightHigh == 1 and self._rightTachValue < Constants.TACH_RIGHT_THRESHOLD_LOW:
       self._rightStripCount += 0.5
+      self._totalRightStripCount += self._rightStripCount
       self._rightHigh = 0
 
     if self._leftHigh == 0 and self._leftTachValue > Constants.TACH_LEFT_THRESHOLD_HIGH:
       self._leftStripCount += 0.5
+      self._totalLeftStripCount += self._rightStripCount
       self._leftHigh = 1
 
     # TODO: Changed the comparison to low, needs testing
     if self._leftHigh == 1 and self._leftTachValue < Constants.TACH_LEFT_THRESHOLD_LOW:
       self._leftStripCount += 0.5
+      self._totalLeftStripCount += self._rightStripCount
       self._leftHigh = 0
 
   #-------------------------------------------------------------------------------
@@ -178,11 +182,8 @@ class SensorConversion(Thread):
     desc += "\tvelocityFilter = {0}\n".format(self.velocityFilter)
     desc += "\tsteeringFilter = {0}\n".format(self.steeringFilter)
     desc += "\t_loopCount = {0}\n".format(self._loopCount)
-    desc += "\t_prevRightTachValue = {0}\n".format(self._prevRightTachValue)
-    desc += "\t_prevLeftTachValue = {0}\n".format(self._prevLeftTachValue)
     desc += "\t_leftTachValue = {0}\n".format(self._leftTachValue)
     desc += "\t_rightTachValue = {0}\n".format(self._rightTachValue)
-    desc += "\t_distStartTime = {0}\n".format(self._distStartTime)
     desc += "\t_rightHigh = {0}\n".format(self._rightHigh)
     desc += "\t_leftHigh = {0}\n".format(self._leftHigh)
     desc += "\t_rightStripCount = {0}\n".format(self._rightStripCount)
