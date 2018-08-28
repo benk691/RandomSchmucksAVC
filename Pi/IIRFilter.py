@@ -1,17 +1,16 @@
 
-class Filter:
+class IIRFilter:
   '''
-  Filters measurements to reduce noisy data
+  Filters measurements to reduce smooth out noisy data. This is essentially a low pass filter
   '''
   #-------------------------------------------------------------------------------
   def __init__(self, A):
     '''
-    Initializes the filter
-    @param a - coefficient between [0,1] (degree to which it listens to input [throws error if not between 0 and 1])
+    Initializes the IIR filter
+    @param A - coefficient between [0,1] (degree to which it listens to input [throws error if not between 0 and 1])
     '''
     if A < 0.0 or A > 1.0:
       raise ValueError("Invalid value of A for Filter class. A must be between [0,1].")
-    # all sensors feed into filter
     self.Y = 0.0
     self.A = A
     self.prevY = "DEAD"
@@ -37,7 +36,7 @@ class Filter:
     Generates debugging information about the filter
     @return string describing debug information
     '''
-    desc = "Filter:\n"
+    desc = "IIRFilter:\n"
     desc += "\tA = {0}\n".format(self.A)
     desc += "\tprevY = {0}\n".format(self.prevY)
     desc += "\tY = {0}\n".format(self.Y)
@@ -59,3 +58,4 @@ class Filter:
     @return string representation of the class
     '''
     return self._debugDescription()
+
