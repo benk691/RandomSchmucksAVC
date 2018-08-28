@@ -74,26 +74,11 @@ class SensorConversion(Thread):
       self.distTraveled += (self.velocity / (time.time() - self._distStartTime))
 
       # TODO: Clean this up
+      # TODO: Convert the pot value into a steering anlg that is in radians
       self.steeringPotValue = self.steeringFilter.filter(self.steeringPotValue)
 
-      if self._rightHigh == 0 and self._rightTachValue > Constants.TACH_RIGHT_THRESHOLD_HIGH:
-        self._rightStripCount += 0.5
-        self._rightHigh = 1
-
-      # TODO: Changed the comparison to low, needs testing
-      if self._rightHigh == 1 and self._rightTachValue < Constants.TACH_RIGHT_THRESHOLD_LOW:
-        self._rightStripCount += 0.5
-        self._rightHigh = 0
-
-      if self._leftHigh == 0 and self._leftTachValue > Constants.TACH_LEFT_THRESHOLD_HIGH:
-        self._leftStripCount += 0.5
-        self._leftHigh = 1
-
-      # TODO: Changed the comparison to low, needs testing
-      if self._leftHigh == 1 and self._leftTachValue < Constants.TACH_LEFT_THRESHOLD_LOW:
-        self._leftStripCount += 0.5
-        self._leftHigh = 0
-
+      self._calculateStripCount()
+      
       self._loopCount += 1
 
       if self._loopCount >= Constants.MAX_LOOP_COUNT:
@@ -117,6 +102,29 @@ class SensorConversion(Thread):
     Shutdown the thread
     '''
     self.shutDown = True
+
+  #-------------------------------------------------------------------------------
+  def _calculateStripCount(self):
+    '''
+    Calculates the new strip counts on the left and right side of the vehicle
+    '''
+    if self._rightHigh == 0 and self._rightTachValue > Constants.TACH_RIGHT_THRESHOLD_HIGH:
+      self._rightStripCount += 0.5
+      self._rightHigh = 1
+
+    # TODO: Changed the comparison to low, needs testing
+    if self._rightHigh == 1 and self._rightTachValue < Constants.TACH_RIGHT_THRESHOLD_LOW:
+      self._rightStripCount += 0.5
+      self._rightHigh = 0
+
+    if self._leftHigh == 0 and self._leftTachValue > Constants.TACH_LEFT_THRESHOLD_HIGH:
+      self._leftStripCount += 0.5
+      self._leftHigh = 1
+
+    # TODO: Changed the comparison to low, needs testing
+    if self._leftHigh == 1 and self._leftTachValue < Constants.TACH_LEFT_THRESHOLD_LOW:
+      self._leftStripCount += 0.5
+      self._leftHigh = 0
 
   #-------------------------------------------------------------------------------
   def _getSensorValues(self):
