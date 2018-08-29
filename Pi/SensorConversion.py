@@ -105,16 +105,15 @@ class SensorConversion(Thread):
     '''
     self._elapsedTime = convertSecToMilliSec(time.time()) - self._startTime
     self._startTime = convertSecToMilliSec(time.time())
-    # TODO: What is 0.36? wheel diameter in meters
-    self._rightVelocity = ((self._rightStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
-    self._leftVelocity = ((self._leftStripCount / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi) / convertMilliSecToSec(self._elapsedTime)
+    self._rightVelocity = ((self._rightStripCount / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi) / convertMilliSecToSec(self._elapsedTime)
+    self._leftVelocity = ((self._leftStripCount / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi) / convertMilliSecToSec(self._elapsedTime)
 
     # Take the average of the left and right velocity to get the vehicle velocity
     self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
     self.velocity = self.velocityMedianFilter.filter(self.velocity)
     self.velocity = self.velocityIirFilter.filter(self.velocity)
 
-    self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi)
+    self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi)
 
   #-------------------------------------------------------------------------------
   def _calculateStripCount(self):
