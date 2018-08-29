@@ -1,8 +1,8 @@
 import math
 import time
-from Constants import Constants
+import Constants
 from GeneralFunctions import GeneralFunctions
-from Filter import Filter
+from IIRFilter import IIRFilter
 from threading import Thread
 
 class SensorConversion(Thread):
@@ -39,8 +39,8 @@ class SensorConversion(Thread):
     self.accelCal = -0.0
     self.magCal = -0.0
     self.distTraveled = 0.0
-    self.velocityFilter = Filter(Constants.VELOCITY_FILTER_A)
-    self.steeringFilter = Filter(Constants.STEERING_FILTER_A)
+    self.velocityFilter = IIRFilter(Constants.VELOCITY_FILTER_A)
+    self.steeringFilter = IIRFilter(Constants.STEERING_FILTER_A)
     # TODO: Distance Filter IIR
     # Check dist >= MAX then set to # higher than max then feed it into filter
     # TODO: IMU Filter
