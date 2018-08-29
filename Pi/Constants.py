@@ -57,11 +57,17 @@ DIST_MIN_DISTANCE = 0.0
 # The length of the queue in the distance sensor we want to use to store values
 DIST_QUEUE_LENGTH = 10
 
-# The velocity filter A value
-VELOCITY_FILTER_A = 0.9
+# The velocity filter IIR A value
+VELOCITY_IIR_FILTER_A = 0.9
 
-# The steering filter A value
-STEERING_FILTER_A = 0.9
+# The steering filter IIR A value
+STEERING_IIR_FILTER_A = 0.9
+
+# The velocity median filter order value
+VELOCITY_MEDIAN_FILTER_ORDER = 3
+
+# The steering median filter order value
+STEERING_MEDIANr_FILTER_ORDER = 3
 
 # The max loop count in the SensorConversion class
 MAX_LOOP_COUNT = 15.0
@@ -107,6 +113,9 @@ MIN_PARTICLE_NUMBER = 2
 
 # Length between the two axles on the vehicle (meters)
 VEHICLE_AXLE_LEN = 0.0
+
+# Diameter of the wheels on the vehicle
+VEHICLE_WHEEL_DIAMETER = 0.36
 
 # Two Points that define the start box, on the map, for the vehicle
 MAP_START_BOX = [ [0.0, 0.0], [0.0, 0.0] ]
