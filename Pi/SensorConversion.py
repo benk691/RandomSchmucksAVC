@@ -3,6 +3,7 @@ import time
 import Constants
 from GeneralFunctions import GeneralFunctions
 from IIRFilter import IIRFilter
+from MedianFilter import MedianFilter
 from threading import Thread
 
 class SensorConversion(Thread):
@@ -39,8 +40,10 @@ class SensorConversion(Thread):
     self.accelCal = -0.0
     self.magCal = -0.0
     self.distTraveled = 0.0
-    self.velocityFilter = IIRFilter(Constants.VELOCITY_FILTER_A)
-    self.steeringFilter = IIRFilter(Constants.STEERING_FILTER_A)
+    self.velocityMedianFilter = MedianFilter(Constants.VELOCITY_MEDIAN_FILTER_ORDER)
+    self.steeringMedianFilter = MedianFilter(Constants.STEERING_MEDIANr_FILTER_ORDER)
+    self.velocityIirFilter = IIRFilter(Constants.VELOCITY_IIR_FILTER_A)
+    self.steeringIirFilter = IIRFilter(Constants.STEERING_IIR_FILTER_A)
     # TODO: Distance Filter IIR
     # Check dist >= MAX then set to # higher than max then feed it into filter
     # TODO: IMU Filter
@@ -72,7 +75,8 @@ class SensorConversion(Thread):
       # TODO: Modularize this
       # TODO: Clean this up
       # TODO: Convert the pot value into a steering anlog that is in radians
-      self.steeringPotValue = self.steeringFilter.filter(self.steeringPotValue)
+      self.steeringPotValue = self.steeringMedianFilter.filter(self.steeringPotValue)
+      self.steeringPotValue = self.steeringIirFilter.filter(self.steeringPotValue)
 
       # TODO: Move this into the consumer thread
       self._calculateStripCount()
@@ -107,7 +111,8 @@ class SensorConversion(Thread):
 
     # Take the average of the left and right velocity to get the vehicle velocity
     self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
-    self.velocity = self.velocityFilter.filter(self.velocity)
+    self.velocity = self.velocityMedianFilter.filter(self.velocity)
+    self.velocity = self.velocityIirFilter.filter(self.velocity)
 
     self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * 0.36 * math.pi)
 
@@ -162,8 +167,8 @@ class SensorConversion(Thread):
     Generates debugging information about the sensor conversion
     @return string describing debug information
     '''
-    self.velocityFilter.setTabs(1)
-    self.steeringFilter.setTabs(1)
+    self.velocityIirFilter.setTabs(1)
+    self.steeringIirFilter.setTabs(1)
     desc = "Sensor Conversion:\n"
     desc += "\tshutDown = {0}\n".format(self.shutDown)
     desc += "\tsteeringPotValue = {0}\n".format(self.steeringPotValue)
@@ -179,8 +184,8 @@ class SensorConversion(Thread):
     desc += "\taccelCal = {0}\n".format(self.accelCal)
     desc += "\tmagCal = {0}\n".format(self.magCal)
     desc += "\tdistTraveled = {0}\n".format(self.distTraveled)
-    desc += "\tvelocityFilter = {0}\n".format(self.velocityFilter)
-    desc += "\tsteeringFilter = {0}\n".format(self.steeringFilter)
+    desc += "\tvelocityIirFilter = {0}\n".format(self.velocityIirFilter)
+    desc += "\tsteeringIirFilter = {0}\n".format(self.steeringIirFilter)
     desc += "\t_loopCount = {0}\n".format(self._loopCount)
     desc += "\t_leftTachValue = {0}\n".format(self._leftTachValue)
     desc += "\t_rightTachValue = {0}\n".format(self._rightTachValue)
