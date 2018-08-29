@@ -63,11 +63,17 @@ VELOCITY_IIR_FILTER_A = 0.9
 # The steering filter IIR A value
 STEERING_IIR_FILTER_A = 0.9
 
+# The distance filter IIR A value
+DIST_IIR_FILTER_A = 0.9
+
 # The velocity median filter order value
 VELOCITY_MEDIAN_FILTER_ORDER = 3
 
 # The steering median filter order value
-STEERING_MEDIANr_FILTER_ORDER = 3
+STEERING_MEDIAN_FILTER_ORDER = 3
+
+# The distance median filter order value
+DIST_MEDIAN_FILTER_ORDER = 3
 
 # The max loop count in the SensorConversion class
 MAX_LOOP_COUNT = 15.0
