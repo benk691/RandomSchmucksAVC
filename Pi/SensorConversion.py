@@ -40,15 +40,16 @@ class SensorConversion(Thread):
     self.accelCal = -0.0
     self.magCal = -0.0
     self.distTraveled = 0.0
+    # TODO: Do we need individual constants for each sensor or just one per filter?
     self.velocityMedianFilter = MedianFilter(Constants.VELOCITY_MEDIAN_FILTER_ORDER)
-    self.steeringMedianFilter = MedianFilter(Constants.STEERING_MEDIANr_FILTER_ORDER)
+    self.steeringMedianFilter = MedianFilter(Constants.STEERING_MEDIAN_FILTER_ORDER)
+    self.leftDistMedianFilter = MedianFilter(Constants.DIST_MEDIAN_FILTER_ORDER)
+    self.rightDistMedianFilter = MedianFilter(Constants.DIST_MEDIAN_FILTER_ORDER)
     self.velocityIirFilter = IIRFilter(Constants.VELOCITY_IIR_FILTER_A)
     self.steeringIirFilter = IIRFilter(Constants.STEERING_IIR_FILTER_A)
+    self.distIirFilter = IIRFilter(Constants.DIST_IIR_FILTER_A)
     # TODO: Distance Filter IIR
     # Check dist >= MAX then set to # higher than max then feed it into filter
-    # TODO: IMU Filter
-    # TODO: Feed all into median filter then int IIR
-    # Median(order) median( queue(order) )
     self._loopCount = 0
     self._leftTachValue = -0.0
     self._rightTachValue = -0.0
@@ -72,11 +73,9 @@ class SensorConversion(Thread):
     while not self.shutDown:
       self._getSensorValues()
 
-      # TODO: Modularize this
-      # TODO: Clean this up
+      self._filterValues()
+
       # TODO: Convert the pot value into a steering anlog that is in radians
-      self.steeringPotValue = self.steeringMedianFilter.filter(self.steeringPotValue)
-      self.steeringPotValue = self.steeringIirFilter.filter(self.steeringPotValue)
 
       # TODO: Move this into the consumer thread
       self._calculateStripCount()
@@ -159,6 +158,21 @@ class SensorConversion(Thread):
     self.gyroCal = self.dataConsumerThread.sensors.gyroCal
     self.accelCal = self.dataConsumerThread.sensors.accelCal
     self.magCal = self.dataConsumerThread.sensors.magCal
+
+  #-------------------------------------------------------------------------------
+  def _filterValues(self):
+    '''
+    Filter values that are read in
+    '''
+    # Filter Steering Pot Value
+    self.steeringPotValue = self.steeringMedianFilter.filter(self.steeringPotValue)
+    self.steeringPotValue = self.steeringIirFilter.filter(self.steeringPotValue)
+    # Filter Left Distance Value
+    self.leftDistance = self.leftDistMedianFilter.filter(self.leftDistance)
+    self.leftDistance = self.distIirFilter.filter(self.leftDistance)
+    # Filter Right Distance Value
+    self.rightDistance = self.rightDistMedianFilter.filter(self.rightDistance)
+    self.rightDistance = self.distIirFilter.filter(self.rightDistance)
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
