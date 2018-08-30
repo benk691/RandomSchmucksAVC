@@ -16,6 +16,7 @@ class ControlPlanner(Thread):
     @param particleFilter - the particle filter used for estimating where the vehicle is
     @param courseMap - the course map
     '''
+    super(ControlPlanner, self).__init__(group=group, target=target, name=name, daemon=daemon)
     self.vehicle = vehicle
     self.particleFilter = particleFilter
     self.courseMap = courseMap
@@ -34,14 +35,15 @@ class ControlPlanner(Thread):
     '''
     Runs the planner to set goals for where the vehicle is going to go
     '''
-    self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
-    self._checkWaypoint()
-    self._control()
-    self.particleFilter.prevTime = self.particleFilter.currentTime
-    sleepTime = (1.0 /Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
-    if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
-      time.sleep(sleepTime)
-    # TODO: Modify number of particles
+    while not self.shutDown:
+      self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
+      self._checkWaypoint()
+      self._control()
+      self.particleFilter.prevTime = self.particleFilter.currentTime
+      sleepTime = (1.0 /Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
+      if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
+        time.sleep(sleepTime)
+      # TODO: Modify number of particles
 
   #-------------------------------------------------------------------------------
   def _control(self):
@@ -62,6 +64,7 @@ class ControlPlanner(Thread):
     If the vehicle has then increment to the next waypoint
     '''
     # TODO: Pull rotate out into general functions
+    print("DBG: waypoint = {0}".format(self.waypoint))
     rWpX, rWpY = self.particleFilter._rotate(self.courseMap.waypoints[self.waypoint][Constants.X], self.courseMap.waypoints[self.waypoint][Constants.Y], -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
     rEstX, rEstY = self.particleFilter._rotate(self.estVehicleX, self.estVehicleY, -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
     if rEstX > (rWpX - Constants.WAYPOINT_CHECK_DIST):

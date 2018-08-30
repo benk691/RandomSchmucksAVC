@@ -115,7 +115,7 @@ class ParticleFilter:
     '''
     for i in range(len(self.particles)):
       print("DBG: vehicleHeading = {0}".format(self.vehicleHeading))
-      particleDistLeft, particleDistRight = self._calcualteDistanceLineOfSight(self.particles[i])
+      particleDistLeft, particleDistRight = self._calculateDistanceLineOfSight(self.particles[i])
       print("DBG: particleDistLeft = {0}".format(particleDistLeft))
       print("DBG: particleDistRight = {0}".format(particleDistRight))
       # PDF(measurement, mean, std_dev)
@@ -171,14 +171,14 @@ class ParticleFilter:
     self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0, 0.0, 0.0 ] for genP in genParticles ]
 
   #-------------------------------------------------------------------------------
-  def _calcualteDistanceLineOfSight(self, particle):
+  def _calculateDistanceLineOfSight(self, particle):
     '''
     Calculate the distance line of sight and intersection of the given particle
     @param particle - list describing the particle distance line of sight [X, Y, Heading, Weight]
     @return particle closest distance intersection on its left side
     @return particle closest distance intersection on its right side
     '''
-    print("DBG: _calcualteDistanceLineOfSight called")
+    print("DBG: _calculateDistanceLineOfSight called")
     particleDistLeft, particleDistRight = 0.0, 0.0
 
     # Left Distance
