@@ -98,9 +98,6 @@ class ControlPlanner(Thread):
     desc += "\twaypointCheck = {0}\n".format(self.waypointCheck)
     desc += "\tvelocityGoal = {0}\n".format(self.velocityGoal)
     desc += "\tsteeringGoal = {0}\n".format(self.steeringGoal)
-    desc += "\twaypoints:\n"
-    for wp in self.waypoints
-      desc += "\t\t{0}\n".format(wp)
     return desc
 
   #-------------------------------------------------------------------------------
