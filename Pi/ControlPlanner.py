@@ -34,15 +34,14 @@ class ControlPlanner(Thread):
     '''
     Runs the planner to set goals for where the vehicle is going to go
     '''
-    while not self.shutDown:
-      self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
-      self._checkWaypoint()
-      self._control()
-      self.particleFilter.prevTime = self.particleFilter.currentTime
-      sleepTime = (1.0 /Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
-      if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
-        time.sleep(sleepTime)
-      # TODO: Modify number of particles
+    self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
+    self._checkWaypoint()
+    self._control()
+    self.particleFilter.prevTime = self.particleFilter.currentTime
+    sleepTime = (1.0 /Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
+    if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
+      time.sleep(sleepTime)
+    # TODO: Modify number of particles
 
   #-------------------------------------------------------------------------------
   def _control(self):
