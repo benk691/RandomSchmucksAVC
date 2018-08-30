@@ -51,10 +51,6 @@ class SensorConversion(Thread):
     # TODO: Distance Filter IIR
     # Check dist >= MAX then set to # higher than max then feed it into filter
     self._loopCount = 0
-    self._leftTachValue = -0.0
-    self._rightTachValue = -0.0
-    self._rightHigh = 0
-    self._leftHigh = 0
     self._rightStripCount = -0.0
     self._leftStripCount = -0.0
     self._totalRightStripCount = -0.0
@@ -77,9 +73,6 @@ class SensorConversion(Thread):
 
       # TODO: Convert the pot value into a steering anlog that is in radians
 
-      # TODO: Move this into the consumer thread
-      self._calculateStripCount()
-      
       self._loopCount += 1
 
       if self._loopCount >= Constants.MAX_LOOP_COUNT:
@@ -89,6 +82,9 @@ class SensorConversion(Thread):
         self._loopCount = 0
         self._rightStripCount = 0.0
         self._leftStripCount = 0.0
+        # TODO: I forsee threading complications with this. Needs testing
+        self.dataConsumerThread.rightStripCount = 0.0
+        self.dataConsumerThread.leftStripCount = 0.0
 
   #-------------------------------------------------------------------------------
   def shutdown(self):
@@ -115,40 +111,16 @@ class SensorConversion(Thread):
     self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi)
 
   #-------------------------------------------------------------------------------
-  def _calculateStripCount(self):
-    '''
-    Calculates the new strip counts on the left and right side of the vehicle
-    '''
-    if self._rightHigh == 0 and self._rightTachValue > Constants.TACH_RIGHT_THRESHOLD_HIGH:
-      self._rightStripCount += 0.5
-      self._totalRightStripCount += self._rightStripCount
-      self._rightHigh = 1
-
-    # TODO: Changed the comparison to low, needs testing
-    if self._rightHigh == 1 and self._rightTachValue < Constants.TACH_RIGHT_THRESHOLD_LOW:
-      self._rightStripCount += 0.5
-      self._totalRightStripCount += self._rightStripCount
-      self._rightHigh = 0
-
-    if self._leftHigh == 0 and self._leftTachValue > Constants.TACH_LEFT_THRESHOLD_HIGH:
-      self._leftStripCount += 0.5
-      self._totalLeftStripCount += self._rightStripCount
-      self._leftHigh = 1
-
-    # TODO: Changed the comparison to low, needs testing
-    if self._leftHigh == 1 and self._leftTachValue < Constants.TACH_LEFT_THRESHOLD_LOW:
-      self._leftStripCount += 0.5
-      self._totalLeftStripCount += self._rightStripCount
-      self._leftHigh = 0
-
-  #-------------------------------------------------------------------------------
   def _getSensorValues(self):
     '''
     Get the raw sensor values
     '''
     self.steeringPotValue = self.dataConsumerThread.sensors.steeringPotValue
-    self._leftTachValue =  self.dataConsumerThread.sensors.leftTachValue
-    self._rightTachValue = self.dataConsumerThread.sensors.rightTachValue
+    # TODO: I forsee threading complication with this. Needs testing
+    self._leftStripCount =  self.dataConsumerThread.leftStripCount
+    self._rightStripCount = self.dataConsumerThread.rightStripCount
+    self._totalLeftStripCount =  self.dataConsumerThread.totalLeftStripCount
+    self._totalRightStripCount = self.dataConsumerThread.totalRightStripCount
     self.leftDistance = self.dataConsumerThread.sensors.leftDistance
     self.rightDistance = self.dataConsumerThread.sensors.rightDistance
     self.heading = self.dataConsumerThread.sensors.heading
@@ -180,6 +152,7 @@ class SensorConversion(Thread):
     Generates debugging information about the sensor conversion
     @return string describing debug information
     '''
+    # TODO: Move all setTabs calls to contructor, only needs to be done once
     self.velocityIirFilter.setTabs(1)
     self.steeringIirFilter.setTabs(1)
     desc = "Sensor Conversion:\n"
@@ -200,10 +173,6 @@ class SensorConversion(Thread):
     desc += "\tvelocityIirFilter = {0}\n".format(self.velocityIirFilter)
     desc += "\tsteeringIirFilter = {0}\n".format(self.steeringIirFilter)
     desc += "\t_loopCount = {0}\n".format(self._loopCount)
-    desc += "\t_leftTachValue = {0}\n".format(self._leftTachValue)
-    desc += "\t_rightTachValue = {0}\n".format(self._rightTachValue)
-    desc += "\t_rightHigh = {0}\n".format(self._rightHigh)
-    desc += "\t_leftHigh = {0}\n".format(self._leftHigh)
     desc += "\t_rightStripCount = {0}\n".format(self._rightStripCount)
     desc += "\t_leftStripCount = {0}\n".format(self._leftStripCount)
     desc += "\t_elapsedTime = {0}\n".format(self._elapsedTime)
