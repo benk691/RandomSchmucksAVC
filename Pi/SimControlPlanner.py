@@ -38,20 +38,20 @@ class SimControlPlanner(Thread):
     '''
     Runs the planner to set goals for where the vehicle is going to go
     '''
-    print("DBG: R0")
+    #print("DBG: R0")
     self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
-    print("DBG: R1")
+    #print("DBG: R1")
     self._checkWaypoint()
-    print("DBG: R2")
+    #print("DBG: R2")
     self._control()
-    print("DBG: R3")
+    #print("DBG: R3")
     self.particleFilter.prevTime = self.particleFilter.currentTime
-    print("DBG: R4")
+    #print("DBG: R4")
     sleepTime = (1.0 /Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
-    print("DBG: R5")
+    #print("DBG: R5")
     if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
       time.sleep(sleepTime)
-    print("DBG: R7")
+    #print("DBG: R7")
     # TODO: Modify number of particles
 
   #-------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ class SimControlPlanner(Thread):
     If the vehicle has then increment to the next waypoint
     '''
     # TODO: Pull rotate out into general functions
-    print("DBG: W0")
+    #print("DBG: W0")
     print("DBG: waypoint = {0}".format(self.waypoint))
     print("DBG: len(courseMap.waypoints) = {0}".format(len(self.courseMap.waypoints)))
     print("DBG: courseMap.waypoints:")
@@ -81,14 +81,14 @@ class SimControlPlanner(Thread):
       print("DBG: wp = {0}".format(wp))
 
     rWpX, rWpY = self.particleFilter._rotate(self.courseMap.waypoints[self.waypoint][Constants.X], self.courseMap.waypoints[self.waypoint][Constants.Y], -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
-    print("DBG: W1")
+    #print("DBG: W1")
     rEstX, rEstY = self.particleFilter._rotate(self.estVehicleX, self.estVehicleY, -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
-    print("DBG: W2")
+    #print("DBG: W2")
     if rEstX > (rWpX - Constants.WAYPOINT_CHECK_DIST):
       self.waypointCheck += 1
     else:
       self.waypointCheck = 0
-    print("DBG: W3")
+    #print("DBG: W3")
 
     if self.waypointCheck >= Constants.WAYPOINT_MAX_CHECKS:
       self.waypointCheck = 0
@@ -97,7 +97,7 @@ class SimControlPlanner(Thread):
         self.waypoint = 0
       # TODO: Add in switch cases for special points (NERF, stop, etc...)
 
-    print("DBG: W4")
+    #print("DBG: W4")
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):

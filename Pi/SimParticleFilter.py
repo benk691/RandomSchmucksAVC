@@ -52,23 +52,23 @@ class SimParticleFilter:
     self._weight()
     self._generateNewParticleList()
     # Calculate estimates
-    print("DBG: GE 1")
+    #print("DBG: GE 1")
     self.estVehicleX = sum([ p[Constants.X] for p in self.particles]) / float(len(self.particles))
 
-    print("DBG: GE 2")
+    #print("DBG: GE 2")
     self.estVehicleY = sum([ p[Constants.Y] for p in self.particles]) / float(len(self.particles))
-    print("DBG: GE 3")
+    #print("DBG: GE 3")
     self.estVehicleHeading = sum([ p[Constants.HEADING] for p in self.particles]) / float(len(self.particles))
-    print("DBG: GE 4")
+    #print("DBG: GE 4")
     # Calculate covariance
     x = [ p[Constants.X] for p in self.particles ]
-    print("DBG: GE 5")
+    #print("DBG: GE 5")
     y = [ p[Constants.Y] for p in self.particles ]
-    print("DBG: GE 6")
+    #print("DBG: GE 6")
     h = [ p[Constants.HEADING] for p in self.particles ]
-    print("DBG: GE 7")
+    #print("DBG: GE 7")
     self.covarVehicle = numpy.cov(numpy.vstack((x,y,h)))
-    print("DBG: GE 8")
+    #print("DBG: GE 8")
     return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle
 
   #-------------------------------------------------------------------------------
@@ -165,11 +165,11 @@ class SimParticleFilter:
     '''
     print("DBG: _generateNewParticleList called")
     self.cumulativeSum = [ sum([ p[Constants.WEIGHT] for p in self.particles[ : i + 1] ]) for i in range(len(self.particles)) ]
-    print("DBG: 1")
+    #print("DBG: 1")
     genParticles = []
     for i in range(len(self.particles)):
       genCumSum = random.uniform(0.0, self.cumulativeSum[-1])
-      print("DBG: 2")
+      #print("DBG: 2")
       # Get the index of the particle we want to generate
       particleIndex = 0
       for csi in range(len(self.cumulativeSum)):
@@ -178,10 +178,10 @@ class SimParticleFilter:
           break
       genParticles.append(particleIndex)
 
-    print("DBG: 3")
+    #print("DBG: 3")
     # Generate particles
     self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0 ] for genP in genParticles ]
-    print("DBG: 4")
+    #print("DBG: 4")
 
   #-------------------------------------------------------------------------------
   def _calculateDistanceLineOfSight(self, particle):
