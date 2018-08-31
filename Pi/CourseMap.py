@@ -112,9 +112,10 @@ class CourseMap(Map):
     self.oq4yl = Line(CourseMap.OQ4YL_START_POINT, CourseMap.OQ4YL_END_POINT)
     self.lines = [self.iq1xl, self.iq1yl, self.oq2xl, self.oq2yl, self.iq3xl, self.iq3yl, self.oq4xl, self.oq4yl]
     # Waypoints
+    self.generateWaypoints()
     
   #-------------------------------------------------------------------------------
-  def generateWaypoint(self):
+  def generateWaypoints(self):
     increment = 15
     self.waypoints = [ [31.0 + 31.0 * math.cos(math.radians(theta)), 31.0 + 31.0 * math.sin(math.radians(theta)), math.radians(theta + 90.0) ] for theta in range(-90, 181, increment) ]
     wp = [ [-31.0 + 31.0 * math.cos(math.radians(theta)), -31.0 + 31.0 * math.sin(math.radians(theta)), math.radians(theta - 90.0) ] for theta in range(90, 361, increment)]
