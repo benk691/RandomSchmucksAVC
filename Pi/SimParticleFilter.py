@@ -3,6 +3,9 @@ import math
 import time
 import numpy
 import matplotlib.pyplot as matplot
+import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
+from matplotlib.collections import PatchCollection
 import Constants
 from matplotlib.colors import Normalize
 from scipy.stats import norm
@@ -274,13 +277,15 @@ class SimParticleFilter:
     return outX, outY
 
   #-------------------------------------------------------------------------------
-  def _scatterPlotParticles(self, filename):
+  def _scatterPlotParticles(self, car, filename):
     '''
     Create a scatter plot of the particle positions, headings and weight
+    @param car - Car class
     @param filename - the SVG filename to write the scatterplot to
     '''
-    matplot.xlim(-0.5,25.5)
-    matplot.ylim(-25.0,-15.0)
+    #matplot.xlim(-0.5,25.5)
+    #matplot.ylim(-25.0,-15.0)
+    self._drawCourseMap()
     x = [ p[Constants.X] for p in self.particles ]
     y = [ p[Constants.Y] for p in self.particles ]
     h = [ p[Constants.HEADING] for p in self.particles ]
@@ -288,6 +293,26 @@ class SimParticleFilter:
     w = [ p[Constants.WEIGHT] / totalWeight for p in self.particles ]
 
     matplot.scatter(x, y, c=w)
+    matplot.scatter([car.x], [car.y], marker='+', color='green')
+
+    # STREAMPLOT ATTEMPT
+    #u = []
+    #v = []
+    #for inX, inY, inH in zip(x, y, h):
+    #  outU, outV = self._rotate(inX, inY, inH)
+    #  u.append(outU)
+    #  v.append(outV)
+    #
+    #u, v = numpy.mgrid[x:y:1j, u:v:1j]
+    ##matplot.streamplot(x, y, [ [ i for i in u ] for i in u ], [ [ i for i in v ] for i in v ], color=w)
+    #matplot.streamplot(numpy.array(x), numpy.array(y), u, v, color=w)
+
+    #cRX, cRY = self._rotate(car.x, car.y, car.heading)
+    #cU, cV = numpy.mgrid[car.x:car.y:1j, cRX:cRY:1j] 
+    #matplot.streamplot(numpy.array([car.x]), numpy.array([car.y]), cU, cV, marker='+', color='pink')
+
+
+    #matplot.scatter(x, y, c=w)
     matplot.savefig(filename)
     #maxWeight = max([ p[Constants.WEIGHT] for p in self.particles ])
     #w = [ p[Constants.WEIGHT] / maxWeight for p in self.particles ]
@@ -297,6 +322,41 @@ class SimParticleFilter:
     #matplot.scatter(x, y, c=colors)
     #matplot.savefig(filename)
     matplot.clf()
+
+
+  #-------------------------------------------------------------------------------
+  def _drawCourseMap(self):
+    '''
+    Draws the course map
+    '''
+    # Draw lines
+    for l in self.courseMap.lines:
+      self._drawLine(l)
+
+    # Draw circles
+    for c in self.courseMap.circles:
+      self._drawCircle(c)
+
+  #-------------------------------------------------------------------------------
+  def _drawLine(self, line):
+    '''
+    Draw a line
+    @param Line class to draw
+    '''
+    ax = matplot.gca()
+    l = mlines.Line2D([line.startPoint[Constants.X], line.endPoint[Constants.X]], [line.startPoint[Constants.Y], line.endPoint[Constants.Y]]) 
+    ax.add_line(l)
+
+  #-------------------------------------------------------------------------------
+  def _drawCircle(self, circle):
+    '''
+    Draw a cirlce
+    @param circle - Circle class to draw
+    '''
+    ax = matplot.gca()
+    c = mpatches.Circle(circle.center, circle.radius) 
+    collection = PatchCollection([c])
+    ax.add_collection(collection)
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -316,11 +376,9 @@ class SimParticleFilter:
     desc += "\tvehicleSteeringAngle = {0}\n".format(self.vehicleSteeringAngle)
     desc += "\tcumulativeSum = {0}\n".format(self.cumulativeSum)
     desc += "\tparticles:\n"
-    print("HERE 1")
     for p in sorted(self.particles, key=lambda x: x[Constants.WEIGHT], reverse=True):
       desc += "\t\t[X = {0:.4f}, Y = {1:.4f}, H = {2:.4f}, W = {3:.4f}]\n".format(p[0], p[1], math.degrees(p[2]), p[3])
 
-    print("HERE 2")
     desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
     desc += "\testVehicleY = {0}\n".format(self.estVehicleY)
     desc += "\testVehicleHeading = {0}\n".format(self.estVehicleHeading)

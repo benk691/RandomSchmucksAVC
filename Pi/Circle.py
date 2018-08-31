@@ -35,7 +35,6 @@ class Circle:
     # Slope of the line
     #print("DBG: shiftedStartPoint = {0}".format(shiftedStartPoint))
     #print("DBG: shiftedEndPoint = {0}".format(shiftedEndPoint))
-    # TODO: Check with Brian on this case
     if (shiftedEndPoint[Constants.X] - shiftedStartPoint[Constants.X]) != 0:
       m = (shiftedEndPoint[Constants.Y] - shiftedStartPoint[Constants.Y]) / (shiftedEndPoint[Constants.X] - shiftedStartPoint[Constants.X])
     else:

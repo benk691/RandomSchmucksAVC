@@ -9,15 +9,15 @@ from SimParticleFilter import SimParticleFilter
 from SimControlPlanner import SimControlPlanner
 from scipy.stats import norm
 
+fi = 10
+
 #-------------------------------------------------------------------------------
 def updateFName():
   global fi
   global filename
+  filename = 'test-{0:03d}.svg'.format(fi)
+  print("DBG: filename = {0}".format(filename))
   fi += 1
-  if fi < 10:
-    filename = 'test-0{0}.svg'.format(fi)
-  else:
-    filename = 'test-{0}.svg'.format(fi)
   return filename
 
 #-------------------------------------------------------------------------------
@@ -72,7 +72,11 @@ Constants.VELOCITY_NOISE = 0.01
 Constants.HEADING_NOISE = math.radians(5.0)
 Constants.DISTANCE_NOISE = 0.3
 
-for i in range(100):
+for i in range(5):
+  print('=' * 50)
+  print("START LOOP {0}".format(i))
+  print('=' * 50)
+  
   # Generate measurements
   pf.vehicleVelocity = random.gauss(car.velocity, Constants.VELOCITY_NOISE)
   pf.vehicleSteeringAngle = random.gauss(car.steeringAngle, Constants.STEERING_ANGLE_NOISE)
@@ -84,7 +88,9 @@ for i in range(100):
   # Run one step
   cp.run()
 
+  print('-' * 50)
   print(cp)
+  print('-' * 50)
 
   car.steeringAngle = random.gauss(cp.steeringAngleGoal, Constants.STEERING_ANGLE_NOISE)
   car.velocity = random.gauss(cp.velocityGoal, Constants.VELOCITY_NOISE)
@@ -102,6 +108,5 @@ for i in range(100):
   moveCar(car, pf)
   # TODO: Add graph car is a + and add a direction arrow
 
-  print(cp)
-
+  pf._scatterPlotParticles(car, updateFName())
 
