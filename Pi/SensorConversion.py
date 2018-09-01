@@ -15,6 +15,11 @@ class SensorConversion(Thread):
   IMU => No change needed
   After converting the values the filter of the values is applied
   '''
+  # Steering pot value slope value for converting to a steering angle
+  STEERING_CONV_SLOPE = 0.00634
+  # Steering pot value y-intercept for converting to a steering angle
+  STEERING_Y_INTERCEPT = -124.13
+
   #-------------------------------------------------------------------------------
   def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, dataConsumerThread=None):
     '''
@@ -67,7 +72,7 @@ class SensorConversion(Thread):
 
       self._filterValues()
 
-      # TODO: Convert the pot value into a steering analog that is in radians
+      self._convertPotValueToAngle()
 
       self._loopCount += 1
 
@@ -160,6 +165,13 @@ class SensorConversion(Thread):
     if distance >= Constants.DIST_MAX_DISTANCE:
       return Constants.DIST_MAX_DISTANCE + Constants.DIST_MAX_FILTER
     return distance
+
+  #-------------------------------------------------------------------------------
+  def _convertPotValueToAngle(self):
+    '''
+    Convert the steering pot value to a steeing angle [radians]
+    '''
+    self.steeringAngle = SensorConversion.STEERING_CONV_SLOPE * self.steeringPotValue + SensorConversion.STEERING_Y_INTERCEPT
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
