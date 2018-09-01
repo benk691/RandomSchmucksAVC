@@ -45,6 +45,7 @@ class Sensors:
     self.rightDistance = self.rightDistSensor.distance
     self.leftDistance = self.leftDistSensor.distance
     # TODO: third front distance sensor?
+    # NOTE: the read in angles are in degrees
     self.heading, self.roll, self.pitch = self.imu.read_euler()
     self.sysCal, self.gyroCal, self.accelCal, self.magCal = self.imu.get_calibration_status()
 
