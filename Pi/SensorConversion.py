@@ -1,10 +1,10 @@
 import math
 import time
 import Constants
-from GeneralFunctions import *
+from threading import Thread
 from IIRFilter import IIRFilter
 from MedianFilter import MedianFilter
-from threading import Thread
+from GeneralFunctions import *
 
 class SensorConversion(Thread):
   '''
@@ -40,16 +40,12 @@ class SensorConversion(Thread):
     self.accelCal = -0.0
     self.magCal = -0.0
     self.distTraveled = 0.0
-    # TODO: Do we need individual constants for each sensor or just one per filter?
-    self.velocityMedianFilter = MedianFilter(Constants.VELOCITY_MEDIAN_FILTER_ORDER)
     self.steeringMedianFilter = MedianFilter(Constants.STEERING_MEDIAN_FILTER_ORDER)
-    self.leftDistMedianFilter = MedianFilter(Constants.DIST_MEDIAN_FILTER_ORDER)
-    self.rightDistMedianFilter = MedianFilter(Constants.DIST_MEDIAN_FILTER_ORDER)
-    self.velocityIirFilter = IIRFilter(Constants.VELOCITY_IIR_FILTER_A)
     self.steeringIirFilter = IIRFilter(Constants.STEERING_IIR_FILTER_A)
+    self.velocityIirFilter = IIRFilter(Constants.VELOCITY_IIR_FILTER_A)
+    self.headingIirFilter = IIRFilter(Constants.HEADING_IIR_FILTER_A)
     self.distIirFilter = IIRFilter(Constants.DIST_IIR_FILTER_A)
-    # TODO: Distance Filter IIR
-    # Check dist >= MAX then set to # higher than max then feed it into filter
+    self._prevHeading = 0.0
     self._loopCount = 0
     self._rightStripCount = -0.0
     self._leftStripCount = -0.0
@@ -71,7 +67,7 @@ class SensorConversion(Thread):
 
       self._filterValues()
 
-      # TODO: Convert the pot value into a steering anlog that is in radians
+      # TODO: Convert the pot value into a steering analog that is in radians
 
       self._loopCount += 1
 
@@ -105,7 +101,7 @@ class SensorConversion(Thread):
 
     # Take the average of the left and right velocity to get the vehicle velocity
     self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
-    self.velocity = self.velocityMedianFilter.filter(self.velocity)
+    # Filter velocity
     self.velocity = self.velocityIirFilter.filter(self.velocity)
 
     self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi)
@@ -116,7 +112,7 @@ class SensorConversion(Thread):
     Get the raw sensor values
     '''
     self.steeringPotValue = self.dataConsumerThread.sensors.steeringPotValue
-    # TODO: I forsee threading complication with this. Needs testing
+    # TODO: Test. I forsee threading complication with this.
     self._leftStripCount =  self.dataConsumerThread.leftStripCount
     self._rightStripCount = self.dataConsumerThread.rightStripCount
     self._totalLeftStripCount =  self.dataConsumerThread.totalLeftStripCount
@@ -140,11 +136,30 @@ class SensorConversion(Thread):
     self.steeringPotValue = self.steeringMedianFilter.filter(self.steeringPotValue)
     self.steeringPotValue = self.steeringIirFilter.filter(self.steeringPotValue)
     # Filter Left Distance Value
-    self.leftDistance = self.leftDistMedianFilter.filter(self.leftDistance)
+    self.leftDistance = self._filterMaxDistance(self.leftDistance)
     self.leftDistance = self.distIirFilter.filter(self.leftDistance)
     # Filter Right Distance Value
-    self.rightDistance = self.rightDistMedianFilter.filter(self.rightDistance)
+    self.rightDistance = self._filterMaxDistance(self.rightDistance)
     self.rightDistance = self.distIirFilter.filter(self.rightDistance)
+    # Filter heading
+    self.heading, self.prevHeading = unwrapAngle(self.heading, self.prevHeading)
+    self.heading = self.headingIirFilter(self.heading)
+    # TODO: Need a way to mark values as ready for particle filter
+    # Consider the thread safe queue, or a publisher subscriber
+    self.heading = math.radians(wrapAngle(self.heading))
+    # Velocity is filtered in the _calculateVelocity function
+
+  #-------------------------------------------------------------------------------
+  def _filterMaxDistance(self, distance):
+    '''
+    Perform a sanity check on the distance
+    @param distance - the distance read from the sensors
+    @return distance that has been sanity checked. If greter than max, then apply a 
+            constant value to it so it is more likely to be ignored.
+    '''
+    if distance >= Constants.DIST_MAX_DISTANCE:
+      return Constants.DIST_MAX_DISTANCE + Constants.DIST_MAX_FILTER
+    return distance
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -155,6 +170,8 @@ class SensorConversion(Thread):
     # TODO: Move all setTabs calls to contructor, only needs to be done once
     self.velocityIirFilter.setTabs(1)
     self.steeringIirFilter.setTabs(1)
+    self.distIirFilter.setTabs(1)
+    self.headingIirFilter.setTabs(1)
     desc = "Sensor Conversion:\n"
     desc += "\tshutDown = {0}\n".format(self.shutDown)
     desc += "\tsteeringPotValue = {0}\n".format(self.steeringPotValue)
@@ -172,6 +189,10 @@ class SensorConversion(Thread):
     desc += "\tdistTraveled = {0}\n".format(self.distTraveled)
     desc += "\tvelocityIirFilter = {0}\n".format(self.velocityIirFilter)
     desc += "\tsteeringIirFilter = {0}\n".format(self.steeringIirFilter)
+    desc += "\tsteeringMedianFilter = {0}\n".format(self.steeringMedianFilter)
+    desc += "\tdistIirFilter = {0}\n".format(self.distIirFilter)
+    desc += "\theadingIirFilter = {0}\n".format(self.headingIirFilter)
+    desc += "\t_prevHeading = {0}\n".format(self._prevHeading)
     desc += "\t_loopCount = {0}\n".format(self._loopCount)
     desc += "\t_rightStripCount = {0}\n".format(self._rightStripCount)
     desc += "\t_leftStripCount = {0}\n".format(self._leftStripCount)

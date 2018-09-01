@@ -1,5 +1,7 @@
 import math
 
+# TODO: Go through all values and make sure we have the right numbers. -0 indicates that we have not decided on a number
+
 '''
 Defines constants for the Rasberry Pi
 '''
@@ -57,23 +59,23 @@ DIST_MIN_DISTANCE = 0.0
 # The length of the queue in the distance sensor we want to use to store values
 DIST_QUEUE_LENGTH = 10
 
-# The velocity filter IIR A value
-VELOCITY_IIR_FILTER_A = 0.9
+# The steering median filter order value
+STEERING_MEDIAN_FILTER_ORDER = 3
 
 # The steering filter IIR A value
 STEERING_IIR_FILTER_A = 0.9
 
+# The velocity filter IIR A value
+VELOCITY_IIR_FILTER_A = 0.9
+
+# The heading filter IIR A value
+HEADING_IIR_FILTER_A = 0.9
+
 # The distance filter IIR A value
 DIST_IIR_FILTER_A = 0.9
 
-# The velocity median filter order value
-VELOCITY_MEDIAN_FILTER_ORDER = 3
-
-# The steering median filter order value
-STEERING_MEDIAN_FILTER_ORDER = 3
-
-# The distance median filter order value
-DIST_MEDIAN_FILTER_ORDER = 3
+# Constant to apply to distance measurements if they are railed
+DIST_MAX_FILTER = -0.0
 
 # The max loop count in the SensorConversion class
 MAX_LOOP_COUNT = 15.0
@@ -136,37 +138,37 @@ CONTROL_SLEEP_THRESHOLD = 1.0e-3
 #         Particle Filter
 #--------------------------------
 # Number of particles to generate for the particle filter
-PARTICLE_NUMBER = 10
+PARTICLE_NUMBER = -0
 
 # Minimum particle number that we do not want to go below
-MIN_PARTICLE_NUMBER = 2
+MIN_PARTICLE_NUMBER = -0
 
 # Length between the two axles on the vehicle (meters)
-VEHICLE_AXLE_LEN = 0.0
+VEHICLE_AXLE_LEN = -0.0
 
 # Diameter of the wheels on the vehicle
 VEHICLE_WHEEL_DIAMETER = 0.36
 
 # Two Points that define the start box, on the map, for the vehicle
-MAP_START_BOX = [ [0.0, 0.0], [0.0, 0.0] ]
+MAP_START_BOX = [ [-0.0, 0.0], [-0.0, -0.0] ]
 
 # The starting heading range for the vehicle
-MAP_HEADING_RANGE = [ 0.0, 0.0 ]
+MAP_HEADING_RANGE = [ -0.0, -0.0 ]
 
 # Offset that is applied so we can set 0 degrees with out worrying about North/South
-MAP_HEADING_OFFSET = 0.0
+MAP_HEADING_OFFSET = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the heading
-HEADING_NOISE = 0.0
+HEADING_NOISE = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the steering angle
-STEERING_ANGLE_NOISE = 0.0
+STEERING_ANGLE_NOISE = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the velocity
-VELOCITY_NOISE = 0.0
+VELOCITY_NOISE = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the distance
-DISTANCE_NOISE = 0.0
+DISTANCE_NOISE = -0.0
 
 # Slippage noise
 SLIP_NOISE = 0.0
