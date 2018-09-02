@@ -61,10 +61,9 @@ def unwrapAngle(angle, prevAngle):
   @return the unwrapped angle [degrees]
   '''
   # TODO: Test. The previous angle bit did not make sens in Brians code so I modified.
-  tmpAngle = angle
   angleShift = wrapAngle(angle - prevAngle)
   angle = angleShift + prevAngle
-  prevAngle = tmpAngle
+  prevAngle = angle
   return angle, prevAngle
   
 
