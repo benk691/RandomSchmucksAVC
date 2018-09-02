@@ -171,7 +171,7 @@ class SensorConversion(Thread):
     '''
     Convert the steering pot value to a steeing angle [radians]
     '''
-    self.steeringAngle = SensorConversion.STEERING_CONV_SLOPE * self.steeringPotValue + SensorConversion.STEERING_Y_INTERCEPT
+    self.steeringAngle = math.radians(SensorConversion.STEERING_CONV_SLOPE * self.steeringPotValue + SensorConversion.STEERING_Y_INTERCEPT)
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
