@@ -40,7 +40,7 @@ class ControlPlanner(Thread):
       self._checkWaypoint()
       self._control()
       self.particleFilter.prevTime = self.particleFilter.currentTime
-      sleepTime = (1.0 /Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
+      sleepTime = (1.0 / Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
       if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
         time.sleep(sleepTime)
       # TODO: Modify number of particles

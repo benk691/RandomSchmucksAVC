@@ -285,6 +285,7 @@ class SimParticleFilter:
     '''
     #matplot.xlim(-0.5,25.5)
     #matplot.ylim(-25.0,-15.0)
+    # Plot Particles
     self._drawCourseMap()
     x = [ p[Constants.X] for p in self.particles ]
     y = [ p[Constants.Y] for p in self.particles ]
@@ -293,7 +294,11 @@ class SimParticleFilter:
     w = [ p[Constants.WEIGHT] / totalWeight for p in self.particles ]
 
     matplot.scatter(x, y, c=w)
-    matplot.scatter([car.x], [car.y], marker='+', color='green')
+
+    self._drawCar(car)
+
+    matplot.savefig(filename)
+    matplot.clf()
 
     # STREAMPLOT ATTEMPT
     #u = []
@@ -311,9 +316,8 @@ class SimParticleFilter:
     #cU, cV = numpy.mgrid[car.x:car.y:1j, cRX:cRY:1j] 
     #matplot.streamplot(numpy.array([car.x]), numpy.array([car.y]), cU, cV, marker='+', color='pink')
 
-
+    # ALPHAS
     #matplot.scatter(x, y, c=w)
-    matplot.savefig(filename)
     #maxWeight = max([ p[Constants.WEIGHT] for p in self.particles ])
     #w = [ p[Constants.WEIGHT] / maxWeight for p in self.particles ]
     #
@@ -321,8 +325,29 @@ class SimParticleFilter:
     #colors = [ [ g, 0, 1-g, 0.2] for g in w ]
     #matplot.scatter(x, y, c=colors)
     #matplot.savefig(filename)
-    matplot.clf()
 
+  #-------------------------------------------------------------------------------
+  def _drawCar(self, car, color):
+    '''
+    Draws the vehicle on the map
+    '''
+    # Get left distance sensor position
+    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], car.heading)
+   
+    leftStartPoint = [ car.x + rX, car.y + rY ]
+    
+    # Get right distance sensor position
+    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], car.heading)
+  
+    rightStartPoint = [ car.x + rX, car.y + rY ]
+
+    # Plot distance sensors
+    matplot.scatter(leftStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='<', color=color)
+
+    matplot.scatter(rightStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='>', color=color)
+    
+    # Plot car
+    matplot.scatter([car.x], [car.y], marker='+', color='green')
 
   #-------------------------------------------------------------------------------
   def _drawCourseMap(self):
