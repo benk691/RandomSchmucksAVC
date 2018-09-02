@@ -59,7 +59,7 @@ class Car:
 car = Car()
 
 m = CourseMap()
-N = 10
+N = 50
 startBox = [[0.0, 0.0], [1.0, 1.0]]
 headingRange = [5.0, 10.0]
 pf = SimParticleFilter(N, startBox, headingRange, m)
@@ -72,7 +72,7 @@ Constants.VELOCITY_NOISE = 0.01
 Constants.HEADING_NOISE = math.radians(5.0)
 Constants.DISTANCE_NOISE = 0.3
 
-for i in range(5):
+for i in range(50):
   print('=' * 50)
   print("START LOOP {0}".format(i))
   print('=' * 50)

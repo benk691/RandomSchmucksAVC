@@ -337,6 +337,8 @@ class SimParticleFilter:
     for c in self.courseMap.circles:
       self._drawCircle(c)
 
+    self._drawWaypoints()
+
   #-------------------------------------------------------------------------------
   def _drawLine(self, line):
     '''
@@ -354,9 +356,17 @@ class SimParticleFilter:
     @param circle - Circle class to draw
     '''
     ax = matplot.gca()
-    c = mpatches.Circle(circle.center, circle.radius) 
-    collection = PatchCollection([c])
-    ax.add_collection(collection)
+    c = matplot.Circle(circle.center, circle.radius, fill=False) 
+    ax.add_patch(c)
+
+  #-------------------------------------------------------------------------------
+  def _drawWaypoints(self):
+    '''
+    Draws a waypoints
+    '''
+    x = [ w[Constants.X] for w in self.courseMap.waypoints ]
+    y = [ w[Constants.Y] for w in self.courseMap.waypoints ]
+    matplot.scatter(x, y, marker='^', color='red')
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):

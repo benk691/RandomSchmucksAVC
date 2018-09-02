@@ -69,7 +69,7 @@ HEADING = 2
 # Weight index in a coordinate list
 WEIGHT = 3
 
-# Weight index in a coordinate list
+# Radius index in a coordinate list
 RADIUS = 3
 
 # Distance away from the waypoint we want to start checking if we are at waypoint or not
