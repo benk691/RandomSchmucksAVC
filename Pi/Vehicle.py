@@ -10,35 +10,34 @@ class Vehicle:
   '''
 
   #-------------------------------------------------------------------------------
-  def __init__(self):
+  def __init__(self, sensorConversionThread):
     '''
     Initializes the basics of the vehicle
+    @param sensorConversionThread - the conversion thread
     '''
+    self.sensorConversionThread = sensorConversionThread
     self.velocityPID = PID(Constants.VELOCITY_PID_P, Constants.VELOCITY_PID_I, Constants.VELOCITY_PID_D, Constants.VELOCITY_PID_WINDUP)
     self.steeringAnglePID = PID(Constants.STEERING_ANGLE_PID_P, Constants.STEERING_ANGLE_PID_I, Constants.STEERING_ANGLE_PID_D, Constants.STEERING_ANGLE_PID_WINDUP)
     # TODO: Wall Follow PID
     self.tabs = 0
 
   #-------------------------------------------------------------------------------
-  def setVelocity(self, velocity):
+  def update(self, velocityGoal, steeringAngleGoal):
     '''
-    Sets the velocity goal of the PID control
-    @param velocity - the goal velocity
+    Updates the vehicle's state
+    @param velocityGoal - the velocity we are trying to achieve
+    @param steeringAngleGoal - the steering angle we are trying to achieve
     '''
+    # Set PID Goals
     self.velocityPID.setGoal(velocity)
-    # TODO: request current vehicle measurement
-    vehicleVelocity = 0.0
+    self.steeringAnglePID.setGoal(steeringAngle)
+    # Set current vehicle measurements
+    # TODO: Test. Threading issues
+    vehicleVelocity = self.sensorConversionThread.velocity
     self.velocityPID.setMeasurement(vehicleVelocity)
 
-  #-------------------------------------------------------------------------------
-  def setTurnAngle(self, steeringAngle):
-    '''
-    Sets the turn angle goal of the PID control
-    @param steeringAngle - the goal turn angle
-    '''
-    self.steeringAnglePID.setGoal(steeringAngle)
-    # TODO: request current vehicle measurement
-    vehicleSteeringAngle = 0.0
+    # TODO: Test. Threading issues
+    vehicleSteeringAngle = self.sensorConversionThread.steeringAngle
     self.velocityPID.setMeasurement(vehicleSteeringAngle)
 
   #-------------------------------------------------------------------------------

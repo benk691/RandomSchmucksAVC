@@ -1,9 +1,10 @@
 import math
 import time
-from threading import Thread
 import Constants
+from threading import Thread
+from Publisher import Publisher
 
-class ControlPlanner(Thread):
+class ControlPlanner(Thread, Publisher):
   '''
   Determines what action to take to get the vehicle to where we want to go.
   '''
@@ -16,7 +17,8 @@ class ControlPlanner(Thread):
     @param particleFilter - the particle filter used for estimating where the vehicle is
     @param courseMap - the course map
     '''
-    super(ControlPlanner, self).__init__(group=group, target=target, name=name, daemon=daemon)
+    Thread.__init__(group=group, target=target, name=name, daemon=daemon)
+    Publisher.__init__()
     self.vehicle = vehicle
     self.particleFilter = particleFilter
     self.courseMap = courseMap
@@ -66,6 +68,8 @@ class ControlPlanner(Thread):
 
     self.steeringAngleGoal = math.atan(Constants.VEHICLE_AXLE_LEN * ((2.0 * yErr) / (math.pow(xErr, 2) + math.pow(yErr, 2)))) * Constants.CONTROL_STEERING_AGRESSION
     self.velocityGoal = max(Constants.MIN_VEHICLE_VELOCITY, Constants.MAX_VEHICLE_VELOCITY - math.atan(self.steeringAngleGoal) * Constants.VELOCITY_SCALE_FACTOR)
+    # Publish goals
+    self.publish(self.velocityGoal, self.steeringAngleGoal)
 
   #------------------------------------------------------------------------------- 
   def _checkWaypoint(self):
