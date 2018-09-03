@@ -3,6 +3,7 @@ import math
 import time
 import numpy
 import matplotlib.pyplot as matplot
+import matplotlib.lines as mlines
 import Constants
 from matplotlib.colors import Normalize
 from scipy.stats import norm
@@ -44,6 +45,7 @@ class ParticleFilter:
     Gets the estimated vehicle location based on the particles
     @return mean(X), mean(Y), mean(heading), covariance
     '''
+    print("DBG: getEstiamtedVehicleLocation called")
     self.currentTime = time.time()
     self._getVehicleMeasurements()
     self.dt = self.currentTime - self.prevTime
@@ -52,14 +54,23 @@ class ParticleFilter:
     self._weight()
     self._generateNewParticleList()
     # Calculate estimates
+    #print("DBG: GE 1")
     self.estVehicleX = sum([ p[Constants.X] for p in self.particles]) / float(len(self.particles))
+
+    #print("DBG: GE 2")
     self.estVehicleY = sum([ p[Constants.Y] for p in self.particles]) / float(len(self.particles))
+    #print("DBG: GE 3")
     self.estVehicleHeading = sum([ p[Constants.HEADING] for p in self.particles]) / float(len(self.particles))
+    #print("DBG: GE 4")
     # Calculate covariance
     x = [ p[Constants.X] for p in self.particles ]
+    #print("DBG: GE 5")
     y = [ p[Constants.Y] for p in self.particles ]
+    #print("DBG: GE 6")
     h = [ p[Constants.HEADING] for p in self.particles ]
+    #print("DBG: GE 7")
     self.covarVehicle = numpy.cov(numpy.vstack((x,y,h)))
+    #print("DBG: GE 8")
     return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle
 
   #-------------------------------------------------------------------------------
@@ -86,6 +97,7 @@ class ParticleFilter:
     Perform the prediction step. This will predict where the particle is going to go 
     based on the most recent values read in from the vehicle
     '''
+    print("DBG: _predict called")
     for i in range(len(self.particles)):
       # Generate a steering angle for the particles
       genSteeringAngle = random.gauss(mu=self.vehicleSteeringAngle, sigma=Constants.STEERING_ANGLE_NOISE)
@@ -104,8 +116,9 @@ class ParticleFilter:
       print("DBG: turnRadius = {0}".format(turnRadius))
       print("DBG: genVelocity = {0}".format(genVelocity))
       print("DBG: rotatedX, rotatedY = ({0}, {1})\n".format(rotatedX, rotatedY))
-      self.particles[i][Constants.X] += rotatedX
-      self.particles[i][Constants.Y] += rotatedY
+      slipX, slipY = self._rotate(0, random.gauss(0, Constants.SLIP_NOISE * self.dt), self.particles[i][Constants.HEADING])
+      self.particles[i][Constants.X] += rotatedX + slipX
+      self.particles[i][Constants.Y] += rotatedY + slipY
       self.particles[i][Constants.HEADING] += genVelocity / turnRadius
 
   #-------------------------------------------------------------------------------
@@ -113,6 +126,7 @@ class ParticleFilter:
     '''
     Calculates the weights for the given particle
     '''
+    print("DBG: _weight called")
     for i in range(len(self.particles)):
       print("DBG: vehicleHeading = {0}".format(self.vehicleHeading))
       particleDistLeft, particleDistRight = self._calculateDistanceLineOfSight(self.particles[i])
@@ -147,18 +161,18 @@ class ParticleFilter:
       print("DBG: leftDistPDF = {0}".format(leftDistPDF))
       print("DBG: rightDistPDF = {0}\n".format(rightDistPDF))
 
-      self.particles[i][4] = particleDistLeft
-      self.particles[i][5] = particleDistRight
-
   #-------------------------------------------------------------------------------
   def _generateNewParticleList(self):
     '''
     Calculate the cumulative sum of the particle weights, then generates new particles using the cumulative sum over a random distribution
     '''
+    print("DBG: _generateNewParticleList called")
     self.cumulativeSum = [ sum([ p[Constants.WEIGHT] for p in self.particles[ : i + 1] ]) for i in range(len(self.particles)) ]
+    #print("DBG: 1")
     genParticles = []
     for i in range(len(self.particles)):
       genCumSum = random.uniform(0.0, self.cumulativeSum[-1])
+      #print("DBG: 2")
       # Get the index of the particle we want to generate
       particleIndex = 0
       for csi in range(len(self.cumulativeSum)):
@@ -167,8 +181,10 @@ class ParticleFilter:
           break
       genParticles.append(particleIndex)
 
+    #print("DBG: 3")
     # Generate particles
-    self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0, 0.0, 0.0 ] for genP in genParticles ]
+    self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0 ] for genP in genParticles ]
+    #print("DBG: 4")
 
   #-------------------------------------------------------------------------------
   def _calculateDistanceLineOfSight(self, particle):
@@ -208,9 +224,11 @@ class ParticleFilter:
     # Get left intersections with map walls
     leftIntersections = []
     for c in self.courseMap.circles:
-      i = c.findIntersection(leftDistLine) 
-      if i is not None:
-        leftIntersections += [ i[0], i[1] ]
+      inter = c.findIntersection(leftDistLine)
+      if inter is not None:
+        for i in inter:
+          if i is not None:
+            leftIntersections += [ i ]
 
     leftIntersections += [ l.findIntersection(leftDistLine) for l in self.courseMap.lines ]
 
@@ -219,9 +237,11 @@ class ParticleFilter:
     # Get right intersections with map walls
     rightIntersections = []
     for c in self.courseMap.circles:
-      i = c.findIntersection(rightDistLine) 
-      if i is not None:
-        rightIntersections += [ i[0], i[1] ]
+      inter = c.findIntersection(leftDistLine)
+      if inter is not None:
+        for i in inter:
+          if i is not None:
+            rightIntersections += [ i ]
 
     rightIntersections += [ l.findIntersection(rightDistLine) for l in self.courseMap.lines ]
     print("DBG: rightIntersections = {0}".format(rightIntersections))
@@ -254,19 +274,23 @@ class ParticleFilter:
     y - the Y coordinate
     theta - the amount to rotate (radians)
     '''
+    print("DBG: _rotate called")
     print("DBG: x = {0}, y = {1}, theta = {2}".format(x, y, theta))
     outX = x * math.cos(theta) - y * math.sin(theta)
     outY = x * math.sin(theta) + y * math.cos(theta)
     return outX, outY
 
   #-------------------------------------------------------------------------------
-  def _scatterPlotParticles(self, filename):
+  def _scatterPlotParticles(self, car, filename):
     '''
     Create a scatter plot of the particle positions, headings and weight
+    @param car - Car class
     @param filename - the SVG filename to write the scatterplot to
     '''
-    matplot.xlim(-0.5,25.5)
-    matplot.ylim(-25.0,-15.0)
+    #matplot.xlim(-0.5,25.5)
+    #matplot.ylim(-25.0,-15.0)
+    # Plot Particles
+    self._drawCourseMap()
     x = [ p[Constants.X] for p in self.particles ]
     y = [ p[Constants.Y] for p in self.particles ]
     h = [ p[Constants.HEADING] for p in self.particles ]
@@ -274,7 +298,32 @@ class ParticleFilter:
     w = [ p[Constants.WEIGHT] / totalWeight for p in self.particles ]
 
     matplot.scatter(x, y, c=w)
+
+    self._drawEstimate()
+
+    self._drawCar(car)
+
     matplot.savefig(filename)
+    matplot.clf()
+
+    # STREAMPLOT ATTEMPT
+    #u = []
+    #v = []
+    #for inX, inY, inH in zip(x, y, h):
+    #  outU, outV = self._rotate(inX, inY, inH)
+    #  u.append(outU)
+    #  v.append(outV)
+    #
+    #u, v = numpy.mgrid[x:y:1j, u:v:1j]
+    ##matplot.streamplot(x, y, [ [ i for i in u ] for i in u ], [ [ i for i in v ] for i in v ], color=w)
+    #matplot.streamplot(numpy.array(x), numpy.array(y), u, v, color=w)
+
+    #cRX, cRY = self._rotate(car.x, car.y, car.heading)
+    #cU, cV = numpy.mgrid[car.x:car.y:1j, cRX:cRY:1j] 
+    #matplot.streamplot(numpy.array([car.x]), numpy.array([car.y]), cU, cV, marker='+', color='pink')
+
+    # ALPHAS
+    #matplot.scatter(x, y, c=w)
     #maxWeight = max([ p[Constants.WEIGHT] for p in self.particles ])
     #w = [ p[Constants.WEIGHT] / maxWeight for p in self.particles ]
     #
@@ -282,7 +331,96 @@ class ParticleFilter:
     #colors = [ [ g, 0, 1-g, 0.2] for g in w ]
     #matplot.scatter(x, y, c=colors)
     #matplot.savefig(filename)
-    matplot.clf()
+
+  #-------------------------------------------------------------------------------
+  def _drawCar(self, car):
+    '''
+    Draws the vehicle on the map
+    '''
+    # Get left distance sensor position
+    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], car.heading)
+   
+    leftStartPoint = [ car.x + rX, car.y + rY ]
+    
+    # Get right distance sensor position
+    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], car.heading)
+  
+    rightStartPoint = [ car.x + rX, car.y + rY ]
+
+    # Plot distance sensors
+    matplot.scatter(leftStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='<', color='green')
+
+    matplot.scatter(rightStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='>', color='green')
+    
+    # Plot car
+    matplot.scatter([car.x], [car.y], marker='+', color='green')
+
+  #-------------------------------------------------------------------------------
+  def _drawEstimate(self):
+    '''
+    Draws the estimated vehicle on the map
+    '''
+    # Get left distance sensor position
+    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
+   
+    leftStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
+    
+    # Get right distance sensor position
+    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
+  
+    rightStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
+
+    # Plot distance sensors
+    matplot.scatter(leftStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='<', color='orange')
+
+    matplot.scatter(rightStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='>', color='orange')
+    
+    # Plot car
+    matplot.scatter([self.estVehicleX], [self.estVehicleY], marker='+', color='orange')
+
+  #-------------------------------------------------------------------------------
+  def _drawCourseMap(self):
+    '''
+    Draws the course map
+    '''
+    # Draw lines
+    for l in self.courseMap.lines:
+      self._drawLine(l)
+
+    # Draw circles
+    for c in self.courseMap.circles:
+      self._drawCircle(c)
+
+    self._drawWaypoints()
+
+  #-------------------------------------------------------------------------------
+  def _drawLine(self, line):
+    '''
+    Draw a line
+    @param Line class to draw
+    '''
+    ax = matplot.gca()
+    l = mlines.Line2D([line.startPoint[Constants.X], line.endPoint[Constants.X]], [line.startPoint[Constants.Y], line.endPoint[Constants.Y]]) 
+    ax.add_line(l)
+
+  #-------------------------------------------------------------------------------
+  def _drawCircle(self, circle):
+    '''
+    Draw a cirlce
+    @param circle - Circle class to draw
+    '''
+    ax = matplot.gca()
+    c = matplot.Circle(circle.center, circle.radius, fill=False) 
+    ax.add_patch(c)
+
+  #-------------------------------------------------------------------------------
+  def _drawWaypoints(self):
+    '''
+    Draws a waypoints
+    '''
+    x = [ w[Constants.X] for w in self.courseMap.waypoints ]
+    y = [ w[Constants.Y] for w in self.courseMap.waypoints ]
+    matplot.scatter(x, y, marker='^', color='red')
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -303,7 +441,8 @@ class ParticleFilter:
     desc += "\tcumulativeSum = {0}\n".format(self.cumulativeSum)
     desc += "\tparticles:\n"
     for p in sorted(self.particles, key=lambda x: x[Constants.WEIGHT], reverse=True):
-      desc += "\t\t[X = {0:.4f}, Y = {1:.4f}, H = {2:.4f}, W = {3:.4f}, LD = {4:.4f}, RD = {5:.4f}]\n".format(p[0], p[1], math.degrees(p[2]), p[3], p[4], p[5])
+      desc += "\t\t[X = {0:.4f}, Y = {1:.4f}, H = {2:.4f}, W = {3:.4f}]\n".format(p[0], p[1], math.degrees(p[2]), p[3])
+
     desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
     desc += "\testVehicleY = {0}\n".format(self.estVehicleY)
     desc += "\testVehicleHeading = {0}\n".format(self.estVehicleHeading)

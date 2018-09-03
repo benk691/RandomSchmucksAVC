@@ -30,19 +30,29 @@ class ControlPlanner(Thread):
     self.steeringAngleGoal = 0.0
     self.velocityGoal = 0.0
 
+    if self.vehicle is not None:
+      self.vehicle.setTabs(1)
+
   #-------------------------------------------------------------------------------
   def run(self):
     '''
     Runs the planner to set goals for where the vehicle is going to go
     '''
     while not self.shutDown:
+      #print("DBG: R0")
       self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
+      #print("DBG: R1")
       self._checkWaypoint()
+      #print("DBG: R2")
       self._control()
+      #print("DBG: R3")
       self.particleFilter.prevTime = self.particleFilter.currentTime
+      #print("DBG: R4")
       sleepTime = (1.0 / Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
+      #print("DBG: R5")
       if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
         time.sleep(sleepTime)
+      #print("DBG: R7")
       # TODO: Modify number of particles
 
   #-------------------------------------------------------------------------------
@@ -54,8 +64,8 @@ class ControlPlanner(Thread):
     yErr = self.courseMap.waypoints[self.waypoint][Constants.Y] - self.estVehicleY
     xErr, yErr = self.particleFilter._rotate(xErr, yErr, -self.estVehicleHeading)
 
-    self.steeringAngleGoal = math.arctan(Constants.VEHICLE_AXLE_LEN * ((2.0 * yErr) / (math.pow(xErr, 2) + math.pow(yErr, 2)))) * Constants.CONTROL_STEERING_AGRESSION
-    self.velocityGoal = max(Constants.MIN_VEHICLE_VELOCITY, Constants.MAX_VEHICLE_VELOCITY - math.arctan(steeringAngleGoal) * Constants.VELOCITY_SCALE_FACTOR)
+    self.steeringAngleGoal = math.atan(Constants.VEHICLE_AXLE_LEN * ((2.0 * yErr) / (math.pow(xErr, 2) + math.pow(yErr, 2)))) * Constants.CONTROL_STEERING_AGRESSION
+    self.velocityGoal = max(Constants.MIN_VEHICLE_VELOCITY, Constants.MAX_VEHICLE_VELOCITY - math.atan(self.steeringAngleGoal) * Constants.VELOCITY_SCALE_FACTOR)
 
   #------------------------------------------------------------------------------- 
   def _checkWaypoint(self):
@@ -64,13 +74,22 @@ class ControlPlanner(Thread):
     If the vehicle has then increment to the next waypoint
     '''
     # TODO: Pull rotate out into general functions
+    #print("DBG: W0")
     print("DBG: waypoint = {0}".format(self.waypoint))
+    print("DBG: len(courseMap.waypoints) = {0}".format(len(self.courseMap.waypoints)))
+    print("DBG: courseMap.waypoints:")
+    for wp in self.courseMap.waypoints:
+      print("DBG: wp = {0}".format(wp))
+
     rWpX, rWpY = self.particleFilter._rotate(self.courseMap.waypoints[self.waypoint][Constants.X], self.courseMap.waypoints[self.waypoint][Constants.Y], -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
+    #print("DBG: W1")
     rEstX, rEstY = self.particleFilter._rotate(self.estVehicleX, self.estVehicleY, -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
+    #print("DBG: W2")
     if rEstX > (rWpX - Constants.WAYPOINT_CHECK_DIST):
       self.waypointCheck += 1
     else:
       self.waypointCheck = 0
+    #print("DBG: W3")
 
     if self.waypointCheck >= Constants.WAYPOINT_MAX_CHECKS:
       self.waypointCheck = 0
@@ -79,6 +98,8 @@ class ControlPlanner(Thread):
         self.waypoint = 0
       # TODO: Add in switch cases for special points (NERF, stop, etc...)
 
+    #print("DBG: W4")
+
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
     '''
@@ -86,7 +107,6 @@ class ControlPlanner(Thread):
     @return string describing debug information
     '''
     desc = "ControlPlanner:\n"
-    vehicle.setTabs(1)
     # TODO: add in setTabs for particle filter and course map
     desc += "\tshutDown = {0}\n".format(self.shutDown)
     desc += "\tvehicle = {0}\n".format(self.vehicle)
@@ -99,7 +119,7 @@ class ControlPlanner(Thread):
     desc += "\twaypoint = [{0}: {1}]\n".format(self.waypoint, self.courseMap.waypoints[self.waypoint])
     desc += "\twaypointCheck = {0}\n".format(self.waypointCheck)
     desc += "\tvelocityGoal = {0}\n".format(self.velocityGoal)
-    desc += "\tsteeringGoal = {0}\n".format(self.steeringGoal)
+    desc += "\tsteeringAngleGoal = {0}\n".format(self.steeringAngleGoal)
     return desc
 
   #-------------------------------------------------------------------------------
@@ -124,4 +144,3 @@ class ControlPlanner(Thread):
     Destructor
     '''
     self.join(timeout=5)
-
