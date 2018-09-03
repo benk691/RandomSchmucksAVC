@@ -235,5 +235,6 @@ class SensorConversion(Thread):
     '''
     Destructor
     '''
+    # TODO: Create timeout constant
     self.join(timeout=5)
 
