@@ -126,6 +126,12 @@ VELOCITY_NOISE = 0.0
 # Noise that is applied to account for sensor inaccuracies in the distance
 DISTANCE_NOISE = 0.0
 
+# Slippage noise
+SLIP_NOISE = 0.0
+
+# Contant to allow us to steer more sharply
+CONTROL_STEERING_AGRESSION = 1.1
+
 # Update rate for the particle filter (Hz)
 PARTICLE_FILTER_UPDATE_RATE = 10
 

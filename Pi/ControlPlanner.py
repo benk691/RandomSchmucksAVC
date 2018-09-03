@@ -54,7 +54,7 @@ class ControlPlanner(Thread):
     yErr = self.courseMap.waypoints[self.waypoint][Constants.Y] - self.estVehicleY
     xErr, yErr = self.particleFilter._rotate(xErr, yErr, -self.estVehicleHeading)
 
-    self.steeringAngleGoal = math.arctan(Constants.VEHICLE_AXLE_LEN * ((2.0 * yErr) / (math.pow(xErr, 2) + math.pow(yErr, 2))))
+    self.steeringAngleGoal = math.arctan(Constants.VEHICLE_AXLE_LEN * ((2.0 * yErr) / (math.pow(xErr, 2) + math.pow(yErr, 2)))) * Constants.CONTROL_STEERING_AGRESSION
     self.velocityGoal = max(Constants.MIN_VEHICLE_VELOCITY, Constants.MAX_VEHICLE_VELOCITY - math.arctan(steeringAngleGoal) * Constants.VELOCITY_SCALE_FACTOR)
 
   #------------------------------------------------------------------------------- 

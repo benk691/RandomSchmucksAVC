@@ -118,8 +118,9 @@ class SimParticleFilter:
       print("DBG: turnRadius = {0}".format(turnRadius))
       print("DBG: genVelocity = {0}".format(genVelocity))
       print("DBG: rotatedX, rotatedY = ({0}, {1})\n".format(rotatedX, rotatedY))
-      self.particles[i][Constants.X] += rotatedX
-      self.particles[i][Constants.Y] += rotatedY
+      slipX, slipY = self._rotate(0, random.gauss(0, Constants.SLIP_NOISE * self.dt), self.particles[i][Constants.HEADING])
+      self.particles[i][Constants.X] += rotatedX + slipX
+      self.particles[i][Constants.Y] += rotatedY + slipY
       self.particles[i][Constants.HEADING] += genVelocity / turnRadius
 
   #-------------------------------------------------------------------------------

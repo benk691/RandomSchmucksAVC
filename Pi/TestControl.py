@@ -38,12 +38,15 @@ def moveCar(c, pf):
   print("DBG: turnRadius = {0}".format(turnRadius))
   print("DBG: genVelocity = {0}".format(genVelocity))
   print("DBG: rotatedX, rotatedY = ({0}, {1})\n".format(rotatedX, rotatedY))
-  c.x += rotatedX
-  c.y += rotatedY
+
+  slipX, slipY = pf._rotate(0, random.gauss(0, Constants.SLIP_NOISE * pf.dt), car.heading)
+  c.x += rotatedX + slipX
+  c.y += rotatedY + slipY
   c.heading += genVelocity / turnRadius
 
 #-------------------------------------------------------------------------------
 # Sim only constants
+CONTROL_SLIP_NOISE = 0.3
 CONTROL_STEERING_ANGLE_NOISE = math.radians(5.0)
 CONTROL_VELOCITY_NOISE = 0.3
 
@@ -71,6 +74,7 @@ Constants.STEERING_ANGLE_NOISE = math.radians(2.0)
 Constants.VELOCITY_NOISE = 0.2
 Constants.HEADING_NOISE = math.radians(5.0)
 Constants.DISTANCE_NOISE = 0.3
+Constants.SLIP_NOISE = 0.4
 
 for i in range(500):
   print('=' * 50)
@@ -79,8 +83,8 @@ for i in range(500):
   
   # Generate measurements
   pf.vehicleVelocity = random.gauss(car.velocity, Constants.VELOCITY_NOISE) + 0.2
-  pf.vehicleSteeringAngle = random.gauss(car.steeringAngle, Constants.STEERING_ANGLE_NOISE) + math.radians(2.0)
-  pf.vehicleHeading = random.gauss(car.heading, Constants.HEADING) + math.radians(5.0)
+  pf.vehicleSteeringAngle = random.gauss(car.steeringAngle, Constants.STEERING_ANGLE_NOISE)
+  pf.vehicleHeading = random.gauss(car.heading, Constants.HEADING)
   meanLeftDistance, meanRightDistance = pf._calculateDistanceLineOfSight([car.x, car.y, car.heading, 1.0])
   pf.vehicleLeftDistance = random.gauss(meanLeftDistance, Constants.DISTANCE_NOISE)
   pf.vehicleRightDistance = random.gauss(meanRightDistance, Constants.DISTANCE_NOISE)
