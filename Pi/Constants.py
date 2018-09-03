@@ -3,6 +3,34 @@ import math
 '''
 Defines constants for the Rasberry Pi
 '''
+#--------------------------------
+#         PID Control
+#--------------------------------
+# Velocity proportional constant
+VELOCITY_PID_P = 0.0
+
+# Velocity integral constant
+VELOCITY_PID_I = 0.0
+
+# Velocity derivative constant
+VELOCITY_PID_D = 0.0
+
+# Velocity windup constant
+VELOCITY_PID_WINDUP = 0.0
+
+# Steering angle proportional constant
+STEERING_ANGLE_PID_P = 0.0
+
+# Steering angle integral constant
+STEERING_ANGLE_PID_I = 0.0
+
+# Steering angle derivative constant
+STEERING_ANGLE_PID_D = 0.0
+
+# Steering angle windup constant
+STEERING_ANGLE_PID_WINDUP = 0.0
+#---------------------------------
+
 # ADC data/sample rate
 #   Valid Data Rates and their mappings per the Adafruit_Python_ADS1x15 repo
 #     8   ->  0x00

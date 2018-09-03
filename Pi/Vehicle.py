@@ -1,7 +1,9 @@
 import time
 import re
 import Constants
+from PID import PID
 
+# TODO: Subscribe to the control planner
 class Vehicle:
   '''
   Controls the Fisher Price Vehicle
@@ -12,41 +14,32 @@ class Vehicle:
     '''
     Initializes the basics of the vehicle
     '''
-    self.leftVelocity = 0
-    self.rightVelocity = 0
+    self.velocityPID = PID(Constants.VELOCITY_PID_P, Constants.VELOCITY_PID_I, Constants.VELOCITY_PID_D, Constants.VELOCITY_PID_WINDUP)
+    self.steeringAnglePID = PID(Constants.STEERING_ANGLE_PID_P, Constants.STEERING_ANGLE_PID_I, Constants.STEERING_ANGLE_PID_D, Constants.STEERING_ANGLE_PID_WINDUP)
+    # TODO: Wall Follow PID
     self.tabs = 0
 
   #-------------------------------------------------------------------------------
-  def setSpeed(self, speed):
+  def setVelocity(self, velocity):
     '''
-    Sets the speed of the vehicle
-    @param speed - the input speed, this should be a decimal value that is used 
-                     as an analog input into the Sabertooth H-Bridge
+    Sets the velocity goal of the PID control
+    @param velocity - the goal velocity
     '''
-    self.speed = speed
+    self.velocityPID.setGoal(velocity)
+    # TODO: request current vehicle measurement
+    vehicleVelocity = 0.0
+    self.velocityPID.setMeasurement(vehicleVelocity)
 
   #-------------------------------------------------------------------------------
-  def getSpeed(self):
+  def setTurnAngle(self, steeringAngle):
     '''
-    Gets the current speed of the vehicle
-    @return speed of the vehicle. This is the analog value being feed into the 
-            Sabertooth H-Bridge
+    Sets the turn angle goal of the PID control
+    @param steeringAngle - the goal turn angle
     '''
-    pass 
-
-  #-------------------------------------------------------------------------------
-  def drive(self):
-    '''
-    Drives the vehicle forward
-    '''
-    pass
-
-  #-------------------------------------------------------------------------------
-  def turn(self):
-    '''
-    Turns the vehicle
-    '''
-    pass
+    self.steeringAnglePID.setGoal(steeringAngle)
+    # TODO: request current vehicle measurement
+    vehicleSteeringAngle = 0.0
+    self.velocityPID.setMeasurement(vehicleSteeringAngle)
 
   #-------------------------------------------------------------------------------
   def setTabs(self, tabs):
@@ -63,8 +56,8 @@ class Vehicle:
     @return string describing debug information
     '''
     desc = "{0}Vehicle Info:\n".format('\t' * self.tabs)
-    desc += "{0}\tRight Velocity = {1}\n".format('\t' * self.tabs, self.rightVelocity)
-    desc += "{0}\tLeft Velocity = {1}\n".format('\t' * self.tabs, self.leftVelocity)
+    desc += "{0}\tvelocityPID = {1}\n".format('\t' * self.tabs, self.velocityPID)
+    desc += "{0}\tsteeringAnglePID = {1}\n".format('\t' * self.tabs, self.steeringAnglePID)
     return desc
   
   #-------------------------------------------------------------------------------
