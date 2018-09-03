@@ -55,8 +55,23 @@ class Circle:
       i1 = [ t1 + self.center[Constants.X], m * t1 + b + self.center[Constants.Y] ]
       # intercept point 2
       i2 = [ t2 + self.center[Constants.X], m * t2 + b + self.center[Constants.Y] ]
-      # TODO: angle accounting and closest point considerations
-      return [i1, i2]
+      # TODO: closest point considerations
+      return [self._checkAngleIntersecion(i1), self._checkAngleIntersecion(i2)]
+
+  #-------------------------------------------------------------------------------
+  def _checkAngleIntersecion(self, intersect):
+    '''
+    Checks if the given intersection falls within the ignored angles of the circle
+    @param intersection - [x ,y] coordinate of the intersection
+    @return None if no intersection, otherwise return the passed in intersection
+    '''
+    # TODO: Check this over with Brian
+    theta = math.atan((intersect[Constants.Y] - self.center[Constants.Y]) / (intersect[Constants.X] - self.center[Constants.X]))
+    # TODO: Wrap?
+    if theta <= max(self.startAngle, self.stopAngle) and theta>= min(self.startAngle, self.stopAngle):
+      # Valid
+      return intersect
+    return None
 
   #-------------------------------------------------------------------------------
   def setTabs(self, tabs):

@@ -224,9 +224,11 @@ class SimParticleFilter:
     # Get left intersections with map walls
     leftIntersections = []
     for c in self.courseMap.circles:
-      i = c.findIntersection(leftDistLine) 
-      if i is not None:
-        leftIntersections += [ i[0], i[1] ]
+      inter = c.findIntersection(leftDistLine)
+      if inter is not None:
+        for i in inter:
+          if i is not None:
+            leftIntersections += [ i ]
 
     leftIntersections += [ l.findIntersection(leftDistLine) for l in self.courseMap.lines ]
 
@@ -235,9 +237,11 @@ class SimParticleFilter:
     # Get right intersections with map walls
     rightIntersections = []
     for c in self.courseMap.circles:
-      i = c.findIntersection(rightDistLine) 
-      if i is not None:
-        rightIntersections += [ i[0], i[1] ]
+      inter = c.findIntersection(leftDistLine)
+      if inter is not None:
+        for i in inter:
+          if i is not None:
+            rightIntersections += [ i ]
 
     rightIntersections += [ l.findIntersection(rightDistLine) for l in self.courseMap.lines ]
     print("DBG: rightIntersections = {0}".format(rightIntersections))
