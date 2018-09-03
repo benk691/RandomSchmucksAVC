@@ -47,7 +47,7 @@ class SimControlPlanner(Thread):
     #print("DBG: R3")
     self.particleFilter.prevTime = self.particleFilter.currentTime
     #print("DBG: R4")
-    sleepTime = (1.0 /Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
+    sleepTime = (1.0 / Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
     #print("DBG: R5")
     if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
       time.sleep(sleepTime)

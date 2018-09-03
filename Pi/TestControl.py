@@ -44,8 +44,8 @@ def moveCar(c, pf):
 
 #-------------------------------------------------------------------------------
 # Sim only constants
-CONTROL_STEERING_ANGLE_NOISE = math.radians(3.0)
-CONTROL_VELOCITY_NOISE = 0.2
+CONTROL_STEERING_ANGLE_NOISE = math.radians(5.0)
+CONTROL_VELOCITY_NOISE = 0.3
 
 # car = [x,y,h,steeraAngle, velocity, controlSteeringNoise, controlVelocityNoise]
 class Car:
@@ -60,27 +60,27 @@ car = Car()
 
 m = CourseMap()
 N = 50
-startBox = [[0.0, 0.0], [1.0, 1.0]]
-headingRange = [5.0, 10.0]
+startBox = [[-0.5, -0.5], [0.5, 0.5]]
+headingRange = [math.radians(-5.0), math.radians(5.0)]
 pf = SimParticleFilter(N, startBox, headingRange, m)
 
 cp = SimControlPlanner(particleFilter=pf, courseMap=m)
 
-Constants.VEHICLE_AXLE_LEN = 1.0
-Constants.STEERING_ANGLE_NOISE = math.radians(10.0)
-Constants.VELOCITY_NOISE = 0.01
+Constants.VEHICLE_AXLE_LEN = 0.91
+Constants.STEERING_ANGLE_NOISE = math.radians(2.0)
+Constants.VELOCITY_NOISE = 0.2
 Constants.HEADING_NOISE = math.radians(5.0)
 Constants.DISTANCE_NOISE = 0.3
 
-for i in range(50):
+for i in range(500):
   print('=' * 50)
   print("START LOOP {0}".format(i))
   print('=' * 50)
   
   # Generate measurements
-  pf.vehicleVelocity = random.gauss(car.velocity, Constants.VELOCITY_NOISE)
-  pf.vehicleSteeringAngle = random.gauss(car.steeringAngle, Constants.STEERING_ANGLE_NOISE)
-  pf.vehicleHeading = random.gauss(car.heading, Constants.HEADING)
+  pf.vehicleVelocity = random.gauss(car.velocity, Constants.VELOCITY_NOISE) + 0.2
+  pf.vehicleSteeringAngle = random.gauss(car.steeringAngle, Constants.STEERING_ANGLE_NOISE) + math.radians(2.0)
+  pf.vehicleHeading = random.gauss(car.heading, Constants.HEADING) + math.radians(5.0)
   meanLeftDistance, meanRightDistance = pf._calculateDistanceLineOfSight([car.x, car.y, car.heading, 1.0])
   pf.vehicleLeftDistance = random.gauss(meanLeftDistance, Constants.DISTANCE_NOISE)
   pf.vehicleRightDistance = random.gauss(meanRightDistance, Constants.DISTANCE_NOISE)
@@ -107,5 +107,6 @@ for i in range(50):
 
   moveCar(car, pf)
 
-  pf._scatterPlotParticles(car, updateFName())
+  if i % 10 == 0:
+    pf._scatterPlotParticles(car, updateFName())
 

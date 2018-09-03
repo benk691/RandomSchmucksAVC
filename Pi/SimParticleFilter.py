@@ -49,7 +49,8 @@ class SimParticleFilter:
     '''
     print("DBG: getEstiamtedVehicleLocation called")
     self.currentTime = time.time()
-    self.dt = self.currentTime - self.prevTime
+    #self.dt = self.currentTime - self.prevTime
+    self.dt = 0.1
     # Perform particle calculations
     self._predict()
     self._weight()
