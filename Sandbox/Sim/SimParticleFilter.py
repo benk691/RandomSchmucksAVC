@@ -4,12 +4,14 @@ import time
 import numpy
 import matplotlib.pyplot as matplot
 import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
+from matplotlib.collections import PatchCollection
 import Constants
 from matplotlib.colors import Normalize
 from scipy.stats import norm
 from Line import Line
 
-class ParticleFilter:
+class SimParticleFilter:
   #-------------------------------------------------------------------------------
   def __init__(self, particleNumber, startBox, headingRange, courseMap):
     '''
@@ -47,8 +49,8 @@ class ParticleFilter:
     '''
     print("DBG: getEstiamtedVehicleLocation called")
     self.currentTime = time.time()
-    self._getVehicleMeasurements()
-    self.dt = self.currentTime - self.prevTime
+    #self.dt = self.currentTime - self.prevTime
+    self.dt = 0.1
     # Perform particle calculations
     self._predict()
     self._weight()

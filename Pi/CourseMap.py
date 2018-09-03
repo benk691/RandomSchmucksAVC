@@ -1,14 +1,22 @@
+import math
+import Constants
 from Map import Map
 from Circle import Circle
 from Line import Line
+
+#TODO: Put into general functions
+'''
+Converts feet to meters
+@param ft - the number of feet
+@return the number of meters
+'''
+convertFtToM = lambda ft: ft * 0.305
 
 class CourseMap(Map):
   '''
   Hard-coded course map
   '''
   # TODO: Draw ASCII Map Here
-
-  # TODO: Degrees, need radians
 
   #--------------------------------------------------------
   #                    CIRCLES
@@ -20,28 +28,28 @@ class CourseMap(Map):
   # OQ3C : Outer Quadrant 3 Circle
 
   # IQ1C Constants
-  IQ1C_CENTER = [ 31.0 / 0.254, 31.0 / 0.254 ] 
-  IQ1C_RADIUS = 23.0 / 0.254
-  IQ1C_START_ANGLE = -90.0
-  IQ1C_STOP_ANGLE = 180.0
+  IQ1C_CENTER = [ convertFtToM(31.0), convertFtToM(31.0) ] 
+  IQ1C_RADIUS = convertFtToM(23.0)
+  IQ1C_START_ANGLE = math.radians(-90.0)
+  IQ1C_STOP_ANGLE = math.radians(180.0)
 
   # OQ1C Constants
-  OQ1C_CENTER = [ 31.0 / 0.254, 31.0 / 0.254 ]
-  OQ1C_RADIUS = 39.0 / 0.254
-  OQ1C_START_ANGLE = -90.0
-  OQ1C_STOP_ANGLE = 180.0
+  OQ1C_CENTER = [ convertFtToM(31.0), convertFtToM(31.0) ]
+  OQ1C_RADIUS = convertFtToM(39.0)
+  OQ1C_START_ANGLE = math.radians(-90.0)
+  OQ1C_STOP_ANGLE = math.radians(180.0)
 
   # IQ3C Constants
-  IQ3C_CENTER = [ -31.0 / 0.254, -31.0 / 0.254 ]
-  IQ3C_RADIUS = 23.0 / 0.254
-  IQ3C_START_ANGLE = 90.0
-  IQ3C_STOP_ANGLE = 360.0
+  IQ3C_CENTER = [ convertFtToM(-31.0), convertFtToM(-31.0) ]
+  IQ3C_RADIUS = convertFtToM(23.0)
+  IQ3C_START_ANGLE = math.radians(90.0)
+  IQ3C_STOP_ANGLE = math.radians(360.0)
 
   # OQ3C Constants
-  OQ3C_CENTER = [ -31.0 / 0.254, -31.0 / 0.254 ]
-  OQ3C_RADIUS = 39.0 / 0.254
-  OQ3C_START_ANGLE = 90.0
-  OQ3C_STOP_ANGLE = 360.0
+  OQ3C_CENTER = [ convertFtToM(-31.0), convertFtToM(-31.0) ]
+  OQ3C_RADIUS = convertFtToM(39.0)
+  OQ3C_START_ANGLE = math.radians(90.0)
+  OQ3C_STOP_ANGLE = math.radians(360.0)
 
   #--------------------------------------------------------
   #                    LINES
@@ -57,36 +65,36 @@ class CourseMap(Map):
   # OQ4YL : Outer Quadrant 4 Y Parallel Line
 
   # IQ1XL Constants
-  IQ1XL_START_POINT = [ 8.0 / 0.254, 8.0 / 0.254 ]
-  IQ1XL_END_POINT = [ 31.0 / 0.254, 8.0 / 0.254 ]
+  IQ1XL_START_POINT = [ convertFtToM(8.0), convertFtToM(8.0) ]
+  IQ1XL_END_POINT = [ convertFtToM(31.0), convertFtToM(8.0) ]
 
   # IQ1YL Constants
-  IQ1YL_START_POINT = [ 8.0 / 0.254, 8.0 / 0.254 ]
-  IQ1YL_END_POINT = [ 8.0 / 0.254, 31.0 / 0.254 ]
+  IQ1YL_START_POINT = [ convertFtToM(8.0), convertFtToM(8.0) ]
+  IQ1YL_END_POINT = [ convertFtToM(8.0), convertFtToM(31.0) ]
 
   # OQ2XL Constants
-  OQ2XL_START_POINT = [ -8.0 / 0.254, 8.0 / 0.254 ]
-  OQ2XL_END_POINT = [ -31.0 / 0.254, 8.0 / 0.254 ]
+  OQ2XL_START_POINT = [ convertFtToM(-8.0), convertFtToM(8.0) ]
+  OQ2XL_END_POINT = [ convertFtToM(-31.0), convertFtToM(8.0) ]
 
   # OQ2YL Constants
-  OQ2YL_START_POINT = [ -8.0 / 0.254, 8.0 / 0.254 ]
-  OQ2YL_END_POINT = [ -8.0 / 0.254, 31.0 / 0.254 ]
+  OQ2YL_START_POINT = [ convertFtToM(-8.0), convertFtToM(8.0) ]
+  OQ2YL_END_POINT = [ convertFtToM(-8.0), convertFtToM(31.0) ]
 
   # IQ3XL Constants
-  IQ3XL_START_POINT = [ -8.0 / 0.254, -8.0 / 0.254 ]
-  IQ3XL_END_POINT = [ -31.0 / 0.254, -8.0 / 0.254 ]
+  IQ3XL_START_POINT = [ convertFtToM(-8.0), convertFtToM(-8.0) ]
+  IQ3XL_END_POINT = [ convertFtToM(-31.0), convertFtToM(-8.0) ]
 
   # IQ3YL Constants
-  IQ3YL_START_POINT = [ -8.0 / 0.254, -8.0 / 0.254 ]
-  IQ3YL_END_POINT = [ -8.0 / 0.254, -31.0 / 0.254 ]
+  IQ3YL_START_POINT = [ convertFtToM(-8.0), convertFtToM(-8.0) ]
+  IQ3YL_END_POINT = [ convertFtToM(-8.0), convertFtToM(-31.0) ]
 
   # OQ4XL Constants
-  OQ4XL_START_POINT = [ 8.0 / 0.254, -8.0 / 0.254 ]
-  OQ4XL_END_POINT = [ 31.0 / 0.254, -8.0 / 0.254 ]
+  OQ4XL_START_POINT = [ convertFtToM(8.0), convertFtToM(-8.0) ]
+  OQ4XL_END_POINT = [ convertFtToM(31.0), convertFtToM(-8.0) ]
 
   # OQ4YL Constants
-  OQ4YL_START_POINT = [ 8.0 / 0.254, -8.0 / 0.254 ]
-  OQ4YL_END_POINT = [ 8.0 / 0.254, -31.0 / 0.254 ]
+  OQ4YL_START_POINT = [ convertFtToM(8.0), convertFtToM(-8.0) ]
+  OQ4YL_END_POINT = [ convertFtToM(8.0), convertFtToM(-31.0) ]
 
   #-------------------------------------------------------------------------------
   def __init__(self):
@@ -95,21 +103,30 @@ class CourseMap(Map):
     '''
     super(CourseMap, self).__init__()
     # Course Circles
-    self.iq1c = Circle(Map.IQ1C_CENTER, Map.IQ1C_RADIUS, Map.IQ1C_START_ANGLE, Map.IQ1C_STOP_ANGLE)
-    self.oq1c = Circle(Map.OQ1C_CENTER, Map.OQ1C_RADIUS, Map.OQ1C_START_ANGLE, Map.OQ1C_STOP_ANGLE)
-    self.iq3c = Circle(Map.IQ3C_CENTER, Map.IQ3C_RADIUS, Map.IQ3C_START_ANGLE, Map.IQ3C_STOP_ANGLE)
-    self.oq3c = Circle(Map.OQ3C_CENTER, Map.OQ3C_RADIUS, Map.OQ3C_START_ANGLE, Map.OQ3C_STOP_ANGLE)
+    self.iq1c = Circle(CourseMap.IQ1C_CENTER, CourseMap.IQ1C_RADIUS, CourseMap.IQ1C_START_ANGLE, CourseMap.IQ1C_STOP_ANGLE)
+    self.oq1c = Circle(CourseMap.OQ1C_CENTER, CourseMap.OQ1C_RADIUS, CourseMap.OQ1C_START_ANGLE, CourseMap.OQ1C_STOP_ANGLE)
+    self.iq3c = Circle(CourseMap.IQ3C_CENTER, CourseMap.IQ3C_RADIUS, CourseMap.IQ3C_START_ANGLE, CourseMap.IQ3C_STOP_ANGLE)
+    self.oq3c = Circle(CourseMap.OQ3C_CENTER, CourseMap.OQ3C_RADIUS, CourseMap.OQ3C_START_ANGLE, CourseMap.OQ3C_STOP_ANGLE)
     self.circles = [self.iq1c, self.oq1c, self.iq3c, self.oq3c]
     # Course Lines
-    self.iq1xl = Line(Map.IQ1XL_START_POINT, Map.IQ1XL_END_POINT)
-    self.iq1yl = Line(Map.IQ1YL_START_POINT, Map.IQ1YL_END_POINT)
-    self.oq2xl = Line(Map.OQ2XL_START_POINT, Map.OQ2XL_END_POINT)
-    self.oq2yl = Line(Map.OQ2YL_START_POINT, Map.OQ2YL_END_POINT)
-    self.iq3xl = Line(Map.IQ3XL_START_POINT, Map.IQ3XL_END_POINT)
-    self.iq3yl = Line(Map.IQ3YL_START_POINT, Map.IQ3YL_END_POINT)
-    self.oq4xl = Line(Map.OQ4XL_START_POINT, Map.OQ4XL_END_POINT)
-    self.oq4yl = Line(Map.OQ4YL_START_POINT, Map.OQ4YL_END_POINT)
+    self.iq1xl = Line(CourseMap.IQ1XL_START_POINT, CourseMap.IQ1XL_END_POINT)
+    self.iq1yl = Line(CourseMap.IQ1YL_START_POINT, CourseMap.IQ1YL_END_POINT)
+    self.oq2xl = Line(CourseMap.OQ2XL_START_POINT, CourseMap.OQ2XL_END_POINT)
+    self.oq2yl = Line(CourseMap.OQ2YL_START_POINT, CourseMap.OQ2YL_END_POINT)
+    self.iq3xl = Line(CourseMap.IQ3XL_START_POINT, CourseMap.IQ3XL_END_POINT)
+    self.iq3yl = Line(CourseMap.IQ3YL_START_POINT, CourseMap.IQ3YL_END_POINT)
+    self.oq4xl = Line(CourseMap.OQ4XL_START_POINT, CourseMap.OQ4XL_END_POINT)
+    self.oq4yl = Line(CourseMap.OQ4YL_START_POINT, CourseMap.OQ4YL_END_POINT)
     self.lines = [self.iq1xl, self.iq1yl, self.oq2xl, self.oq2yl, self.iq3xl, self.iq3yl, self.oq4xl, self.oq4yl]
+    # Waypoints
+    self.generateWaypoints()
+    
+  #-------------------------------------------------------------------------------
+  def generateWaypoints(self):
+    increment = 15
+    self.waypoints = [ [convertFtToM(31.0) + convertFtToM(31.0) * math.cos(math.radians(theta)), convertFtToM(31.0) + convertFtToM(31.0) * math.sin(math.radians(theta)), math.radians(theta + 90.0) ] for theta in range(-90, 181, increment) ]
+    wp = [ [convertFtToM(-31.0) + convertFtToM(31.0) * math.cos(math.radians(theta)), convertFtToM(-31.0) + convertFtToM(31.0) * math.sin(math.radians(theta)), math.radians(theta - 90.0) ] for theta in range(90, 361, increment)]
+    self.waypoints.extend(wp[::-1])
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -136,6 +153,9 @@ class CourseMap(Map):
     desc += "\tIQ3YL: {0}\n".format(self.iq3yl)
     desc += "\tOQ4XL: {0}\n".format(self.oq4xl)
     desc += "\tOQ4YL: {0}\n".format(self.oq4yl)
+    desc += "\tWaypoints:\n"
+    for w in self.waypoints:
+      desc += "\t\t[x = {0}, y = {1}, heading = {2}]\n".format(w[Constants.X], w[Constants.Y], math.degrees(w[Constants.HEADING]))
     return desc
 
   #-------------------------------------------------------------------------------

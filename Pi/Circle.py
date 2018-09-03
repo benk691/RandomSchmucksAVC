@@ -33,7 +33,12 @@ class Circle:
     shiftedEndPoint = [ line.endPoint[Constants.X] - self.center[Constants.X], line.endPoint[Constants.Y] - self.center[Constants.Y] ]
 
     # Slope of the line
-    m = (shiftedEndPoint[Constants.Y] - shiftedStartPoint[Constants.Y]) / (shiftedEndPoint[Constants.X] - shiftedStartPoint[Constants.X])
+    #print("DBG: shiftedStartPoint = {0}".format(shiftedStartPoint))
+    #print("DBG: shiftedEndPoint = {0}".format(shiftedEndPoint))
+    if (shiftedEndPoint[Constants.X] - shiftedStartPoint[Constants.X]) != 0:
+      m = (shiftedEndPoint[Constants.Y] - shiftedStartPoint[Constants.Y]) / (shiftedEndPoint[Constants.X] - shiftedStartPoint[Constants.X])
+    else:
+      m = 1000000.0
     # Y-Intercept of line
     b = shiftedStartPoint[Constants.Y] - m * shiftedStartPoint[Constants.X]
     # Value to be square rooted
@@ -50,13 +55,29 @@ class Circle:
       i1 = [ t1 + self.center[Constants.X], m * t1 + b + self.center[Constants.Y] ]
       # intercept point 2
       i2 = [ t2 + self.center[Constants.X], m * t2 + b + self.center[Constants.Y] ]
-      # TODO: angle accounting and closest point considerations
-      return [i1, i2]
+      # TODO: closest point considerations
+      return [self._checkAngleIntersecion(i1), self._checkAngleIntersecion(i2)]
+
+  #-------------------------------------------------------------------------------
+  def _checkAngleIntersecion(self, intersect):
+    '''
+    Checks if the given intersection falls within the ignored angles of the circle
+    @param intersection - [x ,y] coordinate of the intersection
+    @return None if no intersection, otherwise return the passed in intersection
+    '''
+    # TODO: Check this over with Brian
+    theta = math.atan((intersect[Constants.Y] - self.center[Constants.Y]) / (intersect[Constants.X] - self.center[Constants.X]))
+    # TODO: Wrap?
+    if theta <= max(self.startAngle, self.stopAngle) and theta>= min(self.startAngle, self.stopAngle):
+      # Valid
+      return intersect
+    return None
 
   #-------------------------------------------------------------------------------
   def setTabs(self, tabs):
     '''
     Sets the number of tabs used for print out
+    @param tabs - number of tabs to use in print out
     '''
     self.tabs = tabs
 

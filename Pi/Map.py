@@ -13,6 +13,8 @@ class Map:
     self.circles = []
     # Course Lines
     self.lines = []
+    # Course Waypoints
+    self.waypoints = []
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):

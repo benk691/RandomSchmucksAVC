@@ -1,5 +1,7 @@
 import math
 
+# TODO: Go through all values and make sure we have the right numbers. -0 indicates that we have not decided on a number
+
 '''
 Defines constants for the Rasberry Pi
 '''
@@ -85,6 +87,45 @@ DIST_MIN_DISTANCE = 0.0
 # The length of the queue in the distance sensor we want to use to store values
 DIST_QUEUE_LENGTH = 10
 
+# The steering median filter order value
+STEERING_MEDIAN_FILTER_ORDER = 3
+
+# The steering filter IIR A value
+STEERING_IIR_FILTER_A = 0.9
+
+# The velocity filter IIR A value
+VELOCITY_IIR_FILTER_A = 0.9
+
+# The heading filter IIR A value
+HEADING_IIR_FILTER_A = 0.9
+
+# The distance filter IIR A value
+DIST_IIR_FILTER_A = 0.9
+
+# Constant to apply to distance measurements if they are railed
+DIST_MAX_FILTER = -0.0
+
+# The max loop count in the SensorConversion class
+MAX_LOOP_COUNT = 15.0
+
+# Number of milliseconds in a second
+MILLI_SEC_IN_SEC = 1000.0
+
+# Number of tape strips on each wheel
+TACH_TOTAL_STRIPS = 30.0
+
+# Right Tachometer high value
+TACH_RIGHT_THRESHOLD_HIGH = 10000.0
+
+# Right Tachometer low value
+TACH_RIGHT_THRESHOLD_LOW = 8000.0
+
+# Left Tachometer high value
+TACH_LEFT_THRESHOLD_HIGH = 8500.0
+
+# Left Tachometer low value
+TACH_LEFT_THRESHOLD_LOW = 6500.0
+
 # X index in a coordinate list
 X = 0
 
@@ -97,38 +138,71 @@ HEADING = 2
 # Weight index in a coordinate list
 WEIGHT = 3
 
+# Radius index in a coordinate list
+RADIUS = 3
+
+# Distance away from the waypoint we want to start checking if we are at waypoint or not
+WAYPOINT_CHECK_DIST = 1.0
+
+# Number of checks we want to perform t oconfirm the vehicle is at a waypoint or not
+WAYPOINT_MAX_CHECKS = 3
+
+# Slowest we ever want the vehicle to go
+MIN_VEHICLE_VELOCITY = 0.5
+
+# Fastest we ever want the vehicle to go
+MAX_VEHICLE_VELOCITY = 1.8
+
+# Velocity scale factor. Scaled to decrease speed when the vehicle's heading is off from the waypoint's heading. This uses a degree that we want to be within before we start speeding above min velocity
+VELOCITY_SCALE_FACTOR = (MAX_VEHICLE_VELOCITY - MIN_VEHICLE_VELOCITY) / math.radians(45.0)
+
+# Control Planner update rate (Hz)
+CONTROL_UPDATE_RATE = 10.0
+
+# Update rate sleep threshold
+CONTROL_SLEEP_THRESHOLD = 1.0e-3
+
 #--------------------------------
 #         Particle Filter
 #--------------------------------
 # Number of particles to generate for the particle filter
-PARTICLE_NUMBER = 10
+PARTICLE_NUMBER = -0
 
 # Minimum particle number that we do not want to go below
-MIN_PARTICLE_NUMBER = 2
+MIN_PARTICLE_NUMBER = -0
 
 # Length between the two axles on the vehicle (meters)
-VEHICLE_AXLE_LEN = 0.0
+VEHICLE_AXLE_LEN = -0.0
+
+# Diameter of the wheels on the vehicle
+VEHICLE_WHEEL_DIAMETER = 0.36
 
 # Two Points that define the start box, on the map, for the vehicle
-MAP_START_BOX = [ [0.0, 0.0], [0.0, 0.0] ]
+MAP_START_BOX = [ [-0.0, 0.0], [-0.0, -0.0] ]
 
 # The starting heading range for the vehicle
-MAP_HEADING_RANGE = [ 0.0, 0.0 ]
+MAP_HEADING_RANGE = [ -0.0, -0.0 ]
 
 # Offset that is applied so we can set 0 degrees with out worrying about North/South
-MAP_HEADING_OFFSET = 0.0
+MAP_HEADING_OFFSET = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the heading
-HEADING_NOISE = 0.0
+HEADING_NOISE = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the steering angle
-STEERING_ANGLE_NOISE = 0.0
+STEERING_ANGLE_NOISE = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the velocity
-VELOCITY_NOISE = 0.0
+VELOCITY_NOISE = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the distance
-DISTANCE_NOISE = 0.0
+DISTANCE_NOISE = -0.0
+
+# Slippage noise
+SLIP_NOISE = 0.0
+
+# Contant to allow us to steer more sharply
+CONTROL_STEERING_AGRESSION = 1.1
 
 # Update rate for the particle filter (Hz)
 PARTICLE_FILTER_UPDATE_RATE = 10
