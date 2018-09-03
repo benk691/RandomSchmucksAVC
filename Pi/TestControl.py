@@ -106,7 +106,6 @@ for i in range(50):
     car.velocity = Constants.MIN_VEHICLE_VELOCITY
 
   moveCar(car, pf)
-  # TODO: Add graph car is a + and add a direction arrow
 
   pf._scatterPlotParticles(car, updateFName())
 
