@@ -58,13 +58,19 @@ ADC_RIGHT_WHEEL_CHNL = 1
 ADC_LEFT_WHEEL_CHNL = 2
 
 # The frequency of the PWM sensor, this is the frequency used by the driving and steering motors
-PWM_SENSOR_FREQ = 120
+PWM_SENSOR_FREQ = 2000
 
 # The PWM channel the drive motor is on
 PWM_DRIVE_CHNL = 14
 
 # The PWM channel the turn motor is on
 PWM_TURN_CHNL = 15
+
+# Max allowed pulse length
+PWM_MAX_PULSE = 0.97
+
+# Minimum allowed pulse length
+PWM_MIN_PULSE = 0.0
 
 # Left distance sensor echo pin (this is a GPIO pin #)
 DIST_LEFT_ECHO_PIN = 27
