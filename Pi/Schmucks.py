@@ -2,8 +2,11 @@
 import time
 import RPi.GPIO as GPIO
 import Constants
-from Vehicle import Vehicle
+from ControlPlanner import ControlPlanner
+from CourseMap import CourseMap
 from DataConsumerThread import DataConsumerThread
+from SensorConversion import SensorConversion
+from Vehicle import Vehicle
 
 #-------------------------------------------------------------------------------
 def main():
@@ -11,23 +14,45 @@ def main():
   Main program
   '''
   try:
-    dataConsumerThread = DataConsumerThread(daemon=True)
-    dataConsumerThread.start()
+    threads, vehicle = setup()
+
     while True:
-      print(str(dataConsumerThread.sensors))
-      time.sleep(1)
-      print()
-      
+      vehicle.drive()
+
   finally:
-    dataConsumerThread.shutdown()
+    shutdown(threads)
     GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
 def setup():
   '''
   Setup the Raspberry Pi to run
+  @return list of threads
   '''
-  pass
+  courseMap = CourseMap()
+  # Construct Threads
+  # TODO: Untie threads
+  dataConsumerThread = DataConsumerThread(daemon=True)
+  sensorConversionThread = SensorConversion(daemon=True, dataConsumerThread=dataConsumerThread)
+  controlPlannerThread = ControlPlanner(daemon=True, courseMap=courseMap)
+  vehicle = Vehicle(sensorConversionThread)
+  # Register Subscribers
+  controlPlannerThread.register(vehicle, vehicle.update)
+  # Start threads
+  dataConsumerThread.start()
+  sensorConversionThread.start()
+  controlPlannerThread.start()
+
+  return [dataConsumerThread, sensorConversionThread, controlPlannerThread], vehicle
+
+#-------------------------------------------------------------------------------
+def shutdown(threads):
+  '''
+  Shutdown the threads running
+  @param threads - list of threads
+  '''
+  for t in threads:
+    t.shutDown()
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':

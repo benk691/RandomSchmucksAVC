@@ -2,6 +2,7 @@ import math
 import time
 import Constants
 from threading import Thread
+from ParticleFilter import ParticleFilter
 from Publisher import Publisher
 
 class ControlPlanner(Thread, Publisher):
@@ -9,19 +10,16 @@ class ControlPlanner(Thread, Publisher):
   Determines what action to take to get the vehicle to where we want to go.
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, vehicle=None, particleFilter=None, courseMap=None):
+  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, courseMap=None):
     '''
     Initializes the control planner
     @param Refer to the Python Thread class for documentation on all thread specific parameters
-    @param vehicle - the real vehicle to control
-    @param particleFilter - the particle filter used for estimating where the vehicle is
     @param courseMap - the course map
     '''
     Thread.__init__(group=group, target=target, name=name, daemon=daemon)
     Publisher.__init__()
-    self.vehicle = vehicle
-    self.particleFilter = particleFilter
     self.courseMap = courseMap
+    self.particleFilter = ParticleFilter(Constants.PARTICLE_NUMBER, Constants.MAP_START_BOX, Constants.MAP_HEADING_RANGE, self.courseMap)
     self.shutDown = False
     self.estVehicleX = 0.0
     self.estVehicleY = 0.0
@@ -31,9 +29,6 @@ class ControlPlanner(Thread, Publisher):
     self.waypointCheck = 0
     self.steeringAngleGoal = 0.0
     self.velocityGoal = 0.0
-
-    if self.vehicle is not None:
-      self.vehicle.setTabs(1)
 
   #-------------------------------------------------------------------------------
   def run(self):
@@ -113,7 +108,6 @@ class ControlPlanner(Thread, Publisher):
     desc = "ControlPlanner:\n"
     # TODO: add in setTabs for particle filter and course map
     desc += "\tshutDown = {0}\n".format(self.shutDown)
-    desc += "\tvehicle = {0}\n".format(self.vehicle)
     desc += "\tparticleFilter = {0}\n".format(self.particleFilter)
     desc += "\tcourseMap = {0}\n".format(self.courseMap)
     desc += "\testVehicleX = {0}\n".format(self.estVehicleX)
