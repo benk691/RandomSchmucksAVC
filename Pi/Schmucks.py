@@ -28,6 +28,7 @@ def setup():
   '''
   Setup the Raspberry Pi to run
   @return list of threads
+  @return vehicle object
   '''
   courseMap = CourseMap()
   # Construct Threads
