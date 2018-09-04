@@ -11,18 +11,20 @@ from Line import Line
 
 class ParticleFilter:
   #-------------------------------------------------------------------------------
-  def __init__(self, particleNumber, startBox, headingRange, courseMap):
+  def __init__(self, particleNumber, startBox, headingRange, courseMap, sensorConversionThread):
     '''
     Initializes the particle filter
     @param particleNumber - number of particles to generate
     @param startBox - the inital box to create particles in. List of two X, Y coordinates defining the corners of the box
     @param headingRange - the range of headings to create particles with. List of two doubles.
     @param courseMap - the course map
+    @param sensorConversionThread - the sensor conversion thread
     '''
     random.seed()
     self.prevTime = time.time()
     self.currentTime = time.time()
     self.courseMap = courseMap
+    self.sensorConversionThread = sensorConversionThread
     self.dt = 0.0
     self.vehicleVelocity = 0.0
     self.vehicleHeading = 0.0
@@ -78,13 +80,12 @@ class ParticleFilter:
     '''
     Read the sensor measurements from the vehicle
     '''
-    # TODO: Connect this with the sensor conversion/filtered reading thread
-    self.vehicleVelocity = 0.0
-    self.vehicleHeading = 0.0
-    self.vehicleLeftDistance = 0.0
-    self.vehicleRightDistance = 0.0
-    self.vehicleSteeringAngle = 0.0
-    # TODO: Put this in the sensor conversion thread
+    self.vehicleVelocity = self.sensorConversionThread.velocity
+    self.vehicleHeading = self.sensorConversionThread.heading
+    self.vehicleLeftDistance = self.sensorConversionThread.leftDistance
+    self.vehicleRightDistance = self.sensorConversionThread.rightDistance
+    self.vehicleSteeringAngle = self.sensorConversionThread.steeringAngle
+    # TODO: This is in the sensor conversion thread, still need?
     if self.vehicleLeftDistance >= Constants.DIST_MAX_DISTANCE:
       self.vehicleLeftDistance = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE
 

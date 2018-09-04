@@ -10,16 +10,17 @@ class ControlPlanner(Thread, Publisher):
   Determines what action to take to get the vehicle to where we want to go.
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, courseMap=None):
+  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, courseMap=None, sensorConversionThread=None):
     '''
     Initializes the control planner
     @param Refer to the Python Thread class for documentation on all thread specific parameters
     @param courseMap - the course map
+    @param sensorConversionThread - the sensor conversion thread
     '''
     Thread.__init__(group=group, target=target, name=name, daemon=daemon)
     Publisher.__init__()
     self.courseMap = courseMap
-    self.particleFilter = ParticleFilter(Constants.PARTICLE_NUMBER, Constants.MAP_START_BOX, Constants.MAP_HEADING_RANGE, self.courseMap)
+    self.particleFilter = ParticleFilter(Constants.PARTICLE_NUMBER, Constants.MAP_START_BOX, Constants.MAP_HEADING_RANGE, self.courseMap, sensorConversionThread)
     self.shutDown = False
     self.estVehicleX = 0.0
     self.estVehicleY = 0.0
