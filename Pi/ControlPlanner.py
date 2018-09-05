@@ -17,8 +17,8 @@ class ControlPlanner(Thread, Publisher):
     @param courseMap - the course map
     @param sensorConversionThread - the sensor conversion thread
     '''
-    Thread.__init__(group=group, target=target, name=name, daemon=daemon)
-    Publisher.__init__()
+    Thread.__init__(self, group=group, target=target, name=name, daemon=daemon)
+    Publisher.__init__(self)
     self.courseMap = courseMap
     self.particleFilter = ParticleFilter(Constants.PARTICLE_NUMBER, Constants.MAP_START_BOX, Constants.MAP_HEADING_RANGE, self.courseMap, sensorConversionThread)
     self.shutDown = False
@@ -52,6 +52,13 @@ class ControlPlanner(Thread, Publisher):
         time.sleep(sleepTime)
       #print("DBG: R7")
       # TODO: Modify number of particles
+
+  #-------------------------------------------------------------------------------
+  def shutdown(self):
+    '''
+    Shutdown the thread
+    '''
+    self.shutDown = True
 
   #-------------------------------------------------------------------------------
   def _control(self):

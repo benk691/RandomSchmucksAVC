@@ -8,7 +8,7 @@ class Publisher:
     '''
     Initializes the publisher
     '''
-    self.subsrcibers = dict()
+    self.subscribers = dict()
 
   #-------------------------------------------------------------------------------
   def register(self, subscriber, callback):

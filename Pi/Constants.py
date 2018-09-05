@@ -172,7 +172,7 @@ CONTROL_SLEEP_THRESHOLD = 1.0e-3
 #         Particle Filter
 #--------------------------------
 # Number of particles to generate for the particle filter
-PARTICLE_NUMBER = -0
+PARTICLE_NUMBER = 50
 
 # Minimum particle number that we do not want to go below
 MIN_PARTICLE_NUMBER = -0

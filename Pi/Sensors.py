@@ -1,3 +1,4 @@
+import random
 import Constants
 from gpiozero import DistanceSensor
 import Adafruit_ADS1x15
@@ -13,13 +14,14 @@ class Sensors:
     Initializes all the sensors we want to consume data from
     '''
     # I2C bus readers
-    self.adc = Adafruit_ADS1x15.ADS1115()
-    self.imu = BNO055.BNO055()
-    if not self.imu.begin():
-      raise RuntimeError('Failed to initialize IMU! Is the sensor connected?')
+    # TODO: Uncomment sensors after testing
+    #self.adc = Adafruit_ADS1x15.ADS1115()
+    #self.imu = BNO055.BNO055()
+    #if not self.imu.begin():
+    #  raise RuntimeError('Failed to initialize IMU! Is the sensor connected?')
     # Distance sensors
-    self.leftDistSensor = DistanceSensor(echo=Constants.DIST_LEFT_ECHO_PIN, trigger=Constants.DIST_LEFT_TRIGGER_PIN, max_distance=Constants.DIST_QUEUE_LENGTH)
-    self.rightDistSensor = DistanceSensor(echo=Constants.DIST_RIGHT_ECHO_PIN, trigger=Constants.DIST_RIGHT_TRIGGER_PIN, max_distance=Constants.DIST_QUEUE_LENGTH)
+    #self.leftDistSensor = DistanceSensor(echo=Constants.DIST_LEFT_ECHO_PIN, trigger=Constants.DIST_LEFT_TRIGGER_PIN, max_distance=Constants.DIST_QUEUE_LENGTH)
+    #self.rightDistSensor = DistanceSensor(echo=Constants.DIST_RIGHT_ECHO_PIN, trigger=Constants.DIST_RIGHT_TRIGGER_PIN, max_distance=Constants.DIST_QUEUE_LENGTH)
     # Sensor values (-0 means that the sensor is not reading data)
     self.steeringPotValue = -0
     self.leftTachValue = -0
@@ -39,15 +41,24 @@ class Sensors:
     '''
     Reads all sensor values
     '''
-    self.steeringPotValue = self.adc.read_adc(Constants.ADC_POT_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE) 
-    self.rightTachValue = self.adc.read_adc(Constants.ADC_RIGHT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
-    self.leftTachValue = self.adc.read_adc(Constants.ADC_LEFT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
-    self.rightDistance = self.rightDistSensor.distance
-    self.leftDistance = self.leftDistSensor.distance
+    self.steeringPotValue = random.uniform(16400, 22500)
+    self.rightTachValue = random.uniform(Constants.TACH_RIGHT_THRESHOLD_LOW, Constants.TACH_RIGHT_THRESHOLD_HIGH)
+    self.leftTachValue = random.uniform(Constants.TACH_LEFT_THRESHOLD_LOW, Constants.TACH_LEFT_THRESHOLD_HIGH)
+    self.rightDistance = random.uniform(Constants.DIST_MIN_DISTANCE, Constants.DIST_MAX_DISTANCE)
+    self.leftDistance = random.uniform(Constants.DIST_MIN_DISTANCE, Constants.DIST_MAX_DISTANCE)
     # TODO: third front distance sensor?
     # NOTE: the read in angles are in degrees
-    self.heading, self.roll, self.pitch = self.imu.read_euler()
-    self.sysCal, self.gyroCal, self.accelCal, self.magCal = self.imu.get_calibration_status()
+    self.heading = random.uniform(0.0, 360.0) 
+    #--------------
+    #self.steeringPotValue = self.adc.read_adc(Constants.ADC_POT_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE) 
+    #self.rightTachValue = self.adc.read_adc(Constants.ADC_RIGHT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+    #self.leftTachValue = self.adc.read_adc(Constants.ADC_LEFT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+    #self.rightDistance = self.rightDistSensor.distance
+    #self.leftDistance = self.leftDistSensor.distance
+    ## TODO: third front distance sensor?
+    ## NOTE: the read in angles are in degrees
+    #self.heading, self.roll, self.pitch = self.imu.read_euler()
+    #self.sysCal, self.gyroCal, self.accelCal, self.magCal = self.imu.get_calibration_status()
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):

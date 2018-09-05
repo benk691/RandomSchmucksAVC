@@ -109,7 +109,7 @@ class SensorConversion(Thread):
     # Filter velocity
     self.velocity = self.velocityIirFilter.filter(self.velocity)
 
-    self.distTraveled = ((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi)
+    self.distTraveled = (((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi
 
   #-------------------------------------------------------------------------------
   def _getSensorValues(self):
@@ -147,8 +147,8 @@ class SensorConversion(Thread):
     self.rightDistance = self._filterMaxDistance(self.rightDistance)
     self.rightDistance = self.distIirFilter.filter(self.rightDistance)
     # Filter heading
-    self.heading, self.prevHeading = unwrapAngle(self.heading, self.prevHeading)
-    self.heading = self.headingIirFilter(self.heading)
+    self.heading, self._prevHeading = unwrapAngle(self.heading, self._prevHeading)
+    self.heading = self.headingIirFilter.filter(self.heading)
     # TODO: Need a way to mark values as ready for particle filter
     # Consider the thread safe queue, or a publisher subscriber
     self.heading = math.radians(wrapAngle(self.heading))

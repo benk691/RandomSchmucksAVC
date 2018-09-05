@@ -110,6 +110,8 @@ class ParticleFilter:
       turnRadius = 10000000.0
       if math.tan(genSteeringAngle) != 0.0:
         turnRadius = Constants.VEHICLE_AXLE_LEN / math.tan(genSteeringAngle)
+      if turnRadius == 0.0:
+        turnRadius = 0.000000001
       # Generate a velocity for the particles
       genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
       rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])

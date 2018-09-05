@@ -35,7 +35,7 @@ def setup():
   # TODO: Untie threads
   dataConsumerThread = DataConsumerThread(daemon=True)
   sensorConversionThread = SensorConversion(daemon=True, dataConsumerThread=dataConsumerThread)
-  controlPlannerThread = ControlPlanner(daemon=True, courseMap=courseMap)
+  controlPlannerThread = ControlPlanner(daemon=True, courseMap=courseMap, sensorConversionThread=sensorConversionThread)
   vehicle = Vehicle(sensorConversionThread)
   # Register Subscribers
   controlPlannerThread.register(vehicle, vehicle.update)
@@ -53,7 +53,7 @@ def shutdown(threads):
   @param threads - list of threads
   '''
   for t in threads:
-    t.shutDown()
+    t.shutdown()
 
 #-------------------------------------------------------------------------------
 if __name__ == '__main__':
