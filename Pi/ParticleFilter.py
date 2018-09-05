@@ -47,7 +47,6 @@ class ParticleFilter:
     Gets the estimated vehicle location based on the particles
     @return mean(X), mean(Y), mean(heading), covariance
     '''
-    print("DBG: getEstiamtedVehicleLocation called")
     self.currentTime = time.time()
     self._getVehicleMeasurements()
     self.dt = self.currentTime - self.prevTime
@@ -56,23 +55,15 @@ class ParticleFilter:
     self._weight()
     self._generateNewParticleList()
     # Calculate estimates
-    #print("DBG: GE 1")
     self.estVehicleX = sum([ p[Constants.X] for p in self.particles]) / float(len(self.particles))
 
-    #print("DBG: GE 2")
     self.estVehicleY = sum([ p[Constants.Y] for p in self.particles]) / float(len(self.particles))
-    #print("DBG: GE 3")
     self.estVehicleHeading = sum([ p[Constants.HEADING] for p in self.particles]) / float(len(self.particles))
-    #print("DBG: GE 4")
     # Calculate covariance
     x = [ p[Constants.X] for p in self.particles ]
-    #print("DBG: GE 5")
     y = [ p[Constants.Y] for p in self.particles ]
-    #print("DBG: GE 6")
     h = [ p[Constants.HEADING] for p in self.particles ]
-    #print("DBG: GE 7")
     self.covarVehicle = numpy.cov(numpy.vstack((x,y,h)))
-    #print("DBG: GE 8")
     return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle
 
   #-------------------------------------------------------------------------------
@@ -98,7 +89,6 @@ class ParticleFilter:
     Perform the prediction step. This will predict where the particle is going to go 
     based on the most recent values read in from the vehicle
     '''
-    print("DBG: _predict called")
     for i in range(len(self.particles)):
       # Generate a steering angle for the particles
       genSteeringAngle = random.gauss(mu=self.vehicleSteeringAngle, sigma=Constants.STEERING_ANGLE_NOISE)
@@ -115,10 +105,10 @@ class ParticleFilter:
       # Generate a velocity for the particles
       genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
       rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
-      print("DBG: genSteeringAngle = {0}".format(genSteeringAngle))
-      print("DBG: turnRadius = {0}".format(turnRadius))
-      print("DBG: genVelocity = {0}".format(genVelocity))
-      print("DBG: rotatedX, rotatedY = ({0}, {1})\n".format(rotatedX, rotatedY))
+      #print("DBG: genSteeringAngle = {0}".format(genSteeringAngle))
+      #print("DBG: turnRadius = {0}".format(turnRadius))
+      #print("DBG: genVelocity = {0}".format(genVelocity))
+      #print("DBG: rotatedX, rotatedY = ({0}, {1})\n".format(rotatedX, rotatedY))
       slipX, slipY = self._rotate(0, random.gauss(0, Constants.SLIP_NOISE * self.dt), self.particles[i][Constants.HEADING])
       self.particles[i][Constants.X] += rotatedX + slipX
       self.particles[i][Constants.Y] += rotatedY + slipY
@@ -129,53 +119,49 @@ class ParticleFilter:
     '''
     Calculates the weights for the given particle
     '''
-    print("DBG: _weight called")
     for i in range(len(self.particles)):
-      print("DBG: vehicleHeading = {0}".format(self.vehicleHeading))
+      #print("DBG: vehicleHeading = {0}".format(self.vehicleHeading))
       particleDistLeft, particleDistRight = self._calculateDistanceLineOfSight(self.particles[i])
-      print("DBG: particleDistLeft = {0}".format(particleDistLeft))
-      print("DBG: particleDistRight = {0}".format(particleDistRight))
+      #print("DBG: particleDistLeft = {0}".format(particleDistLeft))
+      #print("DBG: particleDistRight = {0}".format(particleDistRight))
       # PDF(measurement, mean, std_dev)
-      print("DBG: self.particles[{0}][Constants.HEADING] = {1}".format(i, self.particles[i][Constants.HEADING]))
-      print("DBG: self.vehicleHeading = {0}".format(self.vehicleHeading))
-      print("DBG: Constants.HEADING_NOISE = {0}".format(Constants.HEADING_NOISE))
+      #print("DBG: self.particles[{0}][Constants.HEADING] = {1}".format(i, self.particles[i][Constants.HEADING]))
+      #print("DBG: self.vehicleHeading = {0}".format(self.vehicleHeading))
+      #print("DBG: Constants.HEADING_NOISE = {0}".format(Constants.HEADING_NOISE))
       headingPDF = norm.pdf(self.particles[i][Constants.HEADING], self.vehicleHeading, Constants.HEADING_NOISE)
       # Adding a fraction times the peak probability
       # Chances that the measurment is bad
       self.particles[i][Constants.WEIGHT] *= headingPDF + 0.03 * 7.62
 
-      print("DBG: particleDistLeft = {0}".format(particleDistLeft))
-      print("DBG: self.vehicleLeftDistance = {0}".format(self.vehicleLeftDistance))
-      print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
+      #print("DBG: particleDistLeft = {0}".format(particleDistLeft))
+      #print("DBG: self.vehicleLeftDistance = {0}".format(self.vehicleLeftDistance))
+      #print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
       leftDistPDF = norm.pdf(particleDistLeft, self.vehicleLeftDistance, Constants.DISTANCE_NOISE)
       # Adding a fraction times the peak probability
       # Chances that the measurment is bad
       self.particles[i][Constants.WEIGHT] *= leftDistPDF + 0.003 * 1.33
 
-      print("DBG: particleDistRight = {0}".format(particleDistRight))
-      print("DBG: self.vehicleRightDistance = {0}".format(self.vehicleRightDistance))
-      print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
+      #print("DBG: particleDistRight = {0}".format(particleDistRight))
+      #print("DBG: self.vehicleRightDistance = {0}".format(self.vehicleRightDistance))
+      #print("DBG: Constants.DISTANCE_NOISE = {0}".format(Constants.DISTANCE_NOISE))
       rightDistPDF = norm.pdf(particleDistRight, self.vehicleRightDistance, Constants.DISTANCE_NOISE)
       # Adding a fraction times the peak probability
       # Chances that the measurment is bad
       self.particles[i][Constants.WEIGHT] *= rightDistPDF + 0.003 * 1.33
 
-      print("DBG: headingPDF = {0}".format(headingPDF))
-      print("DBG: leftDistPDF = {0}".format(leftDistPDF))
-      print("DBG: rightDistPDF = {0}\n".format(rightDistPDF))
+      #print("DBG: headingPDF = {0}".format(headingPDF))
+      #print("DBG: leftDistPDF = {0}".format(leftDistPDF))
+      #print("DBG: rightDistPDF = {0}\n".format(rightDistPDF))
 
   #-------------------------------------------------------------------------------
   def _generateNewParticleList(self):
     '''
     Calculate the cumulative sum of the particle weights, then generates new particles using the cumulative sum over a random distribution
     '''
-    print("DBG: _generateNewParticleList called")
     self.cumulativeSum = [ sum([ p[Constants.WEIGHT] for p in self.particles[ : i + 1] ]) for i in range(len(self.particles)) ]
-    #print("DBG: 1")
     genParticles = []
     for i in range(len(self.particles)):
       genCumSum = random.uniform(0.0, self.cumulativeSum[-1])
-      #print("DBG: 2")
       # Get the index of the particle we want to generate
       particleIndex = 0
       for csi in range(len(self.cumulativeSum)):
@@ -184,10 +170,8 @@ class ParticleFilter:
           break
       genParticles.append(particleIndex)
 
-    #print("DBG: 3")
     # Generate particles
     self.particles = [ [ self.particles[genP][Constants.X], self.particles[genP][Constants.Y], self.particles[genP][Constants.HEADING], 1.0 ] for genP in genParticles ]
-    #print("DBG: 4")
 
   #-------------------------------------------------------------------------------
   def _calculateDistanceLineOfSight(self, particle):
@@ -197,31 +181,30 @@ class ParticleFilter:
     @return particle closest distance intersection on its left side
     @return particle closest distance intersection on its right side
     '''
-    print("DBG: _calculateDistanceLineOfSight called")
     particleDistLeft, particleDistRight = 0.0, 0.0
 
     # Left Distance
     rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
-    print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
+    #print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
-    print("DBG: leftStartPoint(X, Y) = {0}".format(leftStartPoint))
+    #print("DBG: leftStartPoint(X, Y) = {0}".format(leftStartPoint))
 
     rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_OREINTATION )
-    print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
+    #print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftEndPoint = [ leftStartPoint[Constants.X] + rX,  leftStartPoint[Constants.Y] + rY ]
-    print("DBG: leftEndPoint(X, Y) = {0}".format(leftEndPoint))
+    #print("DBG: leftEndPoint(X, Y) = {0}".format(leftEndPoint))
     leftDistLine = Line(leftStartPoint, leftEndPoint)
 
     # Right Distance
     rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
-    print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
+    #print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
-    print("DBG: rightStartPoint(X, Y) = {0}".format(rightStartPoint))
+    #print("DBG: rightStartPoint(X, Y) = {0}".format(rightStartPoint))
 
     rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_OREINTATION )
-    print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
+    #print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightEndPoint = [ rightStartPoint[Constants.X] + rX,  rightStartPoint[Constants.Y] + rY ]
-    print("DBG: rightEndPoint(X, Y) = {0}".format(rightEndPoint))
+    #print("DBG: rightEndPoint(X, Y) = {0}".format(rightEndPoint))
     rightDistLine = Line(rightStartPoint, rightEndPoint)
 
     # Get left intersections with map walls
@@ -235,7 +218,7 @@ class ParticleFilter:
 
     leftIntersections += [ l.findIntersection(leftDistLine) for l in self.courseMap.lines ]
 
-    print("DBG: leftIntersections = {0}".format(leftIntersections))
+    #print("DBG: leftIntersections = {0}".format(leftIntersections))
 
     # Get right intersections with map walls
     rightIntersections = []
@@ -247,7 +230,7 @@ class ParticleFilter:
             rightIntersections += [ i ]
 
     rightIntersections += [ l.findIntersection(rightDistLine) for l in self.courseMap.lines ]
-    print("DBG: rightIntersections = {0}".format(rightIntersections))
+    #print("DBG: rightIntersections = {0}".format(rightIntersections))
 
     # Calculate distances
     try:
@@ -277,8 +260,7 @@ class ParticleFilter:
     y - the Y coordinate
     theta - the amount to rotate (radians)
     '''
-    print("DBG: _rotate called")
-    print("DBG: x = {0}, y = {1}, theta = {2}".format(x, y, theta))
+    #print("DBG: x = {0}, y = {1}, theta = {2}".format(x, y, theta))
     outX = x * math.cos(theta) - y * math.sin(theta)
     outY = x * math.sin(theta) + y * math.cos(theta)
     return outX, outY
