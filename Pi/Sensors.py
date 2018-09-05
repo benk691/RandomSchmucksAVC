@@ -42,8 +42,8 @@ class Sensors:
     Reads all sensor values
     '''
     self.steeringPotValue = random.uniform(16400, 22500)
-    self.rightTachValue = random.uniform(Constants.TACH_RIGHT_THRESHOLD_LOW, Constants.TACH_RIGHT_THRESHOLD_HIGH)
-    self.leftTachValue = random.uniform(Constants.TACH_LEFT_THRESHOLD_LOW, Constants.TACH_LEFT_THRESHOLD_HIGH)
+    self.rightTachValue = random.uniform(Constants.TACH_RIGHT_THRESHOLD_LOW - 2000, Constants.TACH_RIGHT_THRESHOLD_HIGH + 2000)
+    self.leftTachValue = random.uniform(Constants.TACH_LEFT_THRESHOLD_LOW - 2000, Constants.TACH_LEFT_THRESHOLD_HIGH + 2000)
     self.rightDistance = random.uniform(Constants.DIST_MIN_DISTANCE, Constants.DIST_MAX_DISTANCE)
     self.leftDistance = random.uniform(Constants.DIST_MIN_DISTANCE, Constants.DIST_MAX_DISTANCE)
     # TODO: third front distance sensor?
@@ -67,18 +67,18 @@ class Sensors:
     @return string describing debug information
     '''
     desc = "Sensor Info:\n"
-    desc += "\tSteering Pot = {0}".format(self.steeringPotValue)
-    desc += "\tRight Tach = {0}".format(self.rightTachValue)
-    desc += "\tLeft Tach = {0}".format(self.leftTachValue)
-    desc += "\tRight Distance = {0}".format(self.rightDistance)
-    desc += "\tLeft Distance = {0}".format(self.leftDistance)
-    desc += "\tHeading = {0}".format(self.heading)
-    desc += "\tRoll = {0}".format(self.roll)
-    desc += "\tPitch = {0}".format(self.pitch)
-    desc += "\tSys Cal = {0}".format(self.sysCal)
-    desc += "\tGyro Cal = {0}".format(self.gyroCal)
-    desc += "\tAccel Cal = {0}".format(self.accelCal)
-    desc += "\tMag Cal = {0}".format(self.magCal)
+    desc += "\tSteering Pot = {0}\n".format(self.steeringPotValue)
+    desc += "\tRight Tach = {0}\n".format(self.rightTachValue)
+    desc += "\tLeft Tach = {0}\n".format(self.leftTachValue)
+    desc += "\tRight Distance = {0}\n".format(self.rightDistance)
+    desc += "\tLeft Distance = {0}\n".format(self.leftDistance)
+    desc += "\tHeading = {0}\n".format(self.heading)
+    desc += "\tRoll = {0}\n".format(self.roll)
+    desc += "\tPitch = {0}\n".format(self.pitch)
+    desc += "\tSys Cal = {0}\n".format(self.sysCal)
+    desc += "\tGyro Cal = {0}\n".format(self.gyroCal)
+    desc += "\tAccel Cal = {0}\n".format(self.accelCal)
+    desc += "\tMag Cal = {0}\n".format(self.magCal)
     return desc
 
   #-------------------------------------------------------------------------------

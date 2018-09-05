@@ -18,6 +18,8 @@ def main():
 
     while True:
       vehicle.drive()
+      for t in threads:
+        print(t)
 
   finally:
     shutdown(threads)

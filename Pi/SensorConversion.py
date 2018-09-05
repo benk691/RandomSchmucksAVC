@@ -86,6 +86,9 @@ class SensorConversion(Thread):
         # TODO: I forsee threading complications with this. Needs testing
         self.dataConsumerThread.rightStripCount = 0.0
         self.dataConsumerThread.leftStripCount = 0.0
+        #print("DBG: RESET")
+        #print("DBG: self.dataConsumerThread.rightStripCount = {0}".format(self.dataConsumerThread.rightStripCount))
+        #print("DBG: self.dataConsumerThread.leftStripCount = {0}".format(self.dataConsumerThread.leftStripCount))
 
   #-------------------------------------------------------------------------------
   def shutdown(self):

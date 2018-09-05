@@ -46,6 +46,8 @@ class DataConsumerThread(Thread):
     '''
     Calculates the new strip counts on the left and right side of the vehicle
     '''
+    #print("DBG: self.sensors.rightTachValue = {0}".format(self.sensors.rightTachValue))
+    #print("DBG: self.sensors.leftTachValue = {0}".format(self.sensors.leftTachValue))
     if self._rightHigh == 0 and self.sensors.rightTachValue > Constants.TACH_RIGHT_THRESHOLD_HIGH:
       self.rightStripCount += 0.5
       self.totalRightStripCount += self.rightStripCount
@@ -67,6 +69,11 @@ class DataConsumerThread(Thread):
       self.leftStripCount += 0.5
       self.totalLeftStripCount += self.rightStripCount
       self._leftHigh = 0
+    
+    #print("DBG: self.rightStripCount = {0}".format(self.rightStripCount))
+    #print("DBG: self.leftStripCount = {0}".format(self.leftStripCount))
+    #print("DBG: self.totalRightStripCount = {0}".format(self.totalRightStripCount))
+    #print("DBG: self.totalLeftStripCount = {0}".format(self.totalLeftStripCount))
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -77,7 +84,7 @@ class DataConsumerThread(Thread):
     desc = "DataConsumerThread:\n"
     desc += "\tshutDown = {0}\n".format(self.shutDown)
     # TODO: Add setTabs function in Sensors
-    desc += "\tsensors = {0}\n".format(self.sensors)
+    desc += "\tsensors:\n {0}\n".format(self.sensors)
     desc += "\trightStripCount = {0}\n".format(self.rightStripCount)
     desc += "\tleftStripCount = {0}\n".format(self.leftStripCount)
     desc += "\ttotalRightStripCount = {0}\n".format(self.totalRightStripCount)
