@@ -2,10 +2,10 @@ import random
 import math
 import time
 import numpy
-import matplotlib.pyplot as matplot
-import matplotlib.lines as mlines
+#import matplotlib.pyplot as matplot
+#import matplotlib.lines as mlines
 import Constants
-from matplotlib.colors import Normalize
+#from matplotlib.colors import Normalize
 from scipy.stats import norm
 from Line import Line
 
@@ -266,146 +266,146 @@ class ParticleFilter:
     return outX, outY
 
   #-------------------------------------------------------------------------------
-  def _scatterPlotParticles(self, car, filename):
-    '''
-    Create a scatter plot of the particle positions, headings and weight
-    @param car - Car class
-    @param filename - the SVG filename to write the scatterplot to
-    '''
-    #matplot.xlim(-0.5,25.5)
-    #matplot.ylim(-25.0,-15.0)
-    # Plot Particles
-    self._drawCourseMap()
-    x = [ p[Constants.X] for p in self.particles ]
-    y = [ p[Constants.Y] for p in self.particles ]
-    h = [ p[Constants.HEADING] for p in self.particles ]
-    totalWeight = sum([ p[Constants.WEIGHT] for p in self.particles ])
-    w = [ p[Constants.WEIGHT] / totalWeight for p in self.particles ]
+  #def _scatterPlotParticles(self, car, filename):
+  #  '''
+  #  Create a scatter plot of the particle positions, headings and weight
+  #  @param car - Car class
+  #  @param filename - the SVG filename to write the scatterplot to
+  #  '''
+  #  #matplot.xlim(-0.5,25.5)
+  #  #matplot.ylim(-25.0,-15.0)
+  #  # Plot Particles
+  #  self._drawCourseMap()
+  #  x = [ p[Constants.X] for p in self.particles ]
+  #  y = [ p[Constants.Y] for p in self.particles ]
+  #  h = [ p[Constants.HEADING] for p in self.particles ]
+  #  totalWeight = sum([ p[Constants.WEIGHT] for p in self.particles ])
+  #  w = [ p[Constants.WEIGHT] / totalWeight for p in self.particles ]
 
-    matplot.scatter(x, y, c=w)
+  #  matplot.scatter(x, y, c=w)
 
-    self._drawEstimate()
+  #  self._drawEstimate()
 
-    self._drawCar(car)
+  #  self._drawCar(car)
 
-    matplot.savefig(filename)
-    matplot.clf()
+  #  matplot.savefig(filename)
+  #  matplot.clf()
 
-    # STREAMPLOT ATTEMPT
-    #u = []
-    #v = []
-    #for inX, inY, inH in zip(x, y, h):
-    #  outU, outV = self._rotate(inX, inY, inH)
-    #  u.append(outU)
-    #  v.append(outV)
-    #
-    #u, v = numpy.mgrid[x:y:1j, u:v:1j]
-    ##matplot.streamplot(x, y, [ [ i for i in u ] for i in u ], [ [ i for i in v ] for i in v ], color=w)
-    #matplot.streamplot(numpy.array(x), numpy.array(y), u, v, color=w)
+  #  # STREAMPLOT ATTEMPT
+  #  #u = []
+  #  #v = []
+  #  #for inX, inY, inH in zip(x, y, h):
+  #  #  outU, outV = self._rotate(inX, inY, inH)
+  #  #  u.append(outU)
+  #  #  v.append(outV)
+  #  #
+  #  #u, v = numpy.mgrid[x:y:1j, u:v:1j]
+  #  ##matplot.streamplot(x, y, [ [ i for i in u ] for i in u ], [ [ i for i in v ] for i in v ], color=w)
+  #  #matplot.streamplot(numpy.array(x), numpy.array(y), u, v, color=w)
 
-    #cRX, cRY = self._rotate(car.x, car.y, car.heading)
-    #cU, cV = numpy.mgrid[car.x:car.y:1j, cRX:cRY:1j] 
-    #matplot.streamplot(numpy.array([car.x]), numpy.array([car.y]), cU, cV, marker='+', color='pink')
+  #  #cRX, cRY = self._rotate(car.x, car.y, car.heading)
+  #  #cU, cV = numpy.mgrid[car.x:car.y:1j, cRX:cRY:1j] 
+  #  #matplot.streamplot(numpy.array([car.x]), numpy.array([car.y]), cU, cV, marker='+', color='pink')
 
-    # ALPHAS
-    #matplot.scatter(x, y, c=w)
-    #maxWeight = max([ p[Constants.WEIGHT] for p in self.particles ])
-    #w = [ p[Constants.WEIGHT] / maxWeight for p in self.particles ]
-    #
-    ## RGBA
-    #colors = [ [ g, 0, 1-g, 0.2] for g in w ]
-    #matplot.scatter(x, y, c=colors)
-    #matplot.savefig(filename)
+  #  # ALPHAS
+  #  #matplot.scatter(x, y, c=w)
+  #  #maxWeight = max([ p[Constants.WEIGHT] for p in self.particles ])
+  #  #w = [ p[Constants.WEIGHT] / maxWeight for p in self.particles ]
+  #  #
+  #  ## RGBA
+  #  #colors = [ [ g, 0, 1-g, 0.2] for g in w ]
+  #  #matplot.scatter(x, y, c=colors)
+  #  #matplot.savefig(filename)
 
-  #-------------------------------------------------------------------------------
-  def _drawCar(self, car):
-    '''
-    Draws the vehicle on the map
-    '''
-    # Get left distance sensor position
-    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], car.heading)
-   
-    leftStartPoint = [ car.x + rX, car.y + rY ]
-    
-    # Get right distance sensor position
-    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], car.heading)
-  
-    rightStartPoint = [ car.x + rX, car.y + rY ]
+  ##-------------------------------------------------------------------------------
+  #def _drawCar(self, car):
+  #  '''
+  #  Draws the vehicle on the map
+  #  '''
+  #  # Get left distance sensor position
+  #  rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], car.heading)
+  # 
+  #  leftStartPoint = [ car.x + rX, car.y + rY ]
+  #  
+  #  # Get right distance sensor position
+  #  rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], car.heading)
+  #
+  #  rightStartPoint = [ car.x + rX, car.y + rY ]
 
-    # Plot distance sensors
-    matplot.scatter(leftStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='<', color='green')
+  #  # Plot distance sensors
+  #  matplot.scatter(leftStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='<', color='green')
 
-    matplot.scatter(rightStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='>', color='green')
-    
-    # Plot car
-    matplot.scatter([car.x], [car.y], marker='+', color='green')
+  #  matplot.scatter(rightStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='>', color='green')
+  #  
+  #  # Plot car
+  #  matplot.scatter([car.x], [car.y], marker='+', color='green')
 
-  #-------------------------------------------------------------------------------
-  def _drawEstimate(self):
-    '''
-    Draws the estimated vehicle on the map
-    '''
-    # Get left distance sensor position
-    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
-   
-    leftStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
-    
-    # Get right distance sensor position
-    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
-  
-    rightStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
+  ##-------------------------------------------------------------------------------
+  #def _drawEstimate(self):
+  #  '''
+  #  Draws the estimated vehicle on the map
+  #  '''
+  #  # Get left distance sensor position
+  #  rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
+  # 
+  #  leftStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
+  #  
+  #  # Get right distance sensor position
+  #  rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
+  #
+  #  rightStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
 
-    # Plot distance sensors
-    matplot.scatter(leftStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='<', color='orange')
+  #  # Plot distance sensors
+  #  matplot.scatter(leftStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='<', color='orange')
 
-    matplot.scatter(rightStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='>', color='orange')
-    
-    # Plot car
-    matplot.scatter([self.estVehicleX], [self.estVehicleY], marker='+', color='orange')
+  #  matplot.scatter(rightStartPoint[Constants.X], rightStartPoint[Constants.Y], marker='>', color='orange')
+  #  
+  #  # Plot car
+  #  matplot.scatter([self.estVehicleX], [self.estVehicleY], marker='+', color='orange')
 
-  #-------------------------------------------------------------------------------
-  def _drawCourseMap(self):
-    '''
-    Draws the course map
-    '''
-    # Draw lines
-    for l in self.courseMap.lines:
-      self._drawLine(l)
+  ##-------------------------------------------------------------------------------
+  #def _drawCourseMap(self):
+  #  '''
+  #  Draws the course map
+  #  '''
+  #  # Draw lines
+  #  for l in self.courseMap.lines:
+  #    self._drawLine(l)
 
-    # Draw circles
-    for c in self.courseMap.circles:
-      self._drawCircle(c)
+  #  # Draw circles
+  #  for c in self.courseMap.circles:
+  #    self._drawCircle(c)
 
-    self._drawWaypoints()
+  #  self._drawWaypoints()
 
-  #-------------------------------------------------------------------------------
-  def _drawLine(self, line):
-    '''
-    Draw a line
-    @param Line class to draw
-    '''
-    ax = matplot.gca()
-    l = mlines.Line2D([line.startPoint[Constants.X], line.endPoint[Constants.X]], [line.startPoint[Constants.Y], line.endPoint[Constants.Y]]) 
-    ax.add_line(l)
+  ##-------------------------------------------------------------------------------
+  #def _drawLine(self, line):
+  #  '''
+  #  Draw a line
+  #  @param Line class to draw
+  #  '''
+  #  ax = matplot.gca()
+  #  l = mlines.Line2D([line.startPoint[Constants.X], line.endPoint[Constants.X]], [line.startPoint[Constants.Y], line.endPoint[Constants.Y]]) 
+  #  ax.add_line(l)
 
-  #-------------------------------------------------------------------------------
-  def _drawCircle(self, circle):
-    '''
-    Draw a cirlce
-    @param circle - Circle class to draw
-    '''
-    ax = matplot.gca()
-    c = matplot.Circle(circle.center, circle.radius, fill=False) 
-    ax.add_patch(c)
+  ##-------------------------------------------------------------------------------
+  #def _drawCircle(self, circle):
+  #  '''
+  #  Draw a cirlce
+  #  @param circle - Circle class to draw
+  #  '''
+  #  ax = matplot.gca()
+  #  c = matplot.Circle(circle.center, circle.radius, fill=False) 
+  #  ax.add_patch(c)
 
-  #-------------------------------------------------------------------------------
-  def _drawWaypoints(self):
-    '''
-    Draws a waypoints
-    '''
-    x = [ w[Constants.X] for w in self.courseMap.waypoints ]
-    y = [ w[Constants.Y] for w in self.courseMap.waypoints ]
-    matplot.scatter(x, y, marker='^', color='red')
+  ##-------------------------------------------------------------------------------
+  #def _drawWaypoints(self):
+  #  '''
+  #  Draws a waypoints
+  #  '''
+  #  x = [ w[Constants.X] for w in self.courseMap.waypoints ]
+  #  y = [ w[Constants.Y] for w in self.courseMap.waypoints ]
+  #  matplot.scatter(x, y, marker='^', color='red')
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):

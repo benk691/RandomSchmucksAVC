@@ -86,7 +86,7 @@ class SensorConversion(Thread):
         # TODO: I forsee threading complications with this. Needs testing
         self.dataConsumerThread.rightStripCount = 0.0
         self.dataConsumerThread.leftStripCount = 0.0
-        #print("DBG: RESET")
+        print("DBG: RESET STRIP COUNT")
         #print("DBG: self.dataConsumerThread.rightStripCount = {0}".format(self.dataConsumerThread.rightStripCount))
         #print("DBG: self.dataConsumerThread.leftStripCount = {0}".format(self.dataConsumerThread.leftStripCount))
 
@@ -109,8 +109,10 @@ class SensorConversion(Thread):
 
     # Take the average of the left and right velocity to get the vehicle velocity
     self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
+    print("DBG: Velocity Set = {0}".format(self.velocity))
     # Filter velocity
     self.velocity = self.velocityIirFilter.filter(self.velocity)
+    print("DBG: Velocity Filtered = {0}".format(self.velocity))
 
     self.distTraveled = (((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi
 
@@ -127,7 +129,8 @@ class SensorConversion(Thread):
     self._totalRightStripCount = self.dataConsumerThread.totalRightStripCount
     self.leftDistance = self.dataConsumerThread.sensors.leftDistance
     self.rightDistance = self.dataConsumerThread.sensors.rightDistance
-    self.heading = self.dataConsumerThread.sensors.heading
+    # Account for right hand rotation instead of left hand
+    self.heading = 360.0 - self.dataConsumerThread.sensors.heading
     self.roll = self.dataConsumerThread.sensors.roll
     self.pitch = self.dataConsumerThread.sensors.pitch
     self.sysCal = self.dataConsumerThread.sensors.sysCal

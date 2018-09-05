@@ -1,3 +1,4 @@
+import time
 import random
 import Constants
 from gpiozero import DistanceSensor
@@ -40,15 +41,27 @@ class Sensors:
     '''
     Reads all sensor values
     '''
+    st = time.time()
     self.steeringPotValue = self.adc.read_adc(Constants.ADC_POT_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE) 
+    print("DBG: Pot = {0}".format(time.time() - st))
+    st = time.time()
     self.rightTachValue = self.adc.read_adc(Constants.ADC_RIGHT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+    print("DBG: rightTach = {0}".format(time.time() - st))
+    st = time.time()
     self.leftTachValue = self.adc.read_adc(Constants.ADC_LEFT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+    print("DBG: leftTach = {0}".format(time.time() - st))
+    st = time.time()
     self.rightDistance = self.rightDistSensor.distance
+    print("DBG: rDist = {0}".format(time.time() - st))
+    st = time.time()
     self.leftDistance = self.leftDistSensor.distance
+    print("DBG: lDist = {0}".format(time.time() - st))
+    st = time.time()
     # TODO: third front distance sensor?
     # NOTE: the read in angles are in degrees
     self.heading, self.roll, self.pitch = self.imu.read_euler()
     self.sysCal, self.gyroCal, self.accelCal, self.magCal = self.imu.get_calibration_status()
+    print("DBG: imu = {0}".format(time.time() - st))
     #-------------------
     # NOTE: For testing
     #self.steeringPotValue = random.uniform(16400, 22500)

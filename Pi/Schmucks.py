@@ -25,7 +25,6 @@ def main():
 
   finally:
     shutdown(threads)
-    GPIO.cleanup()
 
 #-------------------------------------------------------------------------------
 def setup():
@@ -35,8 +34,10 @@ def setup():
   @return vehicle object
   '''
   # Setup start button
-  startButton = Button(Constants.START_BUTTON_PIN)
-  startButton.wait_for_press()
+  #print("Waiting for start")
+  #startButton = Button(Constants.START_BUTTON_PIN)
+  #startButton.wait_for_press()
+  #print("Started")
   # Start button has been pressed, so continue setup
   #courseMap = CourseMap()
   courseMap = WallMap()

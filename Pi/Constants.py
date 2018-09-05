@@ -175,7 +175,7 @@ MAP_START_BOX = [ [-0.25, -0.25], [0.25, 0.25] ]
 MAP_HEADING_RANGE = [ math.radians(-7.0), math.radians(7.0) ]
 
 # Offset that is applied so we can set 0 degrees with out worrying about North/South
-MAP_HEADING_OFFSET = -0.0
+MAP_HEADING_OFFSET = math.radians(360.0 - 257.56)
 
 # Noise that is applied to account for sensor inaccuracies in the heading
 HEADING_NOISE = math.radians(3.0)
