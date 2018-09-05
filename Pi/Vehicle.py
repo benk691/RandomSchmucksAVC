@@ -16,9 +16,8 @@ class Vehicle:
     @param sensorConversionThread - the conversion thread
     '''
     self.sensorConversionThread = sensorConversionThread
-    # TODO: uncomment
-    #self.pwm = Adafruit_PCA9685.PCA9685()
-    #self.pwm.set_pwm_freq(Constants.PWM_SENSOR_FREQ)
+    self.pwm = Adafruit_PCA9685.PCA9685()
+    self.pwm.set_pwm_freq(Constants.PWM_SENSOR_FREQ)
     self.velocityPID = PID(Constants.VELOCITY_PID_P, Constants.VELOCITY_PID_I, Constants.VELOCITY_PID_D, Constants.VELOCITY_PID_WINDUP)
     self.steeringAnglePID = PID(Constants.STEERING_ANGLE_PID_P, Constants.STEERING_ANGLE_PID_I, Constants.STEERING_ANGLE_PID_D, Constants.STEERING_ANGLE_PID_WINDUP)
     self.velocityDuration = -0.0
@@ -34,9 +33,8 @@ class Vehicle:
     self.velocityDuration = self.velocityPID.control()
     self.steeringDuration = self.velocityPID.control()
     # TODO: Do we need bound checks on velocity and steering angles?
-    # TODO: Uncomment
-    #self.controlChnl(Constants.PWM_DRIVE_CHNL, self.velocityDuration)
-    #self.controlChnl(Constants.PWM_TURN_CHNL, self.steeringDuration)
+    self.controlChnl(Constants.PWM_DRIVE_CHNL, self.velocityDuration)
+    self.controlChnl(Constants.PWM_TURN_CHNL, self.steeringDuration)
 
   #-------------------------------------------------------------------------------
   def update(self, velocityGoal, steeringAngleGoal):
