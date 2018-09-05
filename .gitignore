@@ -1,4 +1,5 @@
 *.svg
+*.log
 *.txt
 *.pyc
 *~
