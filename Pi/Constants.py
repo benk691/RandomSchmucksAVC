@@ -231,3 +231,6 @@ DIST_RIGHT_SENSOR_POSITION = [0.5, -0.3]
 # The orientation of the right distance sensor (relative to the vehicle)
 DIST_RIGHT_SENSOR_OREINTATION = math.radians(-90.0)
 
+# Start Button Pin, Indicates that we are ready to start the program
+START_BUTTON_PIN = 0
+
