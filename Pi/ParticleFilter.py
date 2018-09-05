@@ -8,6 +8,7 @@ import Constants
 #from matplotlib.colors import Normalize
 from scipy.stats import norm
 from Line import Line
+from GeneralFunctions import rotate
 
 class ParticleFilter:
   #-------------------------------------------------------------------------------
@@ -104,12 +105,12 @@ class ParticleFilter:
         turnRadius = 0.000000001
       # Generate a velocity for the particles
       genVelocity = random.gauss(mu=self.vehicleVelocity, sigma=Constants.VELOCITY_NOISE) * self.dt
-      rotatedX, rotatedY = self._rotate(turnRadius * math.sin(genVelocity / turnRadius), turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
+      rotatedX, rotatedY = rotate(turnRadius * math.sin(genVelocity / turnRadius), turnRadius * (1 - math.cos(genVelocity / turnRadius)), self.particles[i][Constants.HEADING])
       #print("DBG: genSteeringAngle = {0}".format(genSteeringAngle))
       #print("DBG: turnRadius = {0}".format(turnRadius))
       #print("DBG: genVelocity = {0}".format(genVelocity))
       #print("DBG: rotatedX, rotatedY = ({0}, {1})\n".format(rotatedX, rotatedY))
-      slipX, slipY = self._rotate(0, random.gauss(0, Constants.SLIP_NOISE * self.dt), self.particles[i][Constants.HEADING])
+      slipX, slipY = rotate(0, random.gauss(0, Constants.SLIP_NOISE * self.dt), self.particles[i][Constants.HEADING])
       self.particles[i][Constants.X] += rotatedX + slipX
       self.particles[i][Constants.Y] += rotatedY + slipY
       self.particles[i][Constants.HEADING] += genVelocity / turnRadius
@@ -184,24 +185,24 @@ class ParticleFilter:
     particleDistLeft, particleDistRight = 0.0, 0.0
 
     # Left Distance
-    rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
+    rX, rY = rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
     #print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
     #print("DBG: leftStartPoint(X, Y) = {0}".format(leftStartPoint))
 
-    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_ORIENTATION )
+    rX, rY = rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_ORIENTATION )
     #print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftEndPoint = [ leftStartPoint[Constants.X] + rX,  leftStartPoint[Constants.Y] + rY ]
     #print("DBG: leftEndPoint(X, Y) = {0}".format(leftEndPoint))
     leftDistLine = Line(leftStartPoint, leftEndPoint)
 
     # Right Distance
-    rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
+    rX, rY = rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], particle[Constants.HEADING])
     #print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
     #print("DBG: rightStartPoint(X, Y) = {0}".format(rightStartPoint))
 
-    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_ORIENTATION )
+    rX, rY = rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_ORIENTATION )
     #print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightEndPoint = [ rightStartPoint[Constants.X] + rX,  rightStartPoint[Constants.Y] + rY ]
     #print("DBG: rightEndPoint(X, Y) = {0}".format(rightEndPoint))
@@ -252,18 +253,7 @@ class ParticleFilter:
 
     return particleDistLeft, particleDistRight
 
-  #-------------------------------------------------------------------------------
-  def _rotate(self, x, y, theta):
-    '''
-    Rotates the X, Y coordinate by theta
-    x - the X coordinate
-    y - the Y coordinate
-    theta - the amount to rotate (radians)
-    '''
-    #print("DBG: x = {0}, y = {1}, theta = {2}".format(x, y, theta))
-    outX = x * math.cos(theta) - y * math.sin(theta)
-    outY = x * math.sin(theta) + y * math.cos(theta)
-    return outX, outY
+  
 
   #-------------------------------------------------------------------------------
   #def _scatterPlotParticles(self, car, filename):
@@ -295,7 +285,7 @@ class ParticleFilter:
   #  #u = []
   #  #v = []
   #  #for inX, inY, inH in zip(x, y, h):
-  #  #  outU, outV = self._rotate(inX, inY, inH)
+  #  #  outU, outV = rotate(inX, inY, inH)
   #  #  u.append(outU)
   #  #  v.append(outV)
   #  #
@@ -303,7 +293,7 @@ class ParticleFilter:
   #  ##matplot.streamplot(x, y, [ [ i for i in u ] for i in u ], [ [ i for i in v ] for i in v ], color=w)
   #  #matplot.streamplot(numpy.array(x), numpy.array(y), u, v, color=w)
 
-  #  #cRX, cRY = self._rotate(car.x, car.y, car.heading)
+  #  #cRX, cRY = rotate(car.x, car.y, car.heading)
   #  #cU, cV = numpy.mgrid[car.x:car.y:1j, cRX:cRY:1j] 
   #  #matplot.streamplot(numpy.array([car.x]), numpy.array([car.y]), cU, cV, marker='+', color='pink')
 
@@ -323,12 +313,12 @@ class ParticleFilter:
   #  Draws the vehicle on the map
   #  '''
   #  # Get left distance sensor position
-  #  rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], car.heading)
+  #  rX, rY = rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], car.heading)
   # 
   #  leftStartPoint = [ car.x + rX, car.y + rY ]
   #  
   #  # Get right distance sensor position
-  #  rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], car.heading)
+  #  rX, rY = rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], car.heading)
   #
   #  rightStartPoint = [ car.x + rX, car.y + rY ]
 
@@ -346,12 +336,12 @@ class ParticleFilter:
   #  Draws the estimated vehicle on the map
   #  '''
   #  # Get left distance sensor position
-  #  rX, rY = self._rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
+  #  rX, rY = rotate(Constants.DIST_LEFT_SENSOR_POSITION[Constants.X], Constants.DIST_LEFT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
   # 
   #  leftStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
   #  
   #  # Get right distance sensor position
-  #  rX, rY = self._rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
+  #  rX, rY = rotate(Constants.DIST_RIGHT_SENSOR_POSITION[Constants.X], Constants.DIST_RIGHT_SENSOR_POSITION[Constants.Y], self.estVehicleHeading)
   #
   #  rightStartPoint = [ self.estVehicleX + rX, self.estVehicleY + rY ]
 

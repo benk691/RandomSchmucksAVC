@@ -60,10 +60,21 @@ def unwrapAngle(angle, prevAngle):
   @param prevAngle - the previous angle read in [degrees]
   @return the unwrapped angle [degrees]
   '''
-  # TODO: Test. The previous angle bit did not make sens in Brians code so I modified.
   angleShift = wrapAngle(angle - prevAngle)
   angle = angleShift + prevAngle
   prevAngle = angle
   return angle, prevAngle
   
+#-------------------------------------------------------------------------------
+def rotate(x, y, theta):
+  '''
+  Rotates the X, Y coordinate by theta
+  x - the X coordinate
+  y - the Y coordinate
+  theta - the amount to rotate (radians)
+  '''
+  #print("DBG: x = {0}, y = {1}, theta = {2}".format(x, y, theta))
+  outX = x * math.cos(theta) - y * math.sin(theta)
+  outY = x * math.sin(theta) + y * math.cos(theta)
+  return outX, outY
 

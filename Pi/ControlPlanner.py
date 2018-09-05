@@ -4,6 +4,7 @@ import Constants
 from threading import Thread
 from ParticleFilter import ParticleFilter
 from Publisher import Publisher
+from GeneralFunctions import rotate
 
 class ControlPlanner(Thread, Publisher):
   '''
@@ -60,7 +61,7 @@ class ControlPlanner(Thread, Publisher):
     '''
     xErr = self.courseMap.waypoints[self.waypoint][Constants.X] - self.estVehicleX
     yErr = self.courseMap.waypoints[self.waypoint][Constants.Y] - self.estVehicleY
-    xErr, yErr = self.particleFilter._rotate(xErr, yErr, -self.estVehicleHeading)
+    xErr, yErr = rotate(xErr, yErr, -self.estVehicleHeading)
 
     self.steeringAngleGoal = math.atan(Constants.VEHICLE_AXLE_LEN * ((2.0 * yErr) / (math.pow(xErr, 2) + math.pow(yErr, 2)))) * Constants.CONTROL_STEERING_AGRESSION
     self.velocityGoal = max(Constants.MIN_VEHICLE_VELOCITY, Constants.MAX_VEHICLE_VELOCITY - math.atan(self.steeringAngleGoal) * Constants.VELOCITY_SCALE_FACTOR)
@@ -73,15 +74,14 @@ class ControlPlanner(Thread, Publisher):
     Checks if the estimated vehicle location has passed the current waypoint goal.
     If the vehicle has then increment to the next waypoint
     '''
-    # TODO: Pull rotate out into general functions
     #print("DBG: waypoint = {0}".format(self.waypoint))
     #print("DBG: len(courseMap.waypoints) = {0}".format(len(self.courseMap.waypoints)))
     #print("DBG: courseMap.waypoints:")
     #for wp in self.courseMap.waypoints:
     #  print("DBG: wp = {0}".format(wp))
 
-    rWpX, rWpY = self.particleFilter._rotate(self.courseMap.waypoints[self.waypoint][Constants.X], self.courseMap.waypoints[self.waypoint][Constants.Y], -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
-    rEstX, rEstY = self.particleFilter._rotate(self.estVehicleX, self.estVehicleY, -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
+    rWpX, rWpY = rotate(self.courseMap.waypoints[self.waypoint][Constants.X], self.courseMap.waypoints[self.waypoint][Constants.Y], -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
+    rEstX, rEstY = rotate(self.estVehicleX, self.estVehicleY, -self.courseMap.waypoints[self.waypoint][Constants.HEADING])
     if rEstX > (rWpX - Constants.WAYPOINT_CHECK_DIST):
       self.waypointCheck += 1
     else:
@@ -92,7 +92,7 @@ class ControlPlanner(Thread, Publisher):
       self.waypoint += 1
       if self.waypoint > len(self.courseMap.waypoints):
         self.waypoint = 0
-      # TODO: Add in switch cases for special points (NERF, stop, etc...)
+      # TODO: Add in switch cases for special points (NERF, stop, etc...). IDEA: Add a call back to the waypoint list, if it has a callback then call it otherwise no special function
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -137,3 +137,4 @@ class ControlPlanner(Thread, Publisher):
     Destructor
     '''
     self.join(timeout=5)
+
