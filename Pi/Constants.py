@@ -9,28 +9,28 @@ Defines constants for the Rasberry Pi
 #         PID Control
 #--------------------------------
 # Velocity proportional constant
-VELOCITY_PID_P = 0.0
+VELOCITY_PID_P = 50.0
 
 # Velocity integral constant
-VELOCITY_PID_I = 0.0
+VELOCITY_PID_I = 100.0
 
 # Velocity derivative constant
 VELOCITY_PID_D = 0.0
 
 # Velocity windup constant
-VELOCITY_PID_WINDUP = 0.0
+VELOCITY_PID_WINDUP = 3.0
 
 # Steering angle proportional constant
-STEERING_ANGLE_PID_P = 0.0
+STEERING_ANGLE_PID_P = 1.0
 
 # Steering angle integral constant
-STEERING_ANGLE_PID_I = 0.0
+STEERING_ANGLE_PID_I = 0.2
 
 # Steering angle derivative constant
 STEERING_ANGLE_PID_D = 0.0
 
 # Steering angle windup constant
-STEERING_ANGLE_PID_WINDUP = 0.0
+STEERING_ANGLE_PID_WINDUP = 3.0
 #---------------------------------
 
 # ADC data/sample rate
@@ -109,7 +109,7 @@ HEADING_IIR_FILTER_A = 0.9
 DIST_IIR_FILTER_A = 0.9
 
 # Constant to apply to distance measurements if they are railed
-DIST_MAX_FILTER = -0.0
+DIST_MAX_FILTER = 0.3
 
 # The max loop count in the SensorConversion class
 MAX_LOOP_COUNT = 15.0
@@ -132,21 +132,6 @@ TACH_LEFT_THRESHOLD_HIGH = 8500.0
 # Left Tachometer low value
 TACH_LEFT_THRESHOLD_LOW = 6500.0
 
-# X index in a coordinate list
-X = 0
-
-# Y index in a coordinate list
-Y = 1
-
-# Heading index in a coordinate list
-HEADING = 2
-
-# Weight index in a coordinate list
-WEIGHT = 3
-
-# Radius index in a coordinate list
-RADIUS = 3
-
 # Distance away from the waypoint we want to start checking if we are at waypoint or not
 WAYPOINT_CHECK_DIST = 1.0
 
@@ -154,10 +139,10 @@ WAYPOINT_CHECK_DIST = 1.0
 WAYPOINT_MAX_CHECKS = 3
 
 # Slowest we ever want the vehicle to go
-MIN_VEHICLE_VELOCITY = 0.5
+MIN_VEHICLE_VELOCITY = 0.2
 
 # Fastest we ever want the vehicle to go
-MAX_VEHICLE_VELOCITY = 1.8
+MAX_VEHICLE_VELOCITY = 1.0
 
 # Velocity scale factor. Scaled to decrease speed when the vehicle's heading is off from the waypoint's heading. This uses a degree that we want to be within before we start speeding above min velocity
 VELOCITY_SCALE_FACTOR = (MAX_VEHICLE_VELOCITY - MIN_VEHICLE_VELOCITY) / math.radians(45.0)
@@ -172,65 +157,81 @@ CONTROL_SLEEP_THRESHOLD = 1.0e-3
 #         Particle Filter
 #--------------------------------
 # Number of particles to generate for the particle filter
-PARTICLE_NUMBER = 50
+PARTICLE_NUMBER = 100
 
 # Minimum particle number that we do not want to go below
-MIN_PARTICLE_NUMBER = -0
+MIN_PARTICLE_NUMBER = 0
 
 # Length between the two axles on the vehicle (meters)
-VEHICLE_AXLE_LEN = -0.0
+VEHICLE_AXLE_LEN = 0.9
 
 # Diameter of the wheels on the vehicle
 VEHICLE_WHEEL_DIAMETER = 0.36
 
 # Two Points that define the start box, on the map, for the vehicle
-MAP_START_BOX = [ [-0.0, 0.0], [-0.0, -0.0] ]
+MAP_START_BOX = [ [-0.25, -0.25], [0.25, 0.25] ]
 
 # The starting heading range for the vehicle
-MAP_HEADING_RANGE = [ -0.0, -0.0 ]
+MAP_HEADING_RANGE = [ math.radians(-7.0), math.radians(7.0) ]
 
 # Offset that is applied so we can set 0 degrees with out worrying about North/South
 MAP_HEADING_OFFSET = -0.0
 
 # Noise that is applied to account for sensor inaccuracies in the heading
-HEADING_NOISE = -0.0
+HEADING_NOISE = math.radians(3.0)
 
 # Noise that is applied to account for sensor inaccuracies in the steering angle
-STEERING_ANGLE_NOISE = -0.0
+STEERING_ANGLE_NOISE = math.radians(4.0)
 
 # Noise that is applied to account for sensor inaccuracies in the velocity
-VELOCITY_NOISE = -0.0
+VELOCITY_NOISE = 0.3
 
 # Noise that is applied to account for sensor inaccuracies in the distance
-DISTANCE_NOISE = -0.0
+DISTANCE_NOISE = 0.2
 
 # Slippage noise
-SLIP_NOISE = 0.0
+SLIP_NOISE = 0.1
 
 # Contant to allow us to steer more sharply
 CONTROL_STEERING_AGRESSION = 1.1
 
 # Update rate for the particle filter (Hz)
+# TODO: Check this constatnt is redundant
 PARTICLE_FILTER_UPDATE_RATE = 10
 
 # Left Most Steering Angle
-MAX_LEFT_STEERING_ANGLE = math.pi / 4.0
+MAX_LEFT_STEERING_ANGLE = math.radians(25.0)
 
 # Right Most Steering Angle
-MAX_RIGHT_STEERING_ANGLE = -math.pi / 4.0
+MAX_RIGHT_STEERING_ANGLE = math.radians(25.0)
 
 # The position of the left distance sensor on the vehicle (relative to the vehicle)
-DIST_LEFT_SENSOR_POSITION = [0.5, 0.3]
+DIST_LEFT_SENSOR_POSITION = [0.508, 0.381]
 
 # The orientation of the left distance sensor (relative to the vehicle)
-DIST_LEFT_SENSOR_OREINTATION = math.radians(90.0)
+DIST_LEFT_SENSOR_ORIENTATION = math.radians(65.0)
 
 # The position of the right distance sensor on the vehicle (relative to the vehicle)
-DIST_RIGHT_SENSOR_POSITION = [0.5, -0.3]
+DIST_RIGHT_SENSOR_POSITION = [0.508, -0.381]
 
 # The orientation of the right distance sensor (relative to the vehicle)
-DIST_RIGHT_SENSOR_OREINTATION = math.radians(-90.0)
+DIST_RIGHT_SENSOR_ORIENTATION = math.radians(-65.0)
 
 # Start Button Pin, Indicates that we are ready to start the program
 START_BUTTON_PIN = 5
+
+# X index in a coordinate list
+X = 0
+
+# Y index in a coordinate list
+Y = 1
+
+# Heading index in a coordinate list
+HEADING = 2
+
+# Weight index in a coordinate list
+WEIGHT = 3
+
+# Radius index in a coordinate list
+RADIUS = 3
 

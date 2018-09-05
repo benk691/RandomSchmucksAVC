@@ -5,6 +5,7 @@ import Constants
 from gpiozero import Button
 from ControlPlanner import ControlPlanner
 from CourseMap import CourseMap
+from WallMap import WallMap
 from DataConsumerThread import DataConsumerThread
 from SensorConversion import SensorConversion
 from Vehicle import Vehicle
@@ -37,7 +38,8 @@ def setup():
   startButton = Button(Constants.START_BUTTON_PIN)
   startButton.wait_for_press()
   # Start button has been pressed, so continue setup
-  courseMap = CourseMap()
+  #courseMap = CourseMap()
+  courseMap = WallMap()
   # Construct Threads
   # TODO: Untie threads
   dataConsumerThread = DataConsumerThread(daemon=True)

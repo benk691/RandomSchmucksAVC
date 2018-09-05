@@ -189,7 +189,7 @@ class ParticleFilter:
     leftStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
     #print("DBG: leftStartPoint(X, Y) = {0}".format(leftStartPoint))
 
-    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_OREINTATION )
+    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_LEFT_SENSOR_ORIENTATION )
     #print("DBG: Rotate Left (rX, rY) = ({0}, {1})".format(rX, rY))
     leftEndPoint = [ leftStartPoint[Constants.X] + rX,  leftStartPoint[Constants.Y] + rY ]
     #print("DBG: leftEndPoint(X, Y) = {0}".format(leftEndPoint))
@@ -201,7 +201,7 @@ class ParticleFilter:
     rightStartPoint = [ particle[Constants.X] + rX, particle[Constants.Y] + rY ]
     #print("DBG: rightStartPoint(X, Y) = {0}".format(rightStartPoint))
 
-    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_OREINTATION )
+    rX, rY = self._rotate(Constants.DIST_MAX_DISTANCE, 0.0, particle[Constants.HEADING] + Constants.DIST_RIGHT_SENSOR_ORIENTATION )
     #print("DBG: Rotate Right (rX, rY) = ({0}, {1})".format(rX, rY))
     rightEndPoint = [ rightStartPoint[Constants.X] + rX,  rightStartPoint[Constants.Y] + rY ]
     #print("DBG: rightEndPoint(X, Y) = {0}".format(rightEndPoint))
