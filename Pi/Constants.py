@@ -120,9 +120,6 @@ DIST_MAX_FILTER = 0.3
 # Number of milliseconds in a second
 MILLI_SEC_IN_SEC = 1000.0
 
-# Value to convert strip count to meters
-STRIP_COUNT_TO_METERS = 0.0
-
 # Number of tape strips on each wheel
 TACH_TOTAL_STRIPS = 30.0
 
@@ -137,6 +134,18 @@ TACH_LEFT_THRESHOLD_HIGH = 8500.0
 
 # Left Tachometer low value
 TACH_LEFT_THRESHOLD_LOW = 6500.0
+
+# Length between the two axles on the vehicle (meters)
+VEHICLE_AXLE_LEN = 0.9
+
+# Diameter of the wheels on the vehicle (meters)
+VEHICLE_WHEEL_DIAMETER = 0.36
+
+# Wheel's Circumference (meters)
+VEHICLE_WHEEL_CIRCUMFERENCE = 1.31
+
+# Value to convert strip count to meters
+STRIP_COUNT_TO_METERS = VEHICLE_WHEEL_CIRCUMFERENCE / TACH_TOTAL_STRIPS
 
 # Steering pot value slope value for converting to a steering angle
 STEERING_CONV_SLOPE = 0.00634
@@ -173,12 +182,6 @@ PARTICLE_NUMBER = 100
 
 # Minimum particle number that we do not want to go below
 MIN_PARTICLE_NUMBER = 0
-
-# Length between the two axles on the vehicle (meters)
-VEHICLE_AXLE_LEN = 0.9
-
-# Diameter of the wheels on the vehicle
-VEHICLE_WHEEL_DIAMETER = 0.36
 
 # Two Points that define the start box, on the map, for the vehicle
 MAP_START_BOX = [ [-0.25, -0.25], [0.25, 0.25] ]
