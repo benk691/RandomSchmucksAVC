@@ -20,6 +20,8 @@ class ControlPlanner(Thread, Publisher):
     '''
     Thread.__init__(self, group=group, target=target, name=name, daemon=daemon)
     Publisher.__init__(self)
+    self.args = args
+    self.kwargs = kwargs
     self.courseMap = courseMap
     self.particleFilter = ParticleFilter(Constants.PARTICLE_NUMBER, Constants.MAP_START_BOX, Constants.MAP_HEADING_RANGE, self.courseMap, sensorConversionThread)
     self.shutDown = False

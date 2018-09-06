@@ -37,6 +37,24 @@ STEERING_ANGLE_PID_WINDUP = 3.0
 
 # Update rate of the steering PID (Hz)
 STEERING_PID_UPDATE_RATE = 40
+
+# Wall follow proportional constant
+WALL_FOLLOW_PID_P = 10000.0
+
+# Wall follow integral constant
+WALL_FOLLOW_PID_I = 0.0
+
+# Wall follow derivative constant
+WALL_FOLLOW_PID_D = 0.0
+
+# Wall follow windup constant
+WALL_FOLLOW_PID_WINDUP = 0.0
+
+# Wall follow PID goal. Distance we want to keep away from the wall (meters)
+WALL_FOLLOW_PID_DIST_GOAL = 1.5
+
+# Wall follow update rate (Hz)
+WALL_FOLLOW_UPDATE_RATE = 10.0
 #---------------------------------
 
 # ADC data/sample rate
@@ -119,6 +137,15 @@ DIST_MAX_FILTER = 0.3
 
 # Number of milliseconds in a second
 MILLI_SEC_IN_SEC = 1000.0
+
+# Potentiometer value that keeps the vehicle straight
+POT_STRAIGHT = 19203
+
+# Potentiometer value of a max right turn
+POT_RIGHT = 16400
+
+# Potentiometer value of a max left turn
+POT_LEFT = 22500
 
 # Number of tape strips on each wheel
 TACH_TOTAL_STRIPS = 30.0
