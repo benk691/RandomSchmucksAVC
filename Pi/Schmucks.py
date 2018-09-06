@@ -63,9 +63,9 @@ def setup():
 
   performIMUCalibration(calibrate, dataConsumerThread)
 
-  Constants.MAP_HEADING_OFFSET = dataConsumerThread.sensors.heading
+  Constants.MAP_HEADING_OFFSET = math.radians(Constants.HEADING_WRAP_AROUND - dataConsumerThread.sensors.heading)
 
-  print("Heading Offset = {0}".format(Constants.MAP_HEADING_OFFSET))
+  print("Heading Offset = {0} deg".format(math.degrees(Constants.MAP_HEADING_OFFSET)))
 
   return [dataConsumerThread, sensorConversionThread, controlPlannerThread], vehicle
 

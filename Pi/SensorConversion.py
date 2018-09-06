@@ -78,8 +78,7 @@ class SensorConversion(Thread):
     self.totalStripCount = (self._totalLeftStripCount + self._totalRightStripCount) / 2.0
     self.leftDistance = self.dataConsumerThread.sensors.leftDistance
     self.rightDistance = self.dataConsumerThread.sensors.rightDistance
-    # Account for right hand rotation instead of left hand
-    self.heading = 360.0 - self.dataConsumerThread.sensors.heading
+    self.heading = Constants.HEADING_WRAP_AROUND - self.dataConsumerThread.sensors.heading
     self.roll = self.dataConsumerThread.sensors.roll
     self.pitch = self.dataConsumerThread.sensors.pitch
     self.sysCal = self.dataConsumerThread.sensors.sysCal
