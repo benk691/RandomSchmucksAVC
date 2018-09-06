@@ -207,10 +207,6 @@ SLIP_NOISE = 0.1
 # Contant to allow us to steer more sharply
 CONTROL_STEERING_AGRESSION = 1.1
 
-# Update rate for the particle filter (Hz)
-# TODO: Check this constatnt is redundant
-PARTICLE_FILTER_UPDATE_RATE = 10
-
 # Left Most Steering Angle
 MAX_LEFT_STEERING_ANGLE = math.radians(25.0)
 
@@ -252,3 +248,4 @@ RADIUS = 3
 
 # Calibration file where we store are previously configured calibration settings
 CALIB_SETTINGS_FILE = "/home/pi/Documents/RandomSchmucksAVC/calibrationSettings.info"
+

@@ -28,8 +28,8 @@ def runDist():
   #distSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
   #distSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
 
-  leftDistSensor = DistanceSensor(echo=13, trigger=6, max_distance=2, queue_len=10)
-  rightDistSensor = DistanceSensor(echo=19, trigger=26, max_distance=2, queue_len=10)
+  leftDistSensor = DistanceSensor(echo=27, trigger=17, max_distance=2, queue_len=10)
+  rightDistSensor = DistanceSensor(echo=22, trigger=18, max_distance=2, queue_len=10)
 
   try:
     while True:
