@@ -251,4 +251,4 @@ WEIGHT = 3
 RADIUS = 3
 
 # Calibration file where we store are previously configured calibration settings
-CALIB_SETTINGS_FILE = "calibrationSettings.info"
+CALIB_SETTINGS_FILE = "/home/pi/Documents/RandomSchmucksAVC/calibrationSettings.info"

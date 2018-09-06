@@ -1,5 +1,7 @@
 #!/usr/bin/python3.5
+import sys
 import time
+import math
 import Constants
 from threading import Thread
 from argparse import ArgumentParser
@@ -54,6 +56,7 @@ def setup():
   sensorConversionThread = SensorConversion(daemon=True, dataConsumerThread=dataConsumerThread)
   controlPlannerThread = ControlPlanner(daemon=True, courseMap=courseMap, sensorConversionThread=sensorConversionThread)
   vehicle = Vehicle(sensorConversionThread)
+  # TODO: IMPORTANT: Send 0.5 pulse before start button
   # Register Subscribers
   controlPlannerThread.register(vehicle, vehicle.updateGoals)
   # Start threads
@@ -99,12 +102,12 @@ def performIMUCalibration(calibrate, dc):
     doneCalibrateThread.join(timeout=5)
 
     # Save calibration data
-    calibData = dataConsumerThread.sensors.imu.get_calibration()
+    calibData = dc.sensors.imu.get_calibration()
     print("calibData = {0}".format(calibData))
-    dataConsumerThread.sensors.imu.set_calibration(calibData)
+    dc.sensors.imu.set_calibration(calibData)
     with open(Constants.CALIB_SETTINGS_FILE, 'w') as calibFile:
-      calibFile.write(calibData)
-    raw_input("Press any key once the vehicle is aligned with its desired heading. ")
+      calibFile.write(str(calibData))
+    input("Press any key once the vehicle is aligned with its desired heading. ")
 
   else:
     # TODO: read from settings file to set IMU
@@ -118,6 +121,7 @@ def calibrateIMU(dc):
   '''
   while calibrating:
     print('Heading={0:0.2F} Roll={1:0.2F} Pitch={2:0.2F}\tSys_cal={3} Gyro_cal={4} Accel_cal={5} Mag_cal={6}'.format(dc.sensors.heading, dc.sensors.roll, dc.sensors.pitch, dc.sensors.sysCal, dc.sensors.gyroCal, dc.sensors.accelCal, dc.sensors.magCal))
+    #print("RD: {0}, LD = {1}".format(dc.sensors.rightDistance, dc.sensors.leftDistance))
     time.sleep(1)
 
 #-------------------------------------------------------------------------------
@@ -127,7 +131,7 @@ def doneCalibrateIMU():
   '''
   global calibrating
   while calibrating:
-    a = raw_input("Press q once you are done with calibration. ")
+    a = input("Press q once you are done with calibration. ")
     calibrating = a.lower() == 'q'
 
 #-------------------------------------------------------------------------------

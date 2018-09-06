@@ -20,8 +20,8 @@ class Sensors:
     if not self.imu.begin():
       raise RuntimeError('Failed to initialize IMU! Is the sensor connected?')
     # Distance sensors
-    self.leftDistSensor = DistanceSensor(echo=Constants.DIST_LEFT_ECHO_PIN, trigger=Constants.DIST_LEFT_TRIGGER_PIN, max_distance=Constants.DIST_QUEUE_LENGTH)
-    self.rightDistSensor = DistanceSensor(echo=Constants.DIST_RIGHT_ECHO_PIN, trigger=Constants.DIST_RIGHT_TRIGGER_PIN, max_distance=Constants.DIST_QUEUE_LENGTH)
+    self.leftDistSensor = DistanceSensor(echo=Constants.DIST_LEFT_ECHO_PIN, trigger=Constants.DIST_LEFT_TRIGGER_PIN, max_distance=Constants.DIST_MAX_DISTANCE, queue_len=Constants.DIST_QUEUE_LENGTH)
+    self.rightDistSensor = DistanceSensor(echo=Constants.DIST_RIGHT_ECHO_PIN, trigger=Constants.DIST_RIGHT_TRIGGER_PIN, max_distance=Constants.DIST_MAX_DISTANCE, queue_len=Constants.DIST_QUEUE_LENGTH)
     # Sensor values (-0 means that the sensor is not reading data)
     self.steeringPotValue = -0
     self.leftTachValue = -0
@@ -41,27 +41,27 @@ class Sensors:
     '''
     Reads all sensor values
     '''
-    st = time.time()
+    #st = time.time()
     self.steeringPotValue = self.adc.read_adc(Constants.ADC_POT_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE) 
-    print("DBG: Pot = {0}".format(time.time() - st))
-    st = time.time()
+    #print("DBG: Pot = {0}".format(time.time() - st))
+    #st = time.time()
     self.rightTachValue = self.adc.read_adc(Constants.ADC_RIGHT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
-    print("DBG: rightTach = {0}".format(time.time() - st))
-    st = time.time()
+    #print("DBG: rightTach = {0}".format(time.time() - st))
+    #st = time.time()
     self.leftTachValue = self.adc.read_adc(Constants.ADC_LEFT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
-    print("DBG: leftTach = {0}".format(time.time() - st))
-    st = time.time()
+    #print("DBG: leftTach = {0}".format(time.time() - st))
+    #st = time.time()
     self.rightDistance = self.rightDistSensor.distance
-    print("DBG: rDist = {0}".format(time.time() - st))
-    st = time.time()
+    #print("DBG: rDist = {0}".format(time.time() - st))
+    #st = time.time()
     self.leftDistance = self.leftDistSensor.distance
-    print("DBG: lDist = {0}".format(time.time() - st))
-    st = time.time()
+    #print("DBG: lDist = {0}".format(time.time() - st))
+    #st = time.time()
     # TODO: third front distance sensor?
     # NOTE: the read in angles are in degrees
     self.heading, self.roll, self.pitch = self.imu.read_euler()
     self.sysCal, self.gyroCal, self.accelCal, self.magCal = self.imu.get_calibration_status()
-    print("DBG: imu = {0}".format(time.time() - st))
+    #print("DBG: imu = {0}".format(time.time() - st))
     #-------------------
     # NOTE: For testing
     #self.steeringPotValue = random.uniform(16400, 22500)

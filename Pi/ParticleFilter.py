@@ -76,6 +76,8 @@ class ParticleFilter:
     self.vehicleLeftDistance = self.sensorConversionThread.leftDistance
     self.vehicleRightDistance = self.sensorConversionThread.rightDistance
     self.vehicleSteeringAngle = self.sensorConversionThread.steeringAngle
+    if self.dt == 0.0:
+      self.dt = 0.00000001
     self.vehicleVelocity = (self.vehicleTotalStripCount - self.vehiclePrevTotalStripCount) / self.dt * Constants.STRIP_COUNT_TO_METERS
     self.vehiclePrevTotalStripCount = self.vehicleTotalStripCount
     # TODO: This is in the sensor conversion thread, still need?

@@ -21,11 +21,13 @@ class Vehicle:
     self.steeringAnglePID = PID(Constants.STEERING_ANGLE_PID_P, Constants.STEERING_ANGLE_PID_I, Constants.STEERING_ANGLE_PID_D, Constants.STEERING_ANGLE_PID_WINDUP)
     self.velocityDuration = -0.0
     self.steeringDuration = -0.0
+    self.prevTotalStripCount = 0.0
+    self.totalStripCount = 0.0
     # TODO: Wall Follow PID
     self.tabs = 0
     self.totalUpdateTime = 0.0
-    self.prevTime = 0.0
-    self.currentTime = 0.0
+    self.prevTime = time.time()
+    self.currentTime = time.time()
     self.updateRate = gcd(Constants.VELOCITY_PID_UPDATE_RATE, Constants.STEERING_PID_UPDATE_RATE)
 
   #-------------------------------------------------------------------------------
@@ -40,7 +42,6 @@ class Vehicle:
     # TODO: Do we need bound checks on velocity and steering angles?
     self.controlChnl(Constants.PWM_DRIVE_CHNL, self.velocityDuration)
     self.controlChnl(Constants.PWM_TURN_CHNL, self.steeringDuration)
-    self.prevTime = self.currentTime
 
     sleepTime = (1.0 / self.updateRate) - (time.time() - self.currentTime)
     if sleepTime > self.updateRate:
@@ -74,8 +75,13 @@ class Vehicle:
     '''
     if self.totalUpdateTime >= Constants.VELOCITY_PID_UPDATE_RATE:
       # TODO: Test. Threading issues
-      vehicleVelocity = self.sensorConversionThread.velocity
+      self.totalStripCount = self.sensorConversionThread.totalStripCount
+      dt = self.currentTime - self.prevTime
+      if dt == 0.0:
+        dt = 0.00000001
+      vehicleVelocity = (self.totalStripCount - self.prevTotalStripCount) / dt * Constants.STRIP_COUNT_TO_METERS
       self.velocityPID.setMeasurement(vehicleVelocity)
+      self.prevTime = self.currentTime
 
   #-------------------------------------------------------------------------------
   def updateSteeringMeasurement(self):
