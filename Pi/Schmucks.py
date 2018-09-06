@@ -48,7 +48,7 @@ def setup():
   controlPlannerThread = ControlPlanner(daemon=True, courseMap=courseMap, sensorConversionThread=sensorConversionThread)
   vehicle = Vehicle(sensorConversionThread)
   # Register Subscribers
-  controlPlannerThread.register(vehicle, vehicle.update)
+  controlPlannerThread.register(vehicle, vehicle.updateGoals)
   # Start threads
   dataConsumerThread.start()
   sensorConversionThread.start()

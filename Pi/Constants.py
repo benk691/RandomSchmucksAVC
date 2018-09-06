@@ -20,6 +20,9 @@ VELOCITY_PID_D = 0.0
 # Velocity windup constant
 VELOCITY_PID_WINDUP = 3.0
 
+# Update rate of the velocity PID (Hz)
+VELOCITY_PID_UPDATE_RATE = 10
+
 # Steering angle proportional constant
 STEERING_ANGLE_PID_P = 1.0
 
@@ -31,6 +34,9 @@ STEERING_ANGLE_PID_D = 0.0
 
 # Steering angle windup constant
 STEERING_ANGLE_PID_WINDUP = 3.0
+
+# Update rate of the steering PID (Hz)
+STEERING_PID_UPDATE_RATE = 40
 #---------------------------------
 
 # ADC data/sample rate
@@ -131,6 +137,12 @@ TACH_LEFT_THRESHOLD_HIGH = 8500.0
 
 # Left Tachometer low value
 TACH_LEFT_THRESHOLD_LOW = 6500.0
+
+# Steering pot value slope value for converting to a steering angle
+STEERING_CONV_SLOPE = 0.00634
+
+# Steering pot value y-intercept for converting to a steering angle
+STEERING_Y_INTERCEPT = -124.13
 
 # Distance away from the waypoint we want to start checking if we are at waypoint or not
 WAYPOINT_CHECK_DIST = 1.0

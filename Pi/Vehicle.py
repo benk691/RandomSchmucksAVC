@@ -1,14 +1,13 @@
 import time
-import re
 import Constants
 import Adafruit_PCA9685
 from PID import PID
+from fractions import gcd
 
 class Vehicle:
   '''
   Controls the Fisher Price Vehicle
   '''
-
   #-------------------------------------------------------------------------------
   def __init__(self, sensorConversionThread):
     '''
@@ -24,20 +23,33 @@ class Vehicle:
     self.steeringDuration = -0.0
     # TODO: Wall Follow PID
     self.tabs = 0
+    self.totalUpdateTime = 0.0
+    self.prevTime = 0.0
+    self.currentTime = 0.0
+    self.updateRate = gcd(Constants.VELOCITY_PID_UPDATE_RATE, Constants.STEERING_PID_UPDATE_RATE)
 
   #-------------------------------------------------------------------------------
   def drive(self):
     '''
     Autonomously drives the vehicle based on the control goals
     '''
+    self.currentTime = time.time()
+    self.updateMeasurements()
     self.velocityDuration = self.velocityPID.control()
     self.steeringDuration = self.velocityPID.control()
     # TODO: Do we need bound checks on velocity and steering angles?
     self.controlChnl(Constants.PWM_DRIVE_CHNL, self.velocityDuration)
     self.controlChnl(Constants.PWM_TURN_CHNL, self.steeringDuration)
+    self.prevTime = self.currentTime
+
+    sleepTime = (1.0 / self.updateRate) - (time.time() - self.currentTime)
+    if sleepTime > self.updateRate:
+      time.sleep(sleepTime)
+
+    self.totalUpdateTime += self.updateRate
 
   #-------------------------------------------------------------------------------
-  def update(self, velocityGoal, steeringAngleGoal):
+  def updateGoals(self, velocityGoal, steeringAngleGoal):
     '''
     Updates the vehicle's state
     @param velocityGoal - the velocity we are trying to achieve
@@ -46,14 +58,34 @@ class Vehicle:
     # Set PID Goals
     self.velocityPID.setGoal(velocityGoal)
     self.steeringAnglePID.setGoal(steeringAngleGoal)
-    # Set current vehicle measurements
-    # TODO: Test. Threading issues
-    vehicleVelocity = self.sensorConversionThread.velocity
-    self.velocityPID.setMeasurement(vehicleVelocity)
 
-    # TODO: Test. Threading issues
-    vehicleSteeringAngle = self.sensorConversionThread.steeringAngle
-    self.velocityPID.setMeasurement(vehicleSteeringAngle)
+  #-------------------------------------------------------------------------------
+  def updateMeasurements(self):
+    '''
+    Updates PID measurements
+    '''
+    self.updateVelocityMeasurement()
+    self.updateSteeringMeasurement()
+
+  #-------------------------------------------------------------------------------
+  def updateVelocityMeasurement(self):
+    '''
+    Update the velocity PID measurement
+    '''
+    if self.totalUpdateTime >= Constants.VELOCITY_PID_UPDATE_RATE:
+      # TODO: Test. Threading issues
+      vehicleVelocity = self.sensorConversionThread.velocity
+      self.velocityPID.setMeasurement(vehicleVelocity)
+
+  #-------------------------------------------------------------------------------
+  def updateSteeringMeasurement(self):
+    '''
+    Update the steering PID measurement
+    '''
+    if self.totalUpdateTime >= Constants.STEERING_PID_UPDATE_RATE:
+      # TODO: Test. Threading issues
+      vehicleSteeringAngle = self.sensorConversionThread.steeringAngle
+      self.velocityPID.setMeasurement(vehicleSteeringAngle)
 
   #-------------------------------------------------------------------------------
   def controlChnl(self, chnl, pulse):
