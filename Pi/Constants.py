@@ -247,3 +247,5 @@ WEIGHT = 3
 # Radius index in a coordinate list
 RADIUS = 3
 
+# Calibration file where we store are previously configured calibration settings
+CALIB_SETTINGS_FILE = "calibrationSettings.info"
