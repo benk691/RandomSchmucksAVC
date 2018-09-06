@@ -24,6 +24,8 @@ class ParticleFilter:
     self.courseMap = courseMap
     self.sensorConversionThread = sensorConversionThread
     self.dt = 0.0
+    self.vehiclePrevTotalStripCount = 0.0
+    self.vehicleTotalStripCount = 0.0
     self.vehicleVelocity = 0.0
     self.vehicleHeading = 0.0
     self.vehicleLeftDistance = 0.0
@@ -69,11 +71,13 @@ class ParticleFilter:
     '''
     Read the sensor measurements from the vehicle
     '''
-    self.vehicleVelocity = self.sensorConversionThread.velocity
+    self.vehicleTotalStripCount = self.sensorConversionThread.totalStripCount
     self.vehicleHeading = self.sensorConversionThread.heading
     self.vehicleLeftDistance = self.sensorConversionThread.leftDistance
     self.vehicleRightDistance = self.sensorConversionThread.rightDistance
     self.vehicleSteeringAngle = self.sensorConversionThread.steeringAngle
+    self.vehicleVelocity = (self.vehicleTotalStripCount - self.vehiclePrevTotalStripCount) / self.dt * Constants.STRIP_COUNT_TO_METERS
+    self.vehiclePrevTotalStripCount = self.vehicleTotalStripCount
     # TODO: This is in the sensor conversion thread, still need?
     if self.vehicleLeftDistance >= Constants.DIST_MAX_DISTANCE:
       self.vehicleLeftDistance = Constants.DIST_MAX_DISTANCE + 2.0 * Constants.DISTANCE_NOISE

@@ -15,11 +15,6 @@ class SensorConversion(Thread):
   IMU => No change needed
   After converting the values the filter of the values is applied
   '''
-  # Steering pot value slope value for converting to a steering angle
-  STEERING_CONV_SLOPE = 0.00634
-  # Steering pot value y-intercept for converting to a steering angle
-  STEERING_Y_INTERCEPT = -124.13
-
   #-------------------------------------------------------------------------------
   def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, dataConsumerThread=None):
     '''
@@ -32,7 +27,7 @@ class SensorConversion(Thread):
     self.dataConsumerThread = dataConsumerThread
     self.shutDown = False
     self.steeringPotValue = -0.0
-    self.velocity = -0.0
+    self.totalStripCount = -0.0
     # NOTE: Angle is in radians
     self.steeringAngle = -0.0
     self.leftDistance = -0.0
@@ -44,51 +39,25 @@ class SensorConversion(Thread):
     self.gyroCal = -0.0
     self.accelCal = -0.0
     self.magCal = -0.0
-    self.distTraveled = 0.0
     self.steeringMedianFilter = MedianFilter(Constants.STEERING_MEDIAN_FILTER_ORDER)
     self.steeringIirFilter = IIRFilter(Constants.STEERING_IIR_FILTER_A)
-    self.velocityIirFilter = IIRFilter(Constants.VELOCITY_IIR_FILTER_A)
     self.headingIirFilter = IIRFilter(Constants.HEADING_IIR_FILTER_A)
     self.distIirFilter = IIRFilter(Constants.DIST_IIR_FILTER_A)
     self._prevHeading = 0.0
-    self._loopCount = 0
-    self._rightStripCount = -0.0
-    self._leftStripCount = -0.0
     self._totalRightStripCount = -0.0
     self._totalLeftStripCount = -0.0
-    self._elapsedTime = 0
-    self._startTime = 0
-    self._rightVelocity = -0.0
-    self._leftVelocity = -0.0
 
   #-------------------------------------------------------------------------------
   def run(self):
     '''
     Runs the conversion thread
     '''
-    self._startTime = time.time()
     while not self.shutDown:
       self._getSensorValues()
 
       self._filterValues()
 
       self._convertPotValueToAngle()
-
-      self._loopCount += 1
-
-      if self._loopCount >= Constants.MAX_LOOP_COUNT:
-        self._calculateVelocity()
-
-        # Reset counts
-        self._loopCount = 0
-        self._rightStripCount = 0.0
-        self._leftStripCount = 0.0
-        # TODO: I forsee threading complications with this. Needs testing
-        self.dataConsumerThread.rightStripCount = 0.0
-        self.dataConsumerThread.leftStripCount = 0.0
-        print("DBG: RESET STRIP COUNT")
-        #print("DBG: self.dataConsumerThread.rightStripCount = {0}".format(self.dataConsumerThread.rightStripCount))
-        #print("DBG: self.dataConsumerThread.leftStripCount = {0}".format(self.dataConsumerThread.leftStripCount))
 
   #-------------------------------------------------------------------------------
   def shutdown(self):
@@ -98,35 +67,15 @@ class SensorConversion(Thread):
     self.shutDown = True
 
   #-------------------------------------------------------------------------------
-  def _calculateVelocity(self):
-    '''
-    Calculates the vehicles velocity in m/s
-    '''
-    self._elapsedTime = convertSecToMilliSec(time.time()) - self._startTime
-    self._startTime = convertSecToMilliSec(time.time())
-    self._rightVelocity = ((self._rightStripCount / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi) / convertMilliSecToSec(self._elapsedTime)
-    self._leftVelocity = ((self._leftStripCount / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi) / convertMilliSecToSec(self._elapsedTime)
-
-    # Take the average of the left and right velocity to get the vehicle velocity
-    self.velocity = (self._leftVelocity + self._rightVelocity) / 2.0
-    print("DBG: Velocity Set = {0}".format(self.velocity))
-    # Filter velocity
-    self.velocity = self.velocityIirFilter.filter(self.velocity)
-    print("DBG: Velocity Filtered = {0}".format(self.velocity))
-
-    self.distTraveled = (((self._totalLeftStripCount + self._totalRightStripCount) / 2.0) / Constants.TACH_TOTAL_STRIPS) * Constants.VEHICLE_WHEEL_DIAMETER * math.pi
-
-  #-------------------------------------------------------------------------------
   def _getSensorValues(self):
     '''
     Get the raw sensor values
     '''
     self.steeringPotValue = self.dataConsumerThread.sensors.steeringPotValue
     # TODO: Test. I forsee threading complication with this.
-    self._leftStripCount =  self.dataConsumerThread.leftStripCount
-    self._rightStripCount = self.dataConsumerThread.rightStripCount
     self._totalLeftStripCount =  self.dataConsumerThread.totalLeftStripCount
     self._totalRightStripCount = self.dataConsumerThread.totalRightStripCount
+    self.totalStripCount = (self._totalLeftStripCount + self._totalRightStripCount) / 2.0
     self.leftDistance = self.dataConsumerThread.sensors.leftDistance
     self.rightDistance = self.dataConsumerThread.sensors.rightDistance
     # Account for right hand rotation instead of left hand
@@ -177,7 +126,7 @@ class SensorConversion(Thread):
     '''
     Convert the steering pot value to a steeing angle [radians]
     '''
-    self.steeringAngle = math.radians(SensorConversion.STEERING_CONV_SLOPE * self.steeringPotValue + SensorConversion.STEERING_Y_INTERCEPT)
+    self.steeringAngle = math.radians(Constants.STEERING_CONV_SLOPE * self.steeringPotValue + Constants.STEERING_Y_INTERCEPT)
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -186,15 +135,14 @@ class SensorConversion(Thread):
     @return string describing debug information
     '''
     # TODO: Move all setTabs calls to contructor, only needs to be done once
-    self.velocityIirFilter.setTabs(1)
     self.steeringIirFilter.setTabs(1)
     self.distIirFilter.setTabs(1)
     self.headingIirFilter.setTabs(1)
     desc = "Sensor Conversion:\n"
     desc += "\tshutDown = {0}\n".format(self.shutDown)
     desc += "\tsteeringPotValue = {0}\n".format(self.steeringPotValue)
-    desc += "\tvelocity = {0}\n".format(self.velocity)
     desc += "\tsteeringAngle = {0}\n".format(math.degrees(self.steeringAngle))
+    desc += "\ttotalStripCount = {0}\n".format(self.totalStripCount)
     desc += "\tleftDistance = {0}\n".format(self.leftDistance)
     desc += "\trightDistance = {0}\n".format(self.rightDistance)
     desc += "\theading = {0}\n".format(self.heading)
@@ -204,20 +152,11 @@ class SensorConversion(Thread):
     desc += "\tgyroCal = {0}\n".format(self.gyroCal)
     desc += "\taccelCal = {0}\n".format(self.accelCal)
     desc += "\tmagCal = {0}\n".format(self.magCal)
-    desc += "\tdistTraveled = {0}\n".format(self.distTraveled)
-    desc += "\tvelocityIirFilter = {0}\n".format(self.velocityIirFilter)
     desc += "\tsteeringIirFilter = {0}\n".format(self.steeringIirFilter)
     desc += "\tsteeringMedianFilter = {0}\n".format(self.steeringMedianFilter)
     desc += "\tdistIirFilter = {0}\n".format(self.distIirFilter)
     desc += "\theadingIirFilter = {0}\n".format(self.headingIirFilter)
     desc += "\t_prevHeading = {0}\n".format(self._prevHeading)
-    desc += "\t_loopCount = {0}\n".format(self._loopCount)
-    desc += "\t_rightStripCount = {0}\n".format(self._rightStripCount)
-    desc += "\t_leftStripCount = {0}\n".format(self._leftStripCount)
-    desc += "\t_elapsedTime = {0}\n".format(self._elapsedTime)
-    desc += "\t_startTime = {0}\n".format(self._startTime)
-    desc += "\t_rightVelocity = {0}\n".format(self._rightVelocity)
-    desc += "\t_leftVelocity = {0}\n".format(self._leftVelocity)
     return desc
 
   #-------------------------------------------------------------------------------

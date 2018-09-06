@@ -111,11 +111,11 @@ DIST_IIR_FILTER_A = 0.9
 # Constant to apply to distance measurements if they are railed
 DIST_MAX_FILTER = 0.3
 
-# The max loop count in the SensorConversion class
-MAX_LOOP_COUNT = 15.0
-
 # Number of milliseconds in a second
 MILLI_SEC_IN_SEC = 1000.0
+
+# Value to convert strip count to meters
+STRIP_COUNT_TO_METERS = 0.0
 
 # Number of tape strips on each wheel
 TACH_TOTAL_STRIPS = 30.0

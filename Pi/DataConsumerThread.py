@@ -17,8 +17,6 @@ class DataConsumerThread(Thread):
     self.kwargs = kwargs
     self.shutDown = False
     self.sensors = Sensors()
-    self.rightStripCount = -0.0
-    self.leftStripCount = -0.0
     self.totalRightStripCount = -0.0
     self.totalLeftStripCount = -0.0
     self._rightHigh = 0
@@ -31,9 +29,9 @@ class DataConsumerThread(Thread):
     This consumes data off of the I2C bus as well as the distance sensors
     '''
     while not self.shutDown:
-      print("DBG: Read sensors")
+      #print("DBG: Read sensors")
       self.sensors.read() 
-      print("DBG: Sensors read")
+      #print("DBG: Sensors read")
       self._calculateStripCount()
 
   #-------------------------------------------------------------------------------
@@ -48,34 +46,28 @@ class DataConsumerThread(Thread):
     '''
     Calculates the new strip counts on the left and right side of the vehicle
     '''
-    print("DBG: self.sensors.rightTachValue = {0}".format(self.sensors.rightTachValue))
-    print("DBG: self.sensors.leftTachValue = {0}".format(self.sensors.leftTachValue))
+    #print("DBG: self.sensors.rightTachValue = {0}".format(self.sensors.rightTachValue))
+    #print("DBG: self.sensors.leftTachValue = {0}".format(self.sensors.leftTachValue))
     if self._rightHigh == 0 and self.sensors.rightTachValue > Constants.TACH_RIGHT_THRESHOLD_HIGH:
-      self.rightStripCount += 0.5
-      self.totalRightStripCount += self.rightStripCount
+      self.totalRightStripCount += 0.5
       self._rightHigh = 1
 
     # TODO: Changed the comparison to low, needs testing
     if self._rightHigh == 1 and self.sensors.rightTachValue < Constants.TACH_RIGHT_THRESHOLD_LOW:
-      self.rightStripCount += 0.5
-      self.totalRightStripCount += self.rightStripCount
+      self.totalRightStripCount += 0.5
       self._rightHigh = 0
 
     if self._leftHigh == 0 and self.sensors.leftTachValue > Constants.TACH_LEFT_THRESHOLD_HIGH:
-      self.leftStripCount += 0.5
-      self.totalLeftStripCount += self.rightStripCount
+      self.totalLeftStripCount += 0.5
       self._leftHigh = 1
 
     # TODO: Changed the comparison to low, needs testing
     if self._leftHigh == 1 and self.sensors.leftTachValue < Constants.TACH_LEFT_THRESHOLD_LOW:
-      self.leftStripCount += 0.5
-      self.totalLeftStripCount += self.rightStripCount
+      self.totalLeftStripCount += 0.5
       self._leftHigh = 0
     
-    print("DBG: self.rightStripCount = {0}".format(self.rightStripCount))
-    print("DBG: self.leftStripCount = {0}".format(self.leftStripCount))
-    print("DBG: self.totalRightStripCount = {0}".format(self.totalRightStripCount))
-    print("DBG: self.totalLeftStripCount = {0}".format(self.totalLeftStripCount))
+    #print("DBG: self.totalRightStripCount = {0}".format(self.totalRightStripCount))
+    #print("DBG: self.totalLeftStripCount = {0}".format(self.totalLeftStripCount))
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
@@ -87,8 +79,6 @@ class DataConsumerThread(Thread):
     desc += "\tshutDown = {0}\n".format(self.shutDown)
     # TODO: Add setTabs function in Sensors
     desc += "\tsensors:\n {0}\n".format(self.sensors)
-    desc += "\trightStripCount = {0}\n".format(self.rightStripCount)
-    desc += "\tleftStripCount = {0}\n".format(self.leftStripCount)
     desc += "\ttotalRightStripCount = {0}\n".format(self.totalRightStripCount)
     desc += "\ttotalLeftStripCount = {0}\n".format(self.totalLeftStripCount)
     desc += "\t_rightHigh = {0}\n".format(self._rightHigh)
