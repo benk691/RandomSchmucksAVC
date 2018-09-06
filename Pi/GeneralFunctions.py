@@ -39,6 +39,14 @@ Converts millis-seconds to seconds
 convertMilliSecToSec = lambda ms : ms / Constants.MILLI_SEC_IN_SEC
 
 #-------------------------------------------------------------------------------
+'''
+Converts feet to meters
+@param ft - the number of feet
+@return the number of meters
+'''
+convertFtToM = lambda ft: ft * Constants.FEET_IN_METER
+
+#-------------------------------------------------------------------------------
 def wrapAngle(angle):
   '''
   Wraps the angle [0,360] [degrees]
@@ -74,7 +82,6 @@ def rotate(x, y, theta):
   y - the Y coordinate
   theta - the amount to rotate (radians)
   '''
-  #print("DBG: x = {0}, y = {1}, theta = {2}".format(x, y, theta))
   outX = x * math.cos(theta) - y * math.sin(theta)
   outY = x * math.sin(theta) + y * math.cos(theta)
   return outX, outY

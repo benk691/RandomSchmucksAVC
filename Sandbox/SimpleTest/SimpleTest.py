@@ -1,9 +1,6 @@
 #!/usr/bin/python3.5
-import board
-import busio
 import time
 import Adafruit_PCA9685
-import Adafruit_ADS1x15
 import math
 
 # Constants
@@ -42,7 +39,7 @@ MAX_WALL_DIST = 1.5
 #-------------------------------------------------------------------------------
 def main():
   '''
-  Hacky version of our contigency plan
+  Simple test script to control motors
   '''
   # Setup bus
   pwm = Adafruit_PCA9685.PCA9685()
@@ -52,23 +49,25 @@ def main():
     print("Start")
     direction = 1
     steeeringDuration = 0.5
-    velocotyDuration = 0.6
+    velocotyDuration = 0.5
     controlChnl(pwm, TURN_CHNL, steeeringDuration)
     controlChnl(pwm, MOTOR_CHNL, velocotyDuration)
     while True:
-      #controlChnl(pwm, MOTOR_CHNL, velocotyDuration)
-      pass
-      #steeeringDuration += direction * 0.05
-      #velocotyDuration += direction * 0.05
-      #if steeeringDuration >= 0.8 or velocotyDuration >= 0.8:
-      #  direction *= -1
+      controlChnl(pwm, TURN_CHNL, steeeringDuration)
+      controlChnl(pwm, MOTOR_CHNL, velocotyDuration)
 
-      #if steeeringDuration <= 0.2 or velocotyDuration <= 0.2:
-      #  direction *= -1
+      steeeringDuration += direction * 0.05
+      velocotyDuration += direction * 0.05
 
-      #print("velocotyDuration = {0}".format(velocotyDuration))
-      #print("steeeringDuration = {0}".format(steeeringDuration))
-      #time.sleep(1.0)
+      if steeeringDuration >= 0.8 or velocotyDuration >= 0.8:
+        direction *= -1
+
+      if steeeringDuration <= 0.2 or velocotyDuration <= 0.2:
+        direction *= -1
+
+      print("velocotyDuration = {0}".format(velocotyDuration))
+      print("steeeringDuration = {0}".format(steeeringDuration))
+      time.sleep(1.0)
       
   finally:
     #ramp(pwm, MOTOR_CHNL, velDuration, STOP, 1, 5)

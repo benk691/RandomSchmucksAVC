@@ -138,6 +138,9 @@ DIST_MAX_FILTER = 0.3
 # Number of milliseconds in a second
 MILLI_SEC_IN_SEC = 1000.0
 
+# Number of feet in a meter
+FEET_IN_METER = 0.305
+
 # Potentiometer value that keeps the vehicle straight
 POT_STRAIGHT = 19203
 

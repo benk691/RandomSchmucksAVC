@@ -3,14 +3,7 @@ import Constants
 from Map import Map
 from Circle import Circle
 from Line import Line
-
-#TODO: Put into general functions
-'''
-Converts feet to meters
-@param ft - the number of feet
-@return the number of meters
-'''
-convertFtToM = lambda ft: ft * 0.305
+from generalFunctions import convertFtToM
 
 class CourseMap(Map):
   '''
