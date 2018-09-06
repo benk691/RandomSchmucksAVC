@@ -52,21 +52,23 @@ def main():
     print("Start")
     direction = 1
     steeeringDuration = 0.5
-    velocotyDuration = 0.5
+    velocotyDuration = 0.6
+    controlChnl(pwm, TURN_CHNL, steeeringDuration)
+    controlChnl(pwm, MOTOR_CHNL, velocotyDuration)
     while True:
-      controlChnl(pwm, TURN_CHNL, steeeringDuration)
-      controlChnl(pwm, MOTOR_CHNL, velocotyDuration)
-      steeeringDuration += direction * 0.05
-      velocotyDuration += direction * 0.05
-      if steeeringDuration >= 0.8 or velocotyDuration >= 0.8:
-        direction *= -1
+      #controlChnl(pwm, MOTOR_CHNL, velocotyDuration)
+      pass
+      #steeeringDuration += direction * 0.05
+      #velocotyDuration += direction * 0.05
+      #if steeeringDuration >= 0.8 or velocotyDuration >= 0.8:
+      #  direction *= -1
 
-      if steeeringDuration <= 0.2 or velocotyDuration <= 0.2:
-        direction *= -1
+      #if steeeringDuration <= 0.2 or velocotyDuration <= 0.2:
+      #  direction *= -1
 
-      print("velocotyDuration = {0}".format(velocotyDuration))
-      print("steeeringDuration = {0}".format(steeeringDuration))
-      time.sleep(1.0)
+      #print("velocotyDuration = {0}".format(velocotyDuration))
+      #print("steeeringDuration = {0}".format(steeeringDuration))
+      #time.sleep(1.0)
       
   finally:
     #ramp(pwm, MOTOR_CHNL, velDuration, STOP, 1, 5)
