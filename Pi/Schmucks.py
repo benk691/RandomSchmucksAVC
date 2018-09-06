@@ -110,8 +110,11 @@ def performIMUCalibration(calibrate, dc):
     input("Press any key once the vehicle is aligned with its desired heading. ")
 
   else:
-    # TODO: read from settings file to set IMU
-    pass
+    with open(Constants.CALIB_SETTINGS_FILE, 'r') as calibFile:
+      calibration = [ int(c) for c in calibFile.readline().strip().strip('[]').split(', ') ]
+      dc.sensors.imu.set_calibration(calibration)
+      print("Calibrated IMU: {0}".format(calibration))
+      
 
 #-------------------------------------------------------------------------------
 def calibrateIMU(dc):
