@@ -37,8 +37,8 @@ class Vehicle:
     '''
     self.currentTime = time.time()
     self.updateMeasurements()
-    self.velocityDuration = self.velocityPID.control()
-    self.steeringDuration = self.velocityPID.control()
+    self.velocityDuration = 1.0 - (max(min(self.velocityPID.control(), 0.5), -0.5) + 0.5)
+    self.steeringDuration = max(min(self.steeringAnglePID.control(), 0.5), -0.5) + 0.5
     # TODO: Do we need bound checks on velocity and steering angles?
     self.controlChnl(Constants.PWM_DRIVE_CHNL, self.velocityDuration)
     self.controlChnl(Constants.PWM_TURN_CHNL, self.steeringDuration)
