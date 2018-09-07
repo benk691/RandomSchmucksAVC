@@ -43,36 +43,34 @@ class Sensors:
     '''
     #st = time.time()
     self.steeringPotValue = self.adc.read_adc(Constants.ADC_POT_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE) 
+    #print("steeringPotValue = {0}".format(self.steeringPotValue))
     #print("DBG: Pot = {0}".format(time.time() - st))
     #st = time.time()
     self.rightTachValue = self.adc.read_adc(Constants.ADC_RIGHT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+
+    #print("rightTachValue = {0}".format(self.rightTachValue))
     #print("DBG: rightTach = {0}".format(time.time() - st))
     #st = time.time()
     self.leftTachValue = self.adc.read_adc(Constants.ADC_LEFT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+
+    #print("leftTachValue = {0}".format(self.leftTachValue))
     #print("DBG: leftTach = {0}".format(time.time() - st))
     #st = time.time()
-    self.rightDistance = self.rightDistSensor.distance
+    #self.rightDistance = self.rightDistSensor.distance
+    #print("rightDistance = {0}".format(self.rightDistance))
     #print("DBG: rDist = {0}".format(time.time() - st))
     #st = time.time()
-    self.leftDistance = self.leftDistSensor.distance
+    #self.leftDistance = self.leftDistSensor.distance
+    #print("leftDistance = {0}".format(self.leftDistance))
     #print("DBG: lDist = {0}".format(time.time() - st))
     #st = time.time()
     # TODO: third front distance sensor?
     # NOTE: the read in angles are in degrees
     self.heading, self.roll, self.pitch = self.imu.read_euler()
     self.sysCal, self.gyroCal, self.accelCal, self.magCal = self.imu.get_calibration_status()
+
+    #print("read imu")
     #print("DBG: imu = {0}".format(time.time() - st))
-    #-------------------
-    # NOTE: For testing
-    #self.steeringPotValue = random.uniform(16400, 22500)
-    #self.rightTachValue = random.uniform(Constants.TACH_RIGHT_THRESHOLD_LOW - 2000, Constants.TACH_RIGHT_THRESHOLD_HIGH + 2000)
-    #self.leftTachValue = random.uniform(Constants.TACH_LEFT_THRESHOLD_LOW - 2000, Constants.TACH_LEFT_THRESHOLD_HIGH + 2000)
-    #self.rightDistance = random.uniform(Constants.DIST_MIN_DISTANCE, Constants.DIST_MAX_DISTANCE)
-    #self.leftDistance = random.uniform(Constants.DIST_MIN_DISTANCE, Constants.DIST_MAX_DISTANCE)
-    ## TODO: third front distance sensor?
-    ## NOTE: the read in angles are in degrees
-    #self.heading = random.uniform(0.0, 360.0) 
-    #--------------
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):
