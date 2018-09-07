@@ -25,10 +25,14 @@ def main():
   try:
     threads, vehicle = setup()
 
+    i = 0
     while True:
+      print("LOOP {0}".format(i))
       vehicle.drive()
-      for t in threads:
-        print(t)
+      #for t in threads:
+      #  print(t)
+      #print(vehicle)
+      i += 1
 
   finally:
     shutdown(threads)
@@ -51,17 +55,17 @@ def setup():
   courseMap = WallMap()
   # Construct Threads
   # TODO: Untie threads
-  dataConsumerThread = DataConsumerThread(daemon=True)
-  sensorConversionThread = SensorConversion(daemon=True, dataConsumerThread=dataConsumerThread)
-  controlPlannerThread = ControlPlanner(daemon=True, courseMap=courseMap, sensorConversionThread=sensorConversionThread)
+  dataConsumerThread = DataConsumerThread()
+  sensorConversionThread = SensorConversion(dataConsumerThread=dataConsumerThread)
+  controlPlannerThread = ControlPlanner(courseMap=courseMap, sensorConversionThread=sensorConversionThread)
   vehicle = Vehicle(sensorConversionThread)
   # TODO: IMPORTANT: Send 0.5 pulse before start button
   # Register Subscribers
   controlPlannerThread.register(vehicle, vehicle.updateGoals)
   # Start threads
-  dataConsumerThread.start()
   sensorConversionThread.start()
   controlPlannerThread.start()
+  dataConsumerThread.start()
 
   performIMUCalibration(calibrate, dataConsumerThread)
 

@@ -1,24 +1,24 @@
 import math
 import time
 import Constants
-from threading import Thread
+from multiprocessing import Process
 from ParticleFilter import ParticleFilter
 from Publisher import Publisher
 from GeneralFunctions import rotate
 
-class ControlPlanner(Thread, Publisher):
+class ControlPlanner(Process, Publisher):
   '''
   Determines what action to take to get the vehicle to where we want to go.
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, courseMap=None, sensorConversionThread=None):
+  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, courseMap=None, sensorConversionThread=None):
     '''
     Initializes the control planner
     @param Refer to the Python Thread class for documentation on all thread specific parameters
     @param courseMap - the course map
     @param sensorConversionThread - the sensor conversion thread
     '''
-    Thread.__init__(self, group=group, target=target, name=name, daemon=daemon)
+    Process.__init__(self, group=group, target=target, name=name)
     Publisher.__init__(self)
     self.args = args
     self.kwargs = kwargs

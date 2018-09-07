@@ -1,18 +1,18 @@
 import Constants
 from Sensors import Sensors
-from threading import Thread
+from multiprocessing import Process
 
-class DataConsumerThread(Thread):
+class DataConsumerThread(Process):
   '''
   Overrides the Thread class to consume data
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None):
+  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}):
     '''
     Initializes the data consumer thread
     @param Refer to the Python Thread class for documentation on all thread specific parameters
     '''
-    super(DataConsumerThread, self).__init__(group=group, target=target, name=name, daemon=daemon)
+    super(DataConsumerThread, self).__init__(group=group, target=target, name=name)
     self.args = args
     self.kwargs = kwargs
     self.shutDown = False
@@ -29,7 +29,7 @@ class DataConsumerThread(Thread):
     This consumes data off of the I2C bus as well as the distance sensors
     '''
     while not self.shutDown:
-      #print("DBG: Read sensors")
+      print("DBG: Read sensors")
       self.sensors.read() 
       #print("DBG: Sensors read")
       self._calculateStripCount()
@@ -66,8 +66,8 @@ class DataConsumerThread(Thread):
       self.totalLeftStripCount += 0.5
       self._leftHigh = 0
     
-    #print("DBG: self.totalRightStripCount = {0}".format(self.totalRightStripCount))
-    #print("DBG: self.totalLeftStripCount = {0}".format(self.totalLeftStripCount))
+    print("DBG: self.totalRightStripCount = {0}".format(self.totalRightStripCount))
+    print("DBG: self.totalLeftStripCount = {0}".format(self.totalLeftStripCount))
 
   #-------------------------------------------------------------------------------
   def _debugDescription(self):

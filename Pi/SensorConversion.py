@@ -1,12 +1,12 @@
 import math
 import time
 import Constants
-from threading import Thread
+from multiprocessing import Process
 from IIRFilter import IIRFilter
 from MedianFilter import MedianFilter
 from GeneralFunctions import *
 
-class SensorConversion(Thread):
+class SensorConversion(Process):
   '''
   Converts the incoming raw sensor values.
   Tachometer => Convert to a velocity (m/s)
@@ -16,12 +16,12 @@ class SensorConversion(Thread):
   After converting the values the filter of the values is applied
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, dataConsumerThread=None):
+  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, dataConsumerThread=None):
     '''
     Initializes the sensor conversion
     @param Refer to the Python Thread class for documentation on all thread specific parameters
     '''
-    super(SensorConversion, self).__init__(group=group, target=target, name=name, daemon=daemon)
+    super(SensorConversion, self).__init__(group=group, target=target, name=name)
     self.args = args
     self.kwargs = kwargs
     self.dataConsumerThread = dataConsumerThread
@@ -58,6 +58,7 @@ class SensorConversion(Thread):
       self._filterValues()
 
       self._convertPotValueToAngle()
+      time.sleep(1.0 / 10.0)
 
   #-------------------------------------------------------------------------------
   def shutdown(self):
@@ -75,7 +76,12 @@ class SensorConversion(Thread):
     # TODO: Test. I forsee threading complication with this.
     self._totalLeftStripCount =  self.dataConsumerThread.totalLeftStripCount
     self._totalRightStripCount = self.dataConsumerThread.totalRightStripCount
+
+    print("DBG: SC LTSC = {0}".format(self._totalLeftStripCount))
+    print("DBG: SC RTSC = {0}".format(self._totalRightStripCount))
     self.totalStripCount = (self._totalLeftStripCount + self._totalRightStripCount) / 2.0
+
+    print("DBG: SC TSC = {0}".format(self.totalStripCount))
     self.leftDistance = self.dataConsumerThread.sensors.leftDistance
     self.rightDistance = self.dataConsumerThread.sensors.rightDistance
     self.heading = Constants.HEADING_WRAP_AROUND - self.dataConsumerThread.sensors.heading

@@ -72,6 +72,7 @@ class ParticleFilter:
     Read the sensor measurements from the vehicle
     '''
     self.vehicleTotalStripCount = self.sensorConversionThread.totalStripCount
+    print("DBG: PF TSC = {0}".format(self.vehicleTotalStripCount))
     self.vehicleHeading = self.sensorConversionThread.heading
     self.vehicleLeftDistance = self.sensorConversionThread.leftDistance
     self.vehicleRightDistance = self.sensorConversionThread.rightDistance
