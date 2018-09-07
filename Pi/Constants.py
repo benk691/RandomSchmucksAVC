@@ -5,6 +5,14 @@ import math
 '''
 Defines constants for the Rasberry Pi
 '''
+# Frequency of sample rates
+STEERING_POT_FS = 80.0
+DIST_FS = 13.0
+MAG_FS = 12.0
+VPID_FS = 11.0
+SPID_FS = 20.0
+PAR_FS = 0.0
+
 #--------------------------------
 #         PID Control
 #--------------------------------

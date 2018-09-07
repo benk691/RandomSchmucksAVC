@@ -5,13 +5,12 @@ import math
 import Constants
 from threading import Thread
 from argparse import ArgumentParser
-from gpiozero import Button
-from ControlPlanner import ControlPlanner
-from CourseMap import CourseMap
-from WallMap import WallMap
-from DataConsumerThread import DataConsumerThread
-from SensorConversion import SensorConversion
-from Vehicle import Vehicle
+from gpiozero import Button, DistanceSensor
+from IIRFilter import IIRFilter
+from PID import PID
+import Adafruit_ADS1x15
+import Adafruit_PCA9685
+from Adafruit_BNO055 import BNO055
 
 # Global for calibration threads
 calibrating = True
@@ -21,17 +20,151 @@ def main():
   '''
   Main program
   '''
-  threads = []
   try:
-    threads, vehicle = setup()
+    adc, imu, pwm, leftDistSensor, rightDistSensor = setup()
 
-    while True:
-      vehicle.drive()
-      for t in threads:
-        print(t)
+    currentTime = time.time()
+    startTime = currentTime
+    steerPotTime = currentTime + 1.0 / (Constants.STEERING_POT_FS + 1.0)
+    distTime = currentTime + 1.0 / (Constants.DIST_FS + 1.0)
+    vpidTime  = currentTime + 1.0 / (Constants.VPID_FS + 1.0)
+    spidTime = currentTime + 1.0 / (Constants.SPID_FS + 1.0)
+    parTime = currentTime + 1.0 / (Constants.PAR_FS + 1.0)
+    magTime = currentTime + 1.0 / (Constants.MAG_FS + 1.0)
+    
+    tachCount = 0
+    steerCount = 0
+    distCount = 0
+    vpidCount = 0
+    spidCount = 0
+    parCount = 0
+    magCount = 0
+
+    prevVpidTime = 0.0
+    prevVpidTachCount = 0.0
+    prevParTime = 0.0
+    prevParTach = 0.0
+
+    rightHigh = 0
+    leftHigh = 0
+
+    totalRightStripCount = 0.0
+    totalLeftStripCount = 0.0
+
+    heading = 0.0
+    roll = 0.0
+    pitch = 0.0
+
+    leftDist = 0.0
+    rightDist = 0.0
+    distIirFilter = IIRFilter(Constants.DIST_IIR_FILTER_A)
+
+    steeringPotValue = 0.0
+    steerIirFilter = IIRFilter(Constants.STEERING_IIR_FILTER_A)
+
+    velocityPID = PID(Constants.VELOCITY_PID_P, Constants.VELOCITY_PID_I, Constants.VELOCITY_PID_D, Constants.VELOCITY_PID_WINDUP)
+    steeringAnglePID = PID(Constants.STEERING_ANGLE_PID_P, Constants.STEERING_ANGLE_PID_I, Constants.STEERING_ANGLE_PID_D, Constants.STEERING_ANGLE_PID_WINDUP)
+
+    velocity = 0.0
+    steeringAngle = 0.0
+
+    velocityGoal = 0.3
+    steeringGoal = 0.0
+
+    velocityPID.setGoal(velocityGoal)
+    steeringAnglePID.setGoal(steeringGoal)
+
+    while currentTime < (startTime + 30):
+      currentTime = time.time()
+
+      # Tachometers
+      rightTachValue = adc.read_adc(Constants.ADC_RIGHT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+
+      leftTachValue = adc.read_adc(Constants.ADC_LEFT_WHEEL_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE)
+
+      if rightHigh == 0 and rightTachValue > Constants.TACH_RIGHT_THRESHOLD_HIGH:
+        totalRightStripCount += 0.5
+        rightHigh = 1
+
+      if rightHigh == 1 and rightTachValue < Constants.TACH_RIGHT_THRESHOLD_LOW:
+        totalRightStripCount += 0.5
+        rightHigh = 0
+
+      if leftHigh == 0 and leftTachValue > Constants.TACH_LEFT_THRESHOLD_HIGH:
+        totalLeftStripCount += 0.5
+        leftHigh = 1
+
+      if leftHigh == 1 and leftTachValue < Constants.TACH_LEFT_THRESHOLD_LOW:
+        totalLeftStripCount += 0.5
+        leftHigh = 0
+
+      tachCount += 1
+
+      # Velocity PID
+      if currentTime >= vpidTime:
+        velocity = ((totalRightStripCount + totalLeftStripCount - prevVpidTachCount) / (2.0 * (currentTime - prevVpidTime))) * Constants.STRIP_COUNT_TO_METERS
+        velocityPID.setMeasurement(velocity)
+        velocityDuration = 1.0 - (max(min(velocityPID.control(), 0.5), -0.5) + 0.5)
+        controlChnl(pwm, Constants.PWM_DRIVE_CHNL, velocityDuration)
+        prevVpidTime = currentTime
+        prevVpidTachCount = totalRightStripCount + totalLeftStripCount
+        vpidCount += 1
+        vpidTime += 1.0 / Constants.VPID_FS
+        continue
+
+      # IMU
+      if currentTime >= magTime:
+        heading, roll, pitch = imu.read_euler()
+        heading = math.radians(heading)
+        magCount += 1
+        magTime += 1.0 / Constants.MAG_FS
+        continue
+
+      # Distance Sensors
+      if currentTime >= distTime:
+        leftDist = distIirFilter.filter(leftDistSensor.distance)
+        rightDist = distIirFilter.filter(rightDistSensor.distance)
+        distCount += 1
+        distTime += 1.0 / Constants.DIST_FS
+        continue
+
+      # Steering PID
+      if currentTime >= spidTime:
+        steeringAnglePID.setMeasurement(steeringAngle)
+        steeringDuration = max(min(steeringAnglePID.control(), 0.5), -0.5) + 0.5
+        controlChnl(pwm, Constants.PWM_TURN_CHNL, steeringDuration)
+        spidCount += 1
+        spidTime += 1.0 / Constants.SPID_FS
+        continue
+
+      # Steering Sensor
+      if currentTime >= steerPotTime:
+        steeringPotValue = adc.read_adc(Constants.ADC_POT_CHNL, gain=Constants.ADC_GAIN, data_rate=Constants.ADC_DATA_RATE) 
+        steeringPotValue = steerIirFilter.filter(steeringPotValue)
+        steeringAngle = math.radians(Constants.STEERING_CONV_SLOPE * steeringPotValue + Constants.STEERING_Y_INTERCEPT)
+        steerCount += 1
+        steerPotTime += 1.0 / Constants.STEERING_POT_FS
+        continue
+
+    print("tachCount = {0}".format(tachCount))
+    print("steerCount = {0}".format(steerCount))
+    print("distCount = {0}".format(distCount))
+    print("vpidCount = {0}".format(vpidCount))
+    print("spidCount = {0}".format(spidCount))
+    print("parCount = {0}".format(parCount))
+    print("magCount = {0}".format(magCount))
+    print("totalRightStripCount = {0}".format(totalRightStripCount))
+    print("totalLeftStripCount = {0}".format(totalLeftStripCount))
+    print("heading = {0}".format(heading))
+    print("roll = {0}".format(roll))
+    print("pitch = {0}".format(pitch))
+    print("leftDist = {0}".format(leftDist))
+    print("rightDist = {0}".format(rightDist))
+    print("steeringAngle = {0}".format(steeringAngle))
+    print("steeringPotValue = {0}".format(steeringPotValue))
 
   finally:
-    shutdown(threads)
+    pass
 
 #-------------------------------------------------------------------------------
 def setup():
@@ -47,29 +180,24 @@ def setup():
     startButton.wait_for_press()
     print("Started")
     # Start button has been pressed, so continue setup
-  #courseMap = CourseMap()
-  courseMap = WallMap()
-  # Construct Threads
-  # TODO: Untie threads
-  dataConsumerThread = DataConsumerThread(daemon=True)
-  sensorConversionThread = SensorConversion(daemon=True, dataConsumerThread=dataConsumerThread)
-  controlPlannerThread = ControlPlanner(daemon=True, courseMap=courseMap, sensorConversionThread=sensorConversionThread)
-  vehicle = Vehicle(sensorConversionThread)
-  # TODO: IMPORTANT: Send 0.5 pulse before start button
-  # Register Subscribers
-  controlPlannerThread.register(vehicle, vehicle.updateGoals)
-  # Start threads
-  dataConsumerThread.start()
-  sensorConversionThread.start()
-  controlPlannerThread.start()
+  adc = Adafruit_ADS1x15.ADS1115()
+  imu = BNO055.BNO055()
+  pwm = Adafruit_PCA9685.PCA9685()
+  pwm.set_pwm_freq(Constants.PWM_SENSOR_FREQ)
+  if not imu.begin():
+    raise RuntimeError('Failed to initialize IMU! Is the sensor connected?')
+  # Distance sensors
+  leftDistSensor = DistanceSensor(echo=Constants.DIST_LEFT_ECHO_PIN, trigger=Constants.DIST_LEFT_TRIGGER_PIN, max_distance=Constants.DIST_MAX_DISTANCE, queue_len=Constants.DIST_QUEUE_LENGTH)
+  rightDistSensor = DistanceSensor(echo=Constants.DIST_RIGHT_ECHO_PIN, trigger=Constants.DIST_RIGHT_TRIGGER_PIN, max_distance=Constants.DIST_MAX_DISTANCE, queue_len=Constants.DIST_QUEUE_LENGTH)
 
-  performIMUCalibration(calibrate, dataConsumerThread)
+  performIMUCalibration(calibrate, imu)
 
-  Constants.MAP_HEADING_OFFSET = math.radians(Constants.HEADING_WRAP_AROUND - dataConsumerThread.sensors.heading)
+  heading, roll, pitch = imu.read_euler()
+  Constants.MAP_HEADING_OFFSET = math.radians(Constants.HEADING_WRAP_AROUND - heading)
 
   print("Heading Offset = {0} deg".format(math.degrees(Constants.MAP_HEADING_OFFSET)))
 
-  return [dataConsumerThread, sensorConversionThread, controlPlannerThread], vehicle
+  return adc, imu, pwm, leftDistSensor, rightDistSensor
 
 #-------------------------------------------------------------------------------
 def parseArgs():
@@ -80,11 +208,11 @@ def parseArgs():
   return args.skipStart, args.calibrate
 
 #-------------------------------------------------------------------------------
-def performIMUCalibration(calibrate, dc):
+def performIMUCalibration(calibrate, imu):
   '''
   Performs IMU calibration
   @param calibrate - flag indicating we need to calibrate from scratch or not
-  @param dc - the data consumer
+  @param imu - IMU
   '''
   if calibrate:
     # Spawn threads so we can read the IMU values
@@ -101,9 +229,9 @@ def performIMUCalibration(calibrate, dc):
     doneCalibrateThread.join(timeout=5)
 
     # Save calibration data
-    calibData = dc.sensors.imu.get_calibration()
+    calibData = imu.get_calibration()
     print("calibData = {0}".format(calibData))
-    dc.sensors.imu.set_calibration(calibData)
+    imu.set_calibration(calibData)
     with open(Constants.CALIB_SETTINGS_FILE, 'w') as calibFile:
       calibFile.write(str(calibData))
     input("Press any key once the vehicle is aligned with its desired heading. ")
@@ -111,20 +239,21 @@ def performIMUCalibration(calibrate, dc):
   else:
     with open(Constants.CALIB_SETTINGS_FILE, 'r') as calibFile:
       calibration = [ int(c) for c in calibFile.readline().strip().strip('[]').split(', ') ]
-      dc.sensors.imu.set_calibration(calibration)
+      imu.set_calibration(calibration)
       print("Calibrated IMU: {0}".format(calibration))
       
 
 #-------------------------------------------------------------------------------
-def calibrateIMU(dc):
+def calibrateIMU(imu):
   '''
   Prints the IMUs current readings
   @param dc - the data consumer thread
   '''
   while calibrating:
-    print('Heading={0:0.2F} Roll={1:0.2F} Pitch={2:0.2F}\tSys_cal={3} Gyro_cal={4} Accel_cal={5} Mag_cal={6}'.format(dc.sensors.heading, dc.sensors.roll, dc.sensors.pitch, dc.sensors.sysCal, dc.sensors.gyroCal, dc.sensors.accelCal, dc.sensors.magCal))
-    #print("RD: {0}, LD = {1}".format(dc.sensors.rightDistance, dc.sensors.leftDistance))
-    time.sleep(1)
+    pass
+    #print('Heading={0:0.2F} Roll={1:0.2F} Pitch={2:0.2F}\tSys_cal={3} Gyro_cal={4} Accel_cal={5} Mag_cal={6}'.format(dc.sensors.heading, dc.sensors.roll, dc.sensors.pitch, dc.sensors.sysCal, dc.sensors.gyroCal, dc.sensors.accelCal, dc.sensors.magCal))
+    ##print("RD: {0}, LD = {1}".format(dc.sensors.rightDistance, dc.sensors.leftDistance))
+    #time.sleep(1)
 
 #-------------------------------------------------------------------------------
 def doneCalibrateIMU():
@@ -135,6 +264,14 @@ def doneCalibrateIMU():
   while calibrating:
     a = input("Press q once you are done with calibration. ")
     calibrating = a.lower() == 'q'
+
+#-------------------------------------------------------------------------------
+def controlChnl(pwm, chnl, pulse):
+    if pulse > 0.97:
+      pulse = 0.97
+    if pulse < 0:
+      pulse = 0
+    pwm.set_pwm(chnl, 0, int(pulse / Constants.PWM_SENSOR_FREQ * 10000000.0 * 5.0 / 6.0))
 
 #-------------------------------------------------------------------------------
 def shutdown(threads):

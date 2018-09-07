@@ -262,7 +262,7 @@ def controlChnl(pwm, chnl, pulse):
       pulse = 0.97
     if pulse < 0:
       pulse = 0
-    pwm.set_pwm(chnl, 0, int(pulse / FREQ * 10000000.0 * 5.0 / 6.0))
+    pwm.set_pwm(chnl, 0, int(pulse / Constants.PWM_SENSOR_FREQ * 10000000.0 * 5.0 / 6.0))
 
 #-------------------------------------------------------------------------------
 def ramp(pwm, chnl, curVal, rampVal, rampTime, velInc):
