@@ -1,29 +1,21 @@
 import math
 import time
 import Constants
-from threading import Thread
 from ParticleFilter import ParticleFilter
-from Publisher import Publisher
 from GeneralFunctions import rotate
 
-class ControlPlanner(Thread, Publisher):
+class ControlPlanner:
   '''
   Determines what action to take to get the vehicle to where we want to go.
   '''
   #-------------------------------------------------------------------------------
-  def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, daemon=None, courseMap=None, sensorConversionThread=None):
+  def __init__(self, courseMap):
     '''
     Initializes the control planner
-    @param Refer to the Python Thread class for documentation on all thread specific parameters
     @param courseMap - the course map
-    @param sensorConversionThread - the sensor conversion thread
     '''
-    Thread.__init__(self, group=group, target=target, name=name, daemon=daemon)
-    Publisher.__init__(self)
-    self.args = args
-    self.kwargs = kwargs
     self.courseMap = courseMap
-    self.particleFilter = ParticleFilter(Constants.PARTICLE_NUMBER, Constants.MAP_START_BOX, Constants.MAP_HEADING_RANGE, self.courseMap, sensorConversionThread)
+    self.particleFilter = ParticleFilter(Constants.PARTICLE_NUMBER, Constants.MAP_START_BOX, Constants.MAP_HEADING_RANGE, self.courseMap)
     self.shutDown = False
     self.estVehicleX = 0.0
     self.estVehicleY = 0.0
@@ -35,40 +27,24 @@ class ControlPlanner(Thread, Publisher):
     self.velocityGoal = 0.0
 
   #-------------------------------------------------------------------------------
-  def run(self):
-    '''
-    Runs the planner to set goals for where the vehicle is going to go
-    '''
-    while not self.shutDown:
-      self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation()
-      self._checkWaypoint()
-      self._control()
-      self.particleFilter.prevTime = self.particleFilter.currentTime
-      sleepTime = (1.0 / Constants.CONTROL_UPDATE_RATE) - (time.time() - self.particleFilter.currentTime)
-      if sleepTime > Constants.CONTROL_SLEEP_THRESHOLD:
-        time.sleep(sleepTime)
-      # TODO: Modify number of particles
-
-  #-------------------------------------------------------------------------------
-  def shutdown(self):
-    '''
-    Shutdown the thread
-    '''
-    self.shutDown = True
-
-  #-------------------------------------------------------------------------------
-  def _control(self):
+  def control(self, totalStripCount, heading, leftDistance, rightDistance, steeringAngle, returnDict):
     '''
     Send control to vehicle
     '''
+    self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation(totalStripCount, heading, leftDistance, rightDistance, steeringAngle)
+    self._checkWaypoint()
     xErr = self.courseMap.waypoints[self.waypoint][Constants.X] - self.estVehicleX
     yErr = self.courseMap.waypoints[self.waypoint][Constants.Y] - self.estVehicleY
     xErr, yErr = rotate(xErr, yErr, -self.estVehicleHeading)
 
     self.steeringAngleGoal = math.atan(Constants.VEHICLE_AXLE_LEN * ((2.0 * yErr) / (math.pow(xErr, 2) + math.pow(yErr, 2)))) * Constants.CONTROL_STEERING_AGRESSION
     self.velocityGoal = max(Constants.MIN_VEHICLE_VELOCITY, Constants.MAX_VEHICLE_VELOCITY - math.atan(self.steeringAngleGoal) * Constants.VELOCITY_SCALE_FACTOR)
+
+    self.particleFilter.prevTime = self.particleFilter.currentTime
     # Publish goals
-    self.publish(self.velocityGoal, self.steeringAngleGoal)
+    returnDict['velocityGoal'] = self.velocityGoal
+    returnDict['steeringGoal'] = self.steeringAngleGoal
+    #return self.velocityGoal, self.steeringAngleGoal
 
   #------------------------------------------------------------------------------- 
   def _checkWaypoint(self):
@@ -132,11 +108,4 @@ class ControlPlanner(Thread, Publisher):
     @return string representation of the class
     '''
     return self._debugDescription()
-
-  #-------------------------------------------------------------------------------
-  def __del__(self):
-    '''
-    Destructor
-    '''
-    self.join(timeout=5)
 

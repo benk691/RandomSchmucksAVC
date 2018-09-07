@@ -9,20 +9,18 @@ from GeneralFunctions import rotate
 
 class ParticleFilter:
   #-------------------------------------------------------------------------------
-  def __init__(self, particleNumber, startBox, headingRange, courseMap, sensorConversionThread):
+  def __init__(self, particleNumber, startBox, headingRange, courseMap):
     '''
     Initializes the particle filter
     @param particleNumber - number of particles to generate
     @param startBox - the inital box to create particles in. List of two X, Y coordinates defining the corners of the box
     @param headingRange - the range of headings to create particles with. List of two doubles.
     @param courseMap - the course map
-    @param sensorConversionThread - the sensor conversion thread
     '''
     random.seed()
     self.prevTime = time.time()
     self.currentTime = time.time()
     self.courseMap = courseMap
-    self.sensorConversionThread = sensorConversionThread
     self.dt = 0.0
     self.vehiclePrevTotalStripCount = 0.0
     self.vehicleTotalStripCount = 0.0
@@ -42,13 +40,13 @@ class ParticleFilter:
     self.particles = [ [random.uniform(startBox[0][Constants.X], startBox[1][Constants.X]), random.uniform(startBox[0][Constants.Y], startBox[1][Constants.Y]), random.uniform(headingRange[0], headingRange[1]), 1.0, 0.0, 0.0] for i in range(particleNumber) ]
 
   #-------------------------------------------------------------------------------
-  def getEstiamtedVehicleLocation(self):
+  def getEstiamtedVehicleLocation(self, totalStripCount, heading, leftDistance, rightDistance, steeringAngle):
     '''
     Gets the estimated vehicle location based on the particles
     @return mean(X), mean(Y), mean(heading), covariance
     '''
     self.currentTime = time.time()
-    self._getVehicleMeasurements()
+    self._getVehicleMeasurements(totalStripCount, heading, leftDistance, rightDistance, steeringAngle)
     self.dt = self.currentTime - self.prevTime
     # Perform particle calculations
     self._predict()
@@ -67,15 +65,15 @@ class ParticleFilter:
     return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle
 
   #-------------------------------------------------------------------------------
-  def _getVehicleMeasurements(self):
+  def _getVehicleMeasurements(self, totalStripCount, heading, leftDistance, rightDistance, steeringAngle):
     '''
     Read the sensor measurements from the vehicle
     '''
-    self.vehicleTotalStripCount = self.sensorConversionThread.totalStripCount
-    self.vehicleHeading = self.sensorConversionThread.heading
-    self.vehicleLeftDistance = self.sensorConversionThread.leftDistance
-    self.vehicleRightDistance = self.sensorConversionThread.rightDistance
-    self.vehicleSteeringAngle = self.sensorConversionThread.steeringAngle
+    self.vehicleTotalStripCount = totalStripCount
+    self.vehicleHeading = heading
+    self.vehicleLeftDistance = leftDistance
+    self.vehicleRightDistance = rightDistance
+    self.vehicleSteeringAngle = steeringAngle
     if self.dt == 0.0:
       self.dt = 0.00000001
     self.vehicleVelocity = (self.vehicleTotalStripCount - self.vehiclePrevTotalStripCount) / self.dt * Constants.STRIP_COUNT_TO_METERS

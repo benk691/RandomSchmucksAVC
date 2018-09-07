@@ -8,7 +8,10 @@ from argparse import ArgumentParser
 from gpiozero import Button, DistanceSensor
 from IIRFilter import IIRFilter
 from PID import PID
+from CourseMap import CourseMap
+from ControlPlanner import ControlPlanner
 import Adafruit_ADS1x15
+from multiprocessing import Process, Manager
 import Adafruit_PCA9685
 from Adafruit_BNO055 import BNO055
 
@@ -29,7 +32,7 @@ def main():
     distTime = currentTime + 1.0 / (Constants.DIST_FS + 1.0)
     vpidTime  = currentTime + 1.0 / (Constants.VPID_FS + 1.0)
     spidTime = currentTime + 1.0 / (Constants.SPID_FS + 1.0)
-    parTime = currentTime + 1.0 / (Constants.PAR_FS + 1.0)
+    controlTime = currentTime + 1.0 / (Constants.CONT_FS + 1.0)
     magTime = currentTime + 1.0 / (Constants.MAG_FS + 1.0)
     
     tachCount = 0
@@ -37,13 +40,19 @@ def main():
     distCount = 0
     vpidCount = 0
     spidCount = 0
-    parCount = 0
+    controlCount = 0
     magCount = 0
+
+    tachCountTime = 0
+    steerCountTime = 0
+    distCountTime = 0
+    vpidCountTime = 0
+    spidCountTime = 0
+    controlCountTime = 0
+    magCountTime = 0
 
     prevVpidTime = 0.0
     prevVpidTachCount = 0.0
-    prevParTime = 0.0
-    prevParTach = 0.0
 
     rightHigh = 0
     leftHigh = 0
@@ -51,13 +60,18 @@ def main():
     totalRightStripCount = 0.0
     totalLeftStripCount = 0.0
 
+    joinTime = currentTime + 10.0
+    joinCount = 0
+    joinCountTime = 0.0
+
     heading = 0.0
     roll = 0.0
     pitch = 0.0
 
     leftDist = 0.0
     rightDist = 0.0
-    distIirFilter = IIRFilter(Constants.DIST_IIR_FILTER_A)
+    leftDistIirFilter = IIRFilter(Constants.DIST_IIR_FILTER_A)
+    rightDistIirFilter = IIRFilter(Constants.DIST_IIR_FILTER_A)
 
     steeringPotValue = 0.0
     steerIirFilter = IIRFilter(Constants.STEERING_IIR_FILTER_A)
@@ -68,11 +82,19 @@ def main():
     velocity = 0.0
     steeringAngle = 0.0
 
-    velocityGoal = 0.3
+    velocityGoal = 0.4
     steeringGoal = 0.0
 
     velocityPID.setGoal(velocityGoal)
     steeringAnglePID.setGoal(steeringGoal)
+
+    courseMap = CourseMap()
+    controlPlanner = ControlPlanner(courseMap)
+    
+    jobs = []
+
+    manager = Manager()
+    returnDict = manager.dict()
 
     while currentTime < (startTime + 30):
       currentTime = time.time()
@@ -99,6 +121,46 @@ def main():
         leftHigh = 0
 
       tachCount += 1
+      tachCountTime = time.time() - currentTime
+  
+      # Thread Join
+      if currentTime >= joinTime:
+        for proc in jobs:
+          proc.join()
+
+        if returnDict['velocityGoal'] != -1.0:
+          print("Velocity New Goal = {0}".format(returnDict['velocityGoal']))
+          velocityPID.setGoal(returnDict['velocityGoal'])
+        if returnDict['steeringGoal'] != -1.0:
+          print("Steering New Goal = {0}".format(returnDict['steeringGoal']))
+          steeringAnglePID.setGoal(returnDict['steeringGoal'])
+        jobs = []
+        joinCount += 1
+        joinCountTime = time.time() - currentTime
+        joinTime += 10.0
+
+      # Control Step (Particle Filter)
+      if currentTime >= controlTime:
+        totalStripCount = (totalLeftStripCount + totalRightStripCount) / 2.0
+        returnDict['velocityGoal'] = -1.0
+        returnDict['steeringGoal'] = -1.0
+        p = Process(target=controlPlanner.control, args=(totalStripCount, heading, leftDist, rightDist, steeringAngle, returnDict))
+        jobs.append(p)
+        p.start()
+        joinTime = currentTime + 0.3
+        #velocityGoal, steeringGoal = controlPlanner.control(totalStripCount, heading, leftDist, rightDist, steeringAngle)
+        if returnDict['velocityGoal'] != -1.0:
+          print("Velocity New Goal = {0}".format(returnDict['velocityGoal']))
+          velocityPID.setGoal(returnDict['velocityGoal'])
+        if returnDict['steeringGoal'] != -1.0:
+          print("Steering New Goal = {0}".format(returnDict['steeringGoal']))
+          steeringAnglePID.setGoal(returnDict['steeringGoal'])
+        #velocityPID.setGoal(velocityGoal)
+        #steeringAnglePID.setGoal(steeringAngle)
+        controlCount += 1
+        controlCountTime = time.time() - currentTime
+        controlTime += 1.0 / Constants.CONT_FS
+        continue
 
       # Velocity PID
       if currentTime >= vpidTime:
@@ -109,6 +171,7 @@ def main():
         prevVpidTime = currentTime
         prevVpidTachCount = totalRightStripCount + totalLeftStripCount
         vpidCount += 1
+        vpidCountTime = time.time() - currentTime
         vpidTime += 1.0 / Constants.VPID_FS
         continue
 
@@ -117,14 +180,16 @@ def main():
         heading, roll, pitch = imu.read_euler()
         heading = math.radians(heading)
         magCount += 1
+        magCountTime = time.time() - currentTime
         magTime += 1.0 / Constants.MAG_FS
         continue
 
       # Distance Sensors
       if currentTime >= distTime:
-        leftDist = distIirFilter.filter(leftDistSensor.distance)
-        rightDist = distIirFilter.filter(rightDistSensor.distance)
+        leftDist = leftDistIirFilter.filter(leftDistSensor.distance)
+        rightDist = rightDistIirFilter.filter(rightDistSensor.distance)
         distCount += 1
+        distCountTime = time.time() - currentTime
         distTime += 1.0 / Constants.DIST_FS
         continue
 
@@ -134,6 +199,7 @@ def main():
         steeringDuration = max(min(steeringAnglePID.control(), 0.5), -0.5) + 0.5
         controlChnl(pwm, Constants.PWM_TURN_CHNL, steeringDuration)
         spidCount += 1
+        spidCountTime = time.time() - currentTime
         spidTime += 1.0 / Constants.SPID_FS
         continue
 
@@ -143,6 +209,7 @@ def main():
         steeringPotValue = steerIirFilter.filter(steeringPotValue)
         steeringAngle = math.radians(Constants.STEERING_CONV_SLOPE * steeringPotValue + Constants.STEERING_Y_INTERCEPT)
         steerCount += 1
+        steerCountTime = time.time() - currentTime
         steerPotTime += 1.0 / Constants.STEERING_POT_FS
         continue
 
@@ -151,8 +218,18 @@ def main():
     print("distCount = {0}".format(distCount))
     print("vpidCount = {0}".format(vpidCount))
     print("spidCount = {0}".format(spidCount))
-    print("parCount = {0}".format(parCount))
     print("magCount = {0}".format(magCount))
+    print("controlCount = {0}".format(controlCount))
+    print("tachCountTime = {0}".format(tachCountTime))
+    print("steerCountTime = {0}".format(steerCountTime))
+    print("distCountTime = {0}".format(distCountTime))
+    print("vpidCountTime = {0}".format(vpidCountTime))
+    print("spidCountTime = {0}".format(spidCountTime))
+    print("magCountTime = {0}".format(magCountTime))
+    print("controlCountTime = {0}".format(controlCountTime))
+    print("joinTime = {0}".format(joinTime))
+    print("joinCount = {0}".format(joinCount))
+    print("joinCountTime = {0}".format(joinCountTime))
     print("totalRightStripCount = {0}".format(totalRightStripCount))
     print("totalLeftStripCount = {0}".format(totalLeftStripCount))
     print("heading = {0}".format(heading))
@@ -162,6 +239,11 @@ def main():
     print("rightDist = {0}".format(rightDist))
     print("steeringAngle = {0}".format(steeringAngle))
     print("steeringPotValue = {0}".format(steeringPotValue))
+    print("velocityPID = {0}".format(velocityPID))
+    print("steeringAnglePID = {0}".format(steeringAnglePID))
+
+    for j in jobs:
+      j.join()
 
   finally:
     pass
