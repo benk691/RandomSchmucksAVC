@@ -3,7 +3,7 @@ import Constants
 from Map import Map
 from Circle import Circle
 from Line import Line
-from generalFunctions import convertFtToM
+from GeneralFunctions import convertFtToM
 
 class CourseMap(Map):
   '''

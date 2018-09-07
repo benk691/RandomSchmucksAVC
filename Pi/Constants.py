@@ -96,16 +96,16 @@ PWM_MAX_PULSE = 0.97
 # Minimum allowed pulse length
 PWM_MIN_PULSE = 0.0
 
-# Left distance sensor echo pin (this is a GPIO pin #)
+# Left distance sensor echo pin (GPIO pin #)
 DIST_LEFT_ECHO_PIN = 27
 
-# Left distance sensor trigger pin (this is a GPIO pin #)
+# Left distance sensor trigger pin (GPIO pin #)
 DIST_LEFT_TRIGGER_PIN = 17
 
-# Left distance sensor echo pin (this is a GPIO pin #)
+# Left distance sensor echo pin (GPIO pin #)
 DIST_RIGHT_ECHO_PIN = 22
 
-# Left distance sensor trigger pin (this is a GPIO pin #)
+# Left distance sensor trigger pin (GPIO pin #)
 DIST_RIGHT_TRIGGER_PIN = 18
 
 # The max distance we want the sensors to detect (meters)
@@ -261,7 +261,7 @@ DIST_RIGHT_SENSOR_ORIENTATION = math.radians(-65.0)
 # Hading wrap around. Account for right hand rotation instead of left hand [degrees]
 HEADING_WRAP_AROUND = 360.0
 
-# Start Button Pin, Indicates that we are ready to start the program
+# Start Button Pin, Indicates that we are ready to start the program (GPIO pin #)
 START_BUTTON_PIN = 5
 
 # X index in a coordinate list
