@@ -82,7 +82,7 @@ def main():
     velocity = 0.0
     steeringAngle = 0.0
 
-    velocityGoal = 0.4
+    velocityGoal = 0.0
     steeringGoal = 0.0
 
     velocityPID.setGoal(velocityGoal)
@@ -96,7 +96,8 @@ def main():
     manager = Manager()
     returnDict = manager.dict()
 
-    while currentTime < (startTime + 30):
+    #while currentTime < (startTime + 30):
+    while True:
       currentTime = time.time()
 
       # Tachometers
@@ -134,6 +135,7 @@ def main():
         if returnDict['steeringGoal'] != -1.0:
           print("Steering New Goal = {0}".format(returnDict['steeringGoal']))
           steeringAnglePID.setGoal(returnDict['steeringGoal'])
+        #print(controlPlanner)
         jobs = []
         joinCount += 1
         joinCountTime = time.time() - currentTime

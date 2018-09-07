@@ -62,6 +62,7 @@ class ParticleFilter:
     y = [ p[Constants.Y] for p in self.particles ]
     h = [ p[Constants.HEADING] for p in self.particles ]
     self.covarVehicle = numpy.cov(numpy.vstack((x,y,h)))
+    print("EST: ", self.estVehicleX, self.estVehicleY, self.estVehicleHeading)
     return self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle
 
   #-------------------------------------------------------------------------------
@@ -69,6 +70,7 @@ class ParticleFilter:
     '''
     Read the sensor measurements from the vehicle
     '''
+    print("PF RECV: ", totalStripCount, heading, leftDistance, rightDistance, steeringAngle)
     self.vehicleTotalStripCount = totalStripCount
     self.vehicleHeading = heading
     self.vehicleLeftDistance = leftDistance
@@ -77,6 +79,7 @@ class ParticleFilter:
     if self.dt == 0.0:
       self.dt = 0.00000001
     self.vehicleVelocity = (self.vehicleTotalStripCount - self.vehiclePrevTotalStripCount) / self.dt * Constants.STRIP_COUNT_TO_METERS
+    print("PF Velocity = {0}".format(self.vehicleVelocity))
     self.vehiclePrevTotalStripCount = self.vehicleTotalStripCount
     # TODO: This is in the sensor conversion thread, still need?
     if self.vehicleLeftDistance >= Constants.DIST_MAX_DISTANCE:

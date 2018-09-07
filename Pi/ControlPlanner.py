@@ -31,6 +31,7 @@ class ControlPlanner:
     '''
     Send control to vehicle
     '''
+    print("RECV: ", totalStripCount, heading, leftDistance, rightDistance, steeringAngle, returnDict)
     self.estVehicleX, self.estVehicleY, self.estVehicleHeading, self.covarVehicle = self.particleFilter.getEstiamtedVehicleLocation(totalStripCount, heading, leftDistance, rightDistance, steeringAngle)
     self._checkWaypoint()
     xErr = self.courseMap.waypoints[self.waypoint][Constants.X] - self.estVehicleX
